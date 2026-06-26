@@ -1,0 +1,145 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    background-color: #0a0a0f;
+    color: #f0eeff;
+    font-family: "Inter", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden; /* app shell handles scroll internally */
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(124, 106, 247, 0.3);
+    border-radius: 2px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(124, 106, 247, 0.6);
+  }
+}
+
+@layer components {
+  /* Glass card — the signature surface used everywhere */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 -1px 0 rgba(124, 106, 247, 0.4), 0 4px 24px rgba(0, 0, 0, 0.4);
+    border-radius: 12px;
+  }
+
+  .glass-card-hover {
+    @apply glass-card transition-all duration-200;
+  }
+  .glass-card-hover:hover {
+    background: rgba(255, 255, 255, 0.07);
+    box-shadow: 0 -1px 0 rgba(124, 106, 247, 0.6), 0 4px 32px rgba(0, 0, 0, 0.5);
+    transform: translateY(-1px);
+  }
+
+  /* Accent button */
+  .btn-primary {
+    @apply px-5 py-2.5 rounded-lg font-body font-medium text-sm transition-all duration-200;
+    background: #7c6af7;
+    color: #f0eeff;
+  }
+  .btn-primary:hover {
+    background: #8f7ef9;
+    box-shadow: 0 0 20px rgba(124, 106, 247, 0.4);
+    transform: translateY(-1px);
+  }
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+
+  .btn-ghost {
+    @apply px-5 py-2.5 rounded-lg font-body font-medium text-sm transition-all duration-200;
+    color: #7a7a9a;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .btn-ghost:hover {
+    color: #f0eeff;
+    border-color: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  /* Nav icon button */
+  .nav-icon {
+    @apply w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200 cursor-pointer;
+    color: #7a7a9a;
+  }
+  .nav-icon:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #f0eeff;
+  }
+  .nav-icon.active {
+    background: rgba(124, 106, 247, 0.15);
+    color: #7c6af7;
+    box-shadow: 0 0 0 1px rgba(124, 106, 247, 0.3);
+  }
+
+  /* XP / streak pill */
+  .xp-pill {
+    @apply flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium;
+    background: rgba(124, 106, 247, 0.15);
+    color: #7c6af7;
+    border: 1px solid rgba(124, 106, 247, 0.3);
+  }
+
+  .streak-pill {
+    @apply flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium;
+    background: rgba(247, 194, 106, 0.12);
+    color: #f7c26a;
+    border: 1px solid rgba(247, 194, 106, 0.3);
+  }
+
+  /* Task priority badges */
+  .priority-high {
+    @apply text-xs px-2 py-0.5 rounded-full font-medium;
+    background: rgba(247, 106, 106, 0.15);
+    color: #f76a6a;
+    border: 1px solid rgba(247, 106, 106, 0.3);
+  }
+  .priority-med {
+    @apply text-xs px-2 py-0.5 rounded-full font-medium;
+    background: rgba(247, 194, 106, 0.12);
+    color: #f7c26a;
+    border: 1px solid rgba(247, 194, 106, 0.3);
+  }
+  .priority-low {
+    @apply text-xs px-2 py-0.5 rounded-full font-medium;
+    background: rgba(124, 106, 247, 0.12);
+    color: #7c6af7;
+    border: 1px solid rgba(124, 106, 247, 0.3);
+  }
+
+  /* Input */
+  .input-glass {
+    @apply w-full px-4 py-3 rounded-xl text-sm outline-none transition-all duration-200;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #f0eeff;
+    font-family: "Inter", sans-serif;
+  }
+  .input-glass::placeholder {
+    color: #7a7a9a;
+  }
+  .input-glass:focus {
+    border-color: rgba(124, 106, 247, 0.5);
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 0 0 3px rgba(124, 106, 247, 0.1);
+  }
+}

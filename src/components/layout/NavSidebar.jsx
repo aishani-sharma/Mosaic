@@ -1,5 +1,7 @@
 // components/layout/NavSidebar.jsx
-import { Home, CheckSquare, Calendar, Timer, User } from "lucide-react";
+import { Home, CheckSquare, Calendar, Timer, User, LogOut } from "lucide-react";
+import { signOut } from "firebase/auth";
+import { auth } from "../../lib/firebase";
 
 const navItems = [
   { id: "feed", icon: Home, label: "Feed" },
@@ -55,6 +57,30 @@ export default function NavSidebar({ activePage, setActivePage }) {
           </button>
         ))}
       </nav>
+
+      {/* Logout button */}
+      <button
+        onClick={async () => {
+          try {
+            await signOut(auth);
+          } catch (e) {
+            console.error("Signout error:", e);
+          }
+        }}
+        className="nav-icon mt-auto group relative transition-colors duration-200"
+        onMouseOver={e => e.currentTarget.style.color = "#f76a6a"}
+        onMouseOut={e => e.currentTarget.style.color = "#7a7a9a"}
+        title="Log Out"
+      >
+        <LogOut size={20} />
+        {/* Tooltip */}
+        <span
+          className="absolute left-14 px-2 py-1 rounded-md text-xs whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity z-50"
+          style={{ background: "#1a1a2e", color: "#f0eeff", border: "1px solid rgba(255,255,255,0.1)" }}
+        >
+          Log Out
+        </span>
+      </button>
     </aside>
   );
 }

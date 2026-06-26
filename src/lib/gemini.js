@@ -4,9 +4,30 @@
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
-async function callGemini(prompt, systemInstruction = "") {
+async function fetchWithRetry(url, options, maxRetries = 3, delayMs = 1000) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const res = await fetch(url, options);
+      if (res.status === 429 && i < maxRetries - 1) {
+        await new Promise(resolve => setTimeout(resolve, delayMs * Math.pow(2, i)));
+        continue;
+      }
+      return res;
+    } catch (e) {
+      if (i === maxRetries - 1) throw e;
+      await new Promise(resolve => setTimeout(resolve, delayMs * Math.pow(2, i)));
+    }
+  }
+  return fetch(url, options);
+}
+
+async function callGemini(promptOrContents, systemInstruction = "") {
+  const contents = typeof promptOrContents === "string"
+    ? [{ role: "user", parts: [{ text: promptOrContents }] }]
+    : promptOrContents;
+
   const body = {
-    contents: [{ role: "user", parts: [{ text: prompt }] }],
+    contents,
     ...(systemInstruction && {
       systemInstruction: { parts: [{ text: systemInstruction }] },
     }),
@@ -16,7 +37,7 @@ async function callGemini(prompt, systemInstruction = "") {
     },
   };
 
-  const res = await fetch(`${API_URL}?key=${GEMINI_API_KEY}`, {
+  const res = await fetchWithRetry(`${API_URL}?key=${GEMINI_API_KEY}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -39,8 +60,9 @@ User context: ${JSON.stringify(userContext)}
 Tasks to prioritize:
 ${taskList}
 
-Return ONLY a JSON array (no markdown, no explanation) with the tasks reordered by priority.
-Each item: { "id": <original index 0-based>, "priority": "high"|"med"|"low", "reason": "<one sentence>" }
+Label each task with a priority level. Return ONLY a JSON array, no markdown, no explanation.
+Each item must have exactly: { "id": <0-based index from the list above>, "priority": "high"|"med"|"low", "reason": "<one short sentence why>" }
+All ${tasks.length} tasks must appear in the response.
 `;
 
   const raw = await callGemini(prompt);
@@ -91,19 +113,34 @@ Return ONLY: { "quote": "...", "author": "..." } as JSON, no markdown.`;
 
 // ── Chat message (sidebar companion) ──────────────────────────────────────
 export async function chatWithMosaic(messages, userContext) {
-  const system = `You are Mosaic, an AI productivity companion. 
+  const systemText = `You are Mosaic, an AI productivity companion. 
 You are helpful, direct, and occasionally witty — never preachy.
 User context: ${JSON.stringify(userContext)}.
 Keep responses under 3 sentences unless asked for more.`;
 
-  const history = messages
-    .map((m) => `${m.role === "user" ? "User" : "Mosaic"}: ${m.text}`)
-    .join("\n");
+  const contents = messages.map(m => ({
+    role: m.role === "user" ? "user" : "model",
+    parts: [{ text: m.text }]
+  }));
 
-  const lastUser = messages[messages.length - 1]?.text ?? "";
-  const prompt = `${history ? `Conversation so far:\n${history}\n\n` : ""}User: ${lastUser}`;
+  const body = {
+    system_instruction: { parts: [{ text: systemText }] },
+    contents,
+    generationConfig: { temperature: 0.7, maxOutputTokens: 512 }
+  };
 
-  return callGemini(prompt, system);
+  const res = await fetchWithRetry(`${API_URL}?key=${GEMINI_API_KEY}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(JSON.stringify(err));
+  }
+  const data = await res.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "No response";
 }
 
 // ── Break task into subtasks ───────────────────────────────────────────────

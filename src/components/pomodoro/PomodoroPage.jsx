@@ -15,6 +15,10 @@ export default function PomodoroPage() {
 
   const total = (isBreak ? breakMins : studyMins) * 60;
   const progress = 1 - secondsLeft / total;
+  const saplingProgress = Math.max(0.1, progress);
+  const leftBranchProgress = Math.max(0, Math.min((progress - 0.2) / 0.5, 1));
+  const rightBranchProgress = Math.max(0, Math.min((progress - 0.4) / 0.5, 1));
+  const canopyProgress = Math.max(0, Math.min((progress - 0.6) / 0.4, 1));
 
   function beep() {
     try {
@@ -70,33 +74,65 @@ export default function PomodoroPage() {
         Pomodoro
       </h1>
 
-      {/* Timer ring */}
+      {/* Timer visual area */}
       <GlassCard className="p-8 mb-6 flex flex-col items-center">
-        <div className="relative mb-6" style={{ width: 220, height: 220 }}>
-          <svg width="220" height="220" className="absolute inset-0 -rotate-90">
-            <circle cx="110" cy="110" r="90" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="6" />
-            <circle
-              cx="110" cy="110" r="90"
-              fill="none"
-              stroke={accent}
-              strokeWidth="6"
-              strokeLinecap="round"
-              strokeDasharray={circumference}
-              strokeDashoffset={circumference * (1 - progress)}
-              style={{ transition: "stroke-dashoffset 1s linear, stroke 0.5s ease", filter: `drop-shadow(0 0 8px ${accent})` }}
-            />
+        <div className="relative mb-4 flex items-center justify-center" style={{ width: 220, height: 180 }}>
+          <svg width="220" height="180" viewBox="0 0 200 160">
+            {/* Ground base */}
+            <path d="M 30 150 Q 100 145 170 150" stroke="rgba(255,255,255,0.12)" strokeWidth="3" fill="none" strokeLinecap="round" />
+            <path d="M 80 149 Q 100 144 120 149" stroke="#a8f0c6" strokeWidth="4" fill="none" strokeLinecap="round" opacity="0.6" />
+
+            {/* Trunk */}
+            <path d="M 100 150 L 100 90" stroke="#3dd68c" strokeWidth="6" strokeLinecap="round" />
+
+            {/* Left Sapling Branch */}
+            <path d="M 100 125 Q 85 115 75 120" stroke="#3dd68c" strokeWidth="4" fill="none" strokeLinecap="round" />
+            <circle cx="75" cy="120" r={4 * saplingProgress} fill="#a8f0c6" />
+
+            {/* Right Sapling Branch */}
+            <path d="M 100 115 Q 115 105 125 110" stroke="#3dd68c" strokeWidth="4" fill="none" strokeLinecap="round" />
+            <circle cx="125" cy="110" r={4 * saplingProgress} fill="#a8f0c6" />
+
+            {/* Left Upper Branch */}
+            {leftBranchProgress > 0 && (
+              <>
+                <path d="M 100 100 Q 80 80 70 85" stroke="#3dd68c" strokeWidth={3 * leftBranchProgress} fill="none" strokeLinecap="round" />
+                <circle cx="70" cy="85" r={5 * leftBranchProgress} fill="#a8f0c6" />
+              </>
+            )}
+
+            {/* Right Upper Branch */}
+            {rightBranchProgress > 0 && (
+              <>
+                <path d="M 100 95 Q 120 75 130 80" stroke="#3dd68c" strokeWidth={3 * rightBranchProgress} fill="none" strokeLinecap="round" />
+                <circle cx="130" cy="80" r={5 * rightBranchProgress} fill="#a8f0c6" />
+              </>
+            )}
+
+            {/* Canopy */}
+            {canopyProgress > 0 && (
+              <>
+                <path d="M 100 90 L 100 65" stroke="#3dd68c" strokeWidth={3 * canopyProgress} fill="none" strokeLinecap="round" />
+                <circle cx="100" cy="60" r={12 * canopyProgress} fill="#3dd68c" opacity="0.8" />
+                <circle cx="90" cy="55" r={8 * canopyProgress} fill="#a8f0c6" opacity="0.9" />
+                <circle cx="110" cy="55" r={8 * canopyProgress} fill="#a8f0c6" opacity="0.9" />
+                <circle cx="100" cy="48" r={7 * canopyProgress} fill="#a8f0c6" opacity="0.95" />
+              </>
+            )}
           </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <div className="mb-1" style={{ color: accent }}>
-              {isBreak ? <Coffee size={20} /> : <Brain size={20} />}
-            </div>
-            <span className="font-mono text-4xl font-medium" style={{ color: "#f0eeff" }}>
-              {formatTime(secondsLeft)}
-            </span>
-            <span className="text-xs mt-1 font-mono" style={{ color: "#7a7a9a" }}>
+        </div>
+
+        {/* Timer numbers below the tree */}
+        <div className="text-center mb-6">
+          <div className="mb-1 flex items-center justify-center gap-1.5" style={{ color: accent }}>
+            {isBreak ? <Coffee size={16} className="flex-shrink-0" /> : <Brain size={16} className="flex-shrink-0" />}
+            <span className="text-xs font-mono font-semibold uppercase tracking-wider">
               {isBreak ? "Break time" : "Focus time"}
             </span>
           </div>
+          <span className="font-mono text-5xl font-semibold tracking-tight block" style={{ color: "#f0eeff" }}>
+            {formatTime(secondsLeft)}
+          </span>
         </div>
 
         <div className="flex items-center gap-4">

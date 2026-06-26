@@ -8,17 +8,9 @@ import PomodoroPage from "../pomodoro/PomodoroPage";
 import ProfilePage from "../profile/ProfilePage";
 import { useState } from "react";
 
-const pages = {
-  feed: FeedPage,
-  tasks: TasksPage,
-  calendar: CalendarPage,
-  pomodoro: PomodoroPage,
-  profile: ProfilePage,
-};
 
 export default function AppShell({ user, userContext }) {
   const [activePage, setActivePage] = useState("feed");
-  const ActivePage = pages[activePage] ?? FeedPage;
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: "#0a0a0f" }}>
@@ -26,7 +18,21 @@ export default function AppShell({ user, userContext }) {
 
       {/* Main content */}
       <main className="flex-1 overflow-y-auto">
-        <ActivePage user={user} userContext={userContext} />
+        <div style={{ display: activePage === "feed" ? "block" : "none" }}>
+          <FeedPage user={user} userContext={userContext} />
+        </div>
+        <div style={{ display: activePage === "tasks" ? "block" : "none" }}>
+          <TasksPage user={user} userContext={userContext} />
+        </div>
+        <div style={{ display: activePage === "calendar" ? "block" : "none" }}>
+          <CalendarPage user={user} userContext={userContext} />
+        </div>
+        <div style={{ display: activePage === "pomodoro" ? "block" : "none" }}>
+          <PomodoroPage user={user} userContext={userContext} />
+        </div>
+        <div style={{ display: activePage === "profile" ? "block" : "none" }}>
+          <ProfilePage user={user} userContext={userContext} />
+        </div>
       </main>
 
       <GeminiSidebar userContext={userContext} />

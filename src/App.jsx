@@ -13,7 +13,7 @@ export default function App() {
 
   function handleLogin() {
     // TODO: replace with real Firebase Google auth
-    setUser({ uid: "dev-user", displayName: "Aishani", email: "dev@clutch.app" });
+    setUser({ uid: "dev-user", displayName: "Aishani", email: "dev@mosaic.app" });
     setScreen("onboarding");
   }
 

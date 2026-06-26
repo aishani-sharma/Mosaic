@@ -1,10 +1,10 @@
 // hooks/useGemini.js
 import { useState } from "react";
-import { chatWithClutch } from "../lib/gemini";
+import { chatWithMosaic } from "../lib/gemini";
 
 export function useGeminiChat(userContext) {
   const [messages, setMessages] = useState([
-    { role: "assistant", text: "Hey! I'm Clutch 👊 Tell me what's on your plate today and I'll help you crush it." }
+    { role: "assistant", text: "Hey! I'm Mosaic 👊 Tell me what's on your plate today and I'll help you crush it." }
   ]);
   const [loading, setLoading] = useState(false);
 
@@ -14,7 +14,7 @@ export function useGeminiChat(userContext) {
     setMessages(updated);
     setLoading(true);
     try {
-      const reply = await chatWithClutch(updated, userContext || {});
+      const reply = await chatWithMosaic(updated, userContext || {});
       setMessages([...updated, { role: "assistant", text: reply }]);
     } catch {
       setMessages([...updated, { role: "assistant", text: "Something went wrong. Try again?" }]);

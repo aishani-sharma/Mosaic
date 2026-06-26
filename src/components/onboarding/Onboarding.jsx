@@ -22,7 +22,7 @@ export default function Onboarding({ onComplete }) {
   const steps = [
     {
       title: "What's your role?",
-      subtitle: "Clutch tailors priorities based on who you are",
+      subtitle: "Mosaic tailors priorities based on who you are",
       content: (
         <div className="flex flex-col gap-2">
           {ROLES.map(r => (
@@ -31,8 +31,8 @@ export default function Onboarding({ onComplete }) {
               onClick={() => setData(d => ({ ...d, role: r }))}
               className="px-4 py-3 rounded-xl text-sm text-left transition-all"
               style={{
-                background: data.role === r ? "rgba(124,106,247,0.2)" : "rgba(255,255,255,0.04)",
-                border: `1px solid ${data.role === r ? "rgba(124,106,247,0.5)" : "rgba(255,255,255,0.08)"}`,
+                background: data.role === r ? "rgba(61,214,140,0.2)" : "rgba(255,255,255,0.04)",
+                border: `1px solid ${data.role === r ? "rgba(61,214,140,0.5)" : "rgba(255,255,255,0.08)"}`,
                 color: data.role === r ? "#f0eeff" : "#7a7a9a",
               }}
             >
@@ -54,8 +54,8 @@ export default function Onboarding({ onComplete }) {
               onClick={() => toggle("focusAreas", f)}
               className="px-3 py-2 rounded-lg text-sm transition-all"
               style={{
-                background: data.focusAreas.includes(f) ? "rgba(124,106,247,0.2)" : "rgba(255,255,255,0.04)",
-                border: `1px solid ${data.focusAreas.includes(f) ? "rgba(124,106,247,0.5)" : "rgba(255,255,255,0.08)"}`,
+                background: data.focusAreas.includes(f) ? "rgba(61,214,140,0.2)" : "rgba(255,255,255,0.04)",
+                border: `1px solid ${data.focusAreas.includes(f) ? "rgba(61,214,140,0.5)" : "rgba(255,255,255,0.08)"}`,
                 color: data.focusAreas.includes(f) ? "#f0eeff" : "#7a7a9a",
               }}
             >
@@ -68,7 +68,7 @@ export default function Onboarding({ onComplete }) {
     },
     {
       title: "When do you usually work?",
-      subtitle: "Helps Clutch suggest optimal schedules",
+      subtitle: "Helps Mosaic suggest optimal schedules",
       content: (
         <div className="flex flex-col gap-3">
           <input
@@ -96,7 +96,7 @@ export default function Onboarding({ onComplete }) {
     <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "#0a0a0f" }}>
       {/* Ambient glow */}
       <div className="fixed inset-0 pointer-events-none" style={{
-        background: "radial-gradient(ellipse at 50% 40%, rgba(124,106,247,0.08) 0%, transparent 60%)"
+        background: "radial-gradient(ellipse at 50% 40%, rgba(61,214,140,0.08) 0%, transparent 60%)"
       }} />
 
       <div className="w-full max-w-md relative">
@@ -108,7 +108,7 @@ export default function Onboarding({ onComplete }) {
               className="h-1 rounded-full transition-all duration-300"
               style={{
                 width: i === step ? 32 : 8,
-                background: i <= step ? "#7c6af7" : "rgba(255,255,255,0.1)",
+                background: i <= step ? "#3dd68c" : "rgba(255,255,255,0.1)",
               }}
             />
           ))}
@@ -118,8 +118,8 @@ export default function Onboarding({ onComplete }) {
           {/* Header */}
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-1">
-              <Sparkles size={16} style={{ color: "#7c6af7" }} />
-              <span className="text-xs font-mono" style={{ color: "#7c6af7" }}>
+              <Sparkles size={16} style={{ color: "#3dd68c" }} />
+              <span className="text-xs font-mono" style={{ color: "#3dd68c" }}>
                 Step {step + 1} of {steps.length}
               </span>
             </div>

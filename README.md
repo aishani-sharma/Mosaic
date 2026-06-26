@@ -1,4 +1,4 @@
-# Clutch — Don't miss your moment
+# Mosaic — Don't miss your moment
 
 AI-powered productivity companion for students and professionals.
 

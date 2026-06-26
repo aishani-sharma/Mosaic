@@ -53,7 +53,7 @@ export default function CalendarPage() {
 
   const selectedTasks = MOCK_TASKS.filter(t => t.date === selected);
 
-  const priorityColor = { high: "#f76a6a", med: "#f7c26a", low: "#7c6af7" };
+  const priorityColor = { high: "#f76a6a", med: "#a8f0c6", low: "#3dd68c" };
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
@@ -91,11 +91,11 @@ export default function CalendarPage() {
                 onClick={() => setSelected(dateStr)}
                 className="flex flex-col items-center py-1.5 rounded-lg transition-all"
                 style={{
-                  background: isSel ? "rgba(124,106,247,0.2)" : isToday ? "rgba(255,255,255,0.05)" : "transparent",
-                  border: isSel ? "1px solid rgba(124,106,247,0.4)" : "1px solid transparent",
+                  background: isSel ? "rgba(61,214,140,0.2)" : isToday ? "rgba(255,255,255,0.05)" : "transparent",
+                  border: isSel ? "1px solid rgba(61,214,140,0.4)" : "1px solid transparent",
                 }}
               >
-                <span className="text-sm font-mono" style={{ color: isToday ? "#7c6af7" : "#f0eeff", fontWeight: isToday ? 600 : 400 }}>
+                <span className="text-sm font-mono" style={{ color: isToday ? "#3dd68c" : "#f0eeff", fontWeight: isToday ? 600 : 400 }}>
                   {day}
                 </span>
                 <div className="flex gap-0.5 mt-0.5">

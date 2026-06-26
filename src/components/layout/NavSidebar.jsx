@@ -24,9 +24,9 @@ export default function NavSidebar({ activePage, setActivePage }) {
       <div className="mb-6 flex flex-col items-center">
         <div
           className="w-9 h-9 rounded-xl flex items-center justify-center font-display font-bold text-base"
-          style={{ background: "rgba(124,106,247,0.2)", color: "#7c6af7", border: "1px solid rgba(124,106,247,0.3)" }}
+          style={{ background: "rgba(61,214,140,0.2)", color: "#3dd68c", border: "1px solid rgba(61,214,140,0.3)" }}
         >
-          C
+          M
         </div>
       </div>
 
@@ -38,9 +38,9 @@ export default function NavSidebar({ activePage, setActivePage }) {
             onClick={() => setActivePage(id)}
             className={`nav-icon group relative`}
             style={activePage === id ? {
-              background: "rgba(124,106,247,0.15)",
-              color: "#7c6af7",
-              boxShadow: "0 0 0 1px rgba(124,106,247,0.3)",
+              background: "rgba(61,214,140,0.15)",
+              color: "#3dd68c",
+              boxShadow: "0 0 0 1px rgba(61,214,140,0.3)",
             } : {}}
             title={label}
           >

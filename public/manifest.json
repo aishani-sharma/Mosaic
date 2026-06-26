@@ -1,11 +1,11 @@
 {
-  "name": "Clutch",
-  "short_name": "Clutch",
+  "name": "Mosaic",
+  "short_name": "Mosaic",
   "description": "Don't miss your moment",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0f",
-  "theme_color": "#7c6af7",
+  "theme_color": "#3dd68c",
   "icons": [
     {
       "src": "/favicon.svg",

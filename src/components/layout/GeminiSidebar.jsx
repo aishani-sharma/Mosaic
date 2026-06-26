@@ -44,13 +44,13 @@ export default function GeminiSidebar({ userContext }) {
       >
         <div
           className="w-7 h-7 rounded-lg flex items-center justify-center"
-          style={{ background: "rgba(124,106,247,0.2)" }}
+          style={{ background: "rgba(61,214,140,0.2)" }}
         >
-          <Sparkles size={14} style={{ color: "#7c6af7" }} />
+          <Sparkles size={14} style={{ color: "#3dd68c" }} />
         </div>
         <div>
           <p className="text-sm font-display font-semibold" style={{ color: "#f0eeff" }}>
-            Clutch AI
+            Mosaic AI
           </p>
           <p className="text-xs" style={{ color: "#7a7a9a" }}>
             Your companion
@@ -74,7 +74,7 @@ export default function GeminiSidebar({ userContext }) {
               style={
                 msg.role === "user"
                   ? {
-                      background: "rgba(124,106,247,0.2)",
+                      background: "rgba(61,214,140,0.2)",
                       color: "#f0eeff",
                       borderBottomRightRadius: 4,
                     }
@@ -116,7 +116,7 @@ export default function GeminiSidebar({ userContext }) {
           <textarea
             className="flex-1 bg-transparent text-sm resize-none outline-none leading-relaxed"
             style={{ color: "#f0eeff", minHeight: 36, maxHeight: 120, fontFamily: "Inter, sans-serif" }}
-            placeholder="Ask Clutch anything…"
+            placeholder="Ask Mosaic anything…"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKey}
@@ -127,7 +127,7 @@ export default function GeminiSidebar({ userContext }) {
             disabled={!input.trim() || loading}
             className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-200"
             style={{
-              background: input.trim() ? "#7c6af7" : "rgba(255,255,255,0.06)",
+              background: input.trim() ? "#3dd68c" : "rgba(255,255,255,0.06)",
               color: input.trim() ? "#fff" : "#7a7a9a",
             }}
           >

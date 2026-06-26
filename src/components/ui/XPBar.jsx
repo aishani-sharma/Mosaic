@@ -13,8 +13,8 @@ export default function XPBar({ xp = 0, level = 1 }) {
           className="h-full rounded-full transition-all duration-700"
           style={{
             width: `${progress * 100}%`,
-            background: "linear-gradient(90deg, #7c6af7, #a98ff7)",
-            boxShadow: "0 0 8px rgba(124,106,247,0.6)",
+            background: "linear-gradient(90deg, #3dd68c, #a8f0c6)",
+            boxShadow: "0 0 8px rgba(61,214,140,0.6)",
           }}
         />
       </div>

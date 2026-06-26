@@ -62,7 +62,7 @@ export default function PomodoroPage() {
   }
 
   const circumference = 2 * Math.PI * 90;
-  const accent = isBreak ? "#f7c26a" : "#7c6af7";
+  const accent = isBreak ? "#a8f0c6" : "#3dd68c";
 
   return (
     <div className="max-w-md mx-auto px-4 py-6">
@@ -119,7 +119,7 @@ export default function PomodoroPage() {
             <div
               key={i}
               className="w-2 h-2 rounded-full transition-all"
-              style={{ background: i < sessions % 4 ? "#7c6af7" : "rgba(255,255,255,0.1)" }}
+              style={{ background: i < sessions % 4 ? "#3dd68c" : "rgba(255,255,255,0.1)" }}
             />
           ))}
           <span className="text-xs ml-1 font-mono" style={{ color: "#7a7a9a" }}>

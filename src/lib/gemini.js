@@ -1,5 +1,5 @@
 // lib/gemini.js
-// Wrapper for all Gemini API calls in Clutch
+// Wrapper for all Gemini API calls in Mosaic
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
@@ -60,7 +60,7 @@ export async function generateDailyPlan(tasks, userContext) {
     .join("\n");
 
   const prompt = `
-You are Clutch, a proactive productivity companion for ${userContext.role || "a student"}.
+You are Mosaic, a proactive productivity companion for ${userContext.role || "a student"}.
 
 Today's pending tasks:
 ${taskList || "No tasks yet."}
@@ -90,14 +90,14 @@ Return ONLY: { "quote": "...", "author": "..." } as JSON, no markdown.`;
 }
 
 // ── Chat message (sidebar companion) ──────────────────────────────────────
-export async function chatWithClutch(messages, userContext) {
-  const system = `You are Clutch, an AI productivity companion. 
+export async function chatWithMosaic(messages, userContext) {
+  const system = `You are Mosaic, an AI productivity companion. 
 You are helpful, direct, and occasionally witty — never preachy.
 User context: ${JSON.stringify(userContext)}.
 Keep responses under 3 sentences unless asked for more.`;
 
   const history = messages
-    .map((m) => `${m.role === "user" ? "User" : "Clutch"}: ${m.text}`)
+    .map((m) => `${m.role === "user" ? "User" : "Mosaic"}: ${m.text}`)
     .join("\n");
 
   const lastUser = messages[messages.length - 1]?.text ?? "";

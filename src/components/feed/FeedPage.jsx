@@ -37,7 +37,7 @@ const MOCK_POSTS = [
 
 function Avatar({ name, size = 36 }) {
   const initials = name?.slice(0, 1).toUpperCase() ?? "?";
-  const colors = ["#7c6af7", "#f7c26a", "#6af7c2", "#f76a6a"];
+  const colors = ["#3dd68c", "#a8f0c6", "#6af7c2", "#f76a6a"];
   const color = colors[name?.charCodeAt(0) % colors.length] ?? colors[0];
   return (
     <div
@@ -119,13 +119,13 @@ export default function FeedPage({ user, userContext }) {
       <GlassCard className="p-4 mb-6 flex items-center gap-3">
         <div
           className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: "rgba(247,194,106,0.12)" }}
+          style={{ background: "rgba(168,240,198,0.12)" }}
         >
-          <Camera size={18} style={{ color: "#f7c26a" }} />
+          <Camera size={18} style={{ color: "#a8f0c6" }} />
         </div>
         <div className="flex-1">
           <p className="text-sm font-medium" style={{ color: "#f0eeff" }}>
-            Time to Clutch Up 📸
+            Time to Mosaic Up 📸
           </p>
           <p className="text-xs" style={{ color: "#7a7a9a" }}>
             Show your friends what you're working on right now

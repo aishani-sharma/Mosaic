@@ -38,7 +38,7 @@ export default function LoadingScreen({ onDone }) {
       <div
         className="absolute w-96 h-96 rounded-full pointer-events-none"
         style={{
-          background: "radial-gradient(circle, rgba(124,106,247,0.12) 0%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(61,214,140,0.12) 0%, transparent 70%)",
           top: "50%", left: "50%",
           transform: "translate(-50%, -50%)",
         }}
@@ -48,13 +48,13 @@ export default function LoadingScreen({ onDone }) {
         <div
           className="w-16 h-16 rounded-2xl flex items-center justify-center font-display font-bold text-2xl"
           style={{
-            background: "rgba(124,106,247,0.15)",
-            border: "1px solid rgba(124,106,247,0.4)",
-            color: "#7c6af7",
-            boxShadow: "0 0 32px rgba(124,106,247,0.3)",
+            background: "rgba(61,214,140,0.15)",
+            border: "1px solid rgba(61,214,140,0.4)",
+            color: "#3dd68c",
+            boxShadow: "0 0 32px rgba(61,214,140,0.3)",
           }}
         >
-          C
+          M
         </div>
 
         <div className="text-center max-w-sm px-8">
@@ -75,7 +75,7 @@ export default function LoadingScreen({ onDone }) {
           <div
             className="h-full rounded-full"
             style={{
-              background: "linear-gradient(90deg, #7c6af7, #f7c26a)",
+              background: "linear-gradient(90deg, #3dd68c, #a8f0c6)",
               animation: `loadBar ${DISPLAY_MS}ms ease-in-out forwards`,
             }}
           />

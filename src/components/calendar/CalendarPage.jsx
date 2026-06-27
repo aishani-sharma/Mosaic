@@ -34,7 +34,7 @@ function getFirstDay(year, month) {
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
-export default function CalendarPage({ user }) {
+export default function CalendarPage({ user, isActive }) {
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
@@ -43,6 +43,7 @@ export default function CalendarPage({ user }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!isActive) return;
     if (!user?.uid) {
       setTasks([]);
       setLoading(false);
@@ -63,7 +64,7 @@ export default function CalendarPage({ user }) {
       .finally(() => {
         setLoading(false);
       });
-  }, [user?.uid]);
+  }, [user?.uid, isActive]);
 
   const daysInMonth = getDaysInMonth(viewYear, viewMonth);
   const firstDay = getFirstDay(viewYear, viewMonth);

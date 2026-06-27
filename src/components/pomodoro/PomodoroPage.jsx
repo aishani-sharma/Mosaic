@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import GlassCard from "../ui/GlassCard";
 import { Play, Pause, RotateCcw, Coffee, Brain } from "lucide-react";
 
-export default function PomodoroPage() {
+export default function PomodoroPage({ isActive } = {}) {
   const [studyMins, setStudyMins] = useState(25);
   const [breakMins, setBreakMins] = useState(5);
   const [isBreak, setIsBreak] = useState(false);

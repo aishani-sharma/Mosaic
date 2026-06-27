@@ -9,7 +9,7 @@ import { updateUserProfile } from "../../lib/firestore";
 const ROLES = ["Engineering Student", "Medical Student", "Working Professional", "Entrepreneur", "Other"];
 const FOCUS_AREAS = ["Academics", "Work Projects", "Personal Goals", "Health & Fitness", "Finance", "Side Projects"];
 
-export default function ProfilePage({ user, userContext }) {
+export default function ProfilePage({ user, userContext, isActive }) {
   const ctx = userContext ?? {};
   const [profileData, setProfileData] = useState(ctx);
   const [isEditing, setIsEditing] = useState(false);

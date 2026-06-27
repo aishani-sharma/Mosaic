@@ -1,6 +1,6 @@
 // components/ui/LoadingScreen.jsx
 import { useEffect, useState, useRef } from "react";
-import { getQuoteOfDay } from "../../lib/gemini";
+
 
 const FALLBACK = { quote: "Do it now. Sometimes 'later' becomes 'never'.", author: "Unknown" };
 const DISPLAY_MS = 3000;
@@ -18,10 +18,6 @@ export default function LoadingScreen({ onDone }) {
       setFading(true);
       setTimeout(onDone, 600);
     }, DISPLAY_MS);
-
-    getQuoteOfDay()
-      .then((q) => { if (q?.quote) setQuote(q); })
-      .catch(() => { });
 
     return () => clearTimeout(exitTimer);
   }, []);

@@ -96,7 +96,7 @@ function FeedPost({ post }) {
   );
 }
 
-export default function FeedPage({ user, userContext }) {
+export default function FeedPage({ user, userContext, isActive }) {
   return (
     <div className="max-w-xl mx-auto px-4 py-6">
       {/* User header */}

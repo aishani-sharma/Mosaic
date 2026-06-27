@@ -19,19 +19,19 @@ export default function AppShell({ user, userContext }) {
       {/* Main content */}
       <main className="flex-1 overflow-y-auto">
         <div style={{ display: activePage === "feed" ? "block" : "none" }}>
-          <FeedPage user={user} userContext={userContext} />
+          <FeedPage user={user} userContext={userContext} isActive={activePage === "feed"} />
         </div>
         <div style={{ display: activePage === "tasks" ? "block" : "none" }}>
-          <TasksPage user={user} userContext={userContext} />
+          <TasksPage user={user} userContext={userContext} isActive={activePage === "tasks"} />
         </div>
         <div style={{ display: activePage === "calendar" ? "block" : "none" }}>
-          <CalendarPage user={user} userContext={userContext} />
+          <CalendarPage user={user} userContext={userContext} isActive={activePage === "calendar"} />
         </div>
         <div style={{ display: activePage === "pomodoro" ? "block" : "none" }}>
-          <PomodoroPage user={user} userContext={userContext} />
+          <PomodoroPage user={user} userContext={userContext} isActive={activePage === "pomodoro"} />
         </div>
         <div style={{ display: activePage === "profile" ? "block" : "none" }}>
-          <ProfilePage user={user} userContext={userContext} />
+          <ProfilePage user={user} userContext={userContext} isActive={activePage === "profile"} />
         </div>
       </main>
 

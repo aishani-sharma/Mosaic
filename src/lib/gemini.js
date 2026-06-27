@@ -2,8 +2,7 @@
 // Wrapper for all Gemini API calls in Mosaic
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
-
+const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 async function fetchWithRetry(url, options, maxRetries = 3, delayMs = 1000) {
   for (let i = 0; i < maxRetries; i++) {
     try {
@@ -21,31 +20,53 @@ async function fetchWithRetry(url, options, maxRetries = 3, delayMs = 1000) {
   return fetch(url, options);
 }
 
-async function callGemini(promptOrContents, systemInstruction = "") {
-  const contents = typeof promptOrContents === "string"
-    ? [{ role: "user", parts: [{ text: promptOrContents }] }]
-    : promptOrContents;
+let lastCallTime = 0;
+const MIN_INTERVAL = 2000;
+let apiQueue = Promise.resolve();
 
-  const body = {
-    contents,
-    ...(systemInstruction && {
-      systemInstruction: { parts: [{ text: systemInstruction }] },
-    }),
-    generationConfig: {
-      temperature: 0.7,
-      maxOutputTokens: 1024,
-    },
-  };
-
-  const res = await fetchWithRetry(`${API_URL}?key=${GEMINI_API_KEY}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+async function callGemini(prompt, systemInstruction = "") {
+  const currentQueue = apiQueue;
+  let resolveQueue;
+  apiQueue = new Promise((resolve) => {
+    resolveQueue = resolve;
   });
 
-  if (!res.ok) throw new Error(`Gemini API error: ${res.status}`);
-  const data = await res.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+  try {
+    await currentQueue;
+    const now = Date.now();
+    const wait = MIN_INTERVAL - (now - lastCallTime);
+    if (wait > 0) await new Promise(r => setTimeout(r, wait));
+    lastCallTime = Date.now();
+
+    const contents = typeof prompt === "string"
+      ? [{ role: "user", parts: [{ text: prompt }] }]
+      : prompt;
+
+    const body = {
+      contents,
+      ...(systemInstruction && {
+        systemInstruction: { parts: [{ text: systemInstruction }] },
+      }),
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 1024,
+      },
+    };
+
+    const res = await fetchWithRetry(`${API_URL}?key=${GEMINI_API_KEY}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error?.message || `Gemini API error: ${res.status}`);
+    }
+    return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+  } finally {
+    resolveQueue();
+  }
 }
 
 // ── Prioritize tasks based on user context ─────────────────────────────────
@@ -124,7 +145,7 @@ Keep responses under 3 sentences unless asked for more.`;
   }));
 
   const body = {
-    system_instruction: { parts: [{ text: systemText }] },
+    systemInstruction: { parts: [{ text: systemText }] },
     contents,
     generationConfig: { temperature: 0.7, maxOutputTokens: 512 }
   };

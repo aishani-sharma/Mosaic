@@ -1,5 +1,5 @@
 // components/tasks/TasksPage.jsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import GlassCard from "../ui/GlassCard";
 import { Plus, Sparkles, Clock, Trash2, CheckCircle } from "lucide-react";
 import { prioritizeTasks, breakdownTask } from "../../lib/gemini";
@@ -56,7 +56,8 @@ function TaskCard({ task, onComplete, onDelete }) {
   );
 }
 
-export default function TasksPage({ user, userContext }) {
+export default function TasksPage({ user, userContext, isActive }) {
+  const prioritizeRef = useRef(false);
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState("");
   const [newDeadline, setNewDeadline] = useState("");
@@ -66,11 +67,12 @@ export default function TasksPage({ user, userContext }) {
 
   // Load tasks from Firestore on mount
   useEffect(() => {
+    if (!isActive) return;
     if (!user?.uid) return;
     getUserTasks(user.uid)
       .then(setTasks)
       .finally(() => setLoadingTasks(false));
-  }, [user?.uid]);
+  }, [user?.uid, isActive]);
 
   async function handleAdd() {
     if (!newTask.trim() || !user?.uid) return;
@@ -111,7 +113,12 @@ export default function TasksPage({ user, userContext }) {
   }
 
   async function handlePrioritize() {
-    if (prioritizing || tasks.length === 0) return;
+    if (prioritizeRef.current) return;
+    prioritizeRef.current = true;
+    if (prioritizing || tasks.length === 0) {
+      prioritizeRef.current = false;
+      return;
+    }
     setPrioritizing(true);
     try {
       const pending = tasks.filter(t => !t.completed);
@@ -136,6 +143,7 @@ export default function TasksPage({ user, userContext }) {
       console.error(e);
     } finally {
       setPrioritizing(false);
+      prioritizeRef.current = false;
     }
   }
 

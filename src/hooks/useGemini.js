@@ -16,8 +16,11 @@ export function useGeminiChat(userContext) {
     try {
       const reply = await chatWithMosaic(updated, userContext || {});
       setMessages([...updated, { role: "assistant", text: reply }]);
-    } catch {
-      setMessages([...updated, { role: "assistant", text: "Something went wrong. Try again?" }]);
+    } catch (e) {
+      const msg = e.message?.includes("429")
+        ? "I'm getting too many requests — wait 30 seconds and try again 🙏"
+        : "Something went wrong. Try again?";
+      setMessages([...updated, { role: "assistant", text: msg }]);
     } finally {
       setLoading(false);
     }

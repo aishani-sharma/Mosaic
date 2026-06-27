@@ -388,9 +388,24 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
     if (!newTask.trim() || !user?.uid) return;
     const finalCategory = newCategory === "auto" ? detectedCategory : newCategory;
 
+    let formattedDeadline = "";
+    if (newDeadline) {
+      const dateObj = new Date(newDeadline);
+      if (!isNaN(dateObj.getTime())) {
+        // Format to a clean date string, e.g. "Jun 29, 2026"
+        formattedDeadline = dateObj.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        });
+      } else {
+        formattedDeadline = newDeadline;
+      }
+    }
+
     const ref = await addTask(user.uid, {
       title: newTask.trim(),
-      deadline: newDeadline,
+      deadline: formattedDeadline,
       category: finalCategory,
     });
 
@@ -398,7 +413,7 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
       {
         id: ref.id,
         title: newTask.trim(),
-        deadline: newDeadline,
+        deadline: formattedDeadline,
         category: finalCategory,
         completed: false,
         priority: "med",
@@ -489,7 +504,7 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
 
 
   return (
-    <div className={`min-h-screen relative text-[#374151] ${viewMode === "dashboard" ? "h-screen overflow-hidden" : ""}`}>
+    <div className="min-h-screen relative text-[#374151] h-screen overflow-hidden">
       {/* XP Popup overlay */}
       {xpPopup && (
         <div
@@ -506,7 +521,7 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
       )}
 
       {/* Main Container */}
-      <div className={`max-w-6xl mx-auto px-6 relative ${viewMode === "dashboard" ? "h-full py-4 flex flex-col min-h-0" : "py-8"}`}>
+      <div className="max-w-6xl mx-auto px-6 relative h-full py-4 flex flex-col min-h-0">
 
         {viewMode === "dashboard" ? (
 
@@ -562,9 +577,8 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
                         Deadline
                       </label>
                       <input
-                        type="text"
-                        className="w-full bg-white/30 rounded-lg px-3 py-1.5 text-xs text-[#374151] placeholder-[#6B7280] outline-none"
-                        placeholder="e.g. Today, 5:00 PM"
+                        type="date"
+                        className="w-full bg-white/30 rounded-lg px-3 py-1.5 text-xs text-[#374151] outline-none cursor-pointer"
                         value={newDeadline}
                         onChange={e => setNewDeadline(e.target.value)}
                       />
@@ -656,32 +670,39 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
           /* =======================================================
              ALL TASKS VIEW LAYOUT (Tasks Tab)
              ======================================================= */
-          <div className="max-w-2xl mx-auto flex flex-col w-full mt-12 animate-page-enter">
-            {/* Top Greeting Header Row */}
-            <div className="flex items-start justify-between mb-8">
-              <div>
-                <h1 className="font-display font-bold text-[32px] text-[#111827] leading-tight tracking-tight">
-                  All Tasks
-                </h1>
-                <p className="text-sm font-semibold text-[#6B7280] mt-1 font-mono uppercase tracking-wide">
-                  You have {tasks.length} total tasks
-                </p>
-              </div>
-            </div>
-
-            {/* Task Add search style input */}
+          <div className="max-w-2xl mx-auto flex flex-col w-full flex-1 min-h-0 mt-2 animate-page-enter">
             <div
-              className="mb-8 relative"
-              onBlur={(e) => {
-                if (!e.currentTarget.contains(e.relatedTarget) && !newTask.trim()) {
-                  setIsExpanded(false);
-                }
+              className="p-5 md:p-6 flex flex-col w-full flex-1 min-h-0"
+              style={{
+                background: "linear-gradient(to bottom, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04))",
+                backdropFilter: "blur(28px)",
+                WebkitBackdropFilter: "blur(28px)",
+                border: "1px solid rgba(255, 255, 255, 0.18)",
+                borderRadius: "28px",
               }}
             >
+              {/* Top Greeting Header Row */}
+              <div className="flex items-start justify-between mb-5 flex-shrink-0">
+                <div>
+                  <h1 className="font-display font-bold text-[26px] text-[#111827] leading-tight tracking-tight">
+                    All Tasks
+                  </h1>
+                  <p className="text-xs font-semibold text-[#6B7280] mt-0.5 font-mono uppercase tracking-wide">
+                    Pending: {pending.length} &nbsp;•&nbsp; Completed: {done.length}
+                  </p>
+                </div>
+              </div>
+
+              {/* Task Add search style input */}
               <div
-                className={`transition-all duration-300 bg-white/15 backdrop-blur-md border border-white/20 flex flex-col gap-3 ${
-                  isExpanded || newTask.trim() ? "rounded-2xl p-4" : "rounded-full py-2.5 px-5"
+                className={`transition-all duration-300 bg-white/15 backdrop-blur-[28px] border border-white/20 flex flex-col gap-3 mb-4 relative flex-shrink-0 ${
+                  isExpanded || newTask.trim() ? "rounded-2xl p-4" : "rounded-full py-2 px-4"
                 }`}
+                onBlur={(e) => {
+                  if (!e.currentTarget.contains(e.relatedTarget) && !newTask.trim()) {
+                    setIsExpanded(false);
+                  }
+                }}
               >
                 {(isExpanded || newTask.trim() !== "") && (
                   <div className="flex gap-3 items-center animate-page-enter">
@@ -690,9 +711,8 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
                         Deadline
                       </label>
                       <input
-                        type="text"
-                        className="w-full bg-white/30 rounded-lg px-3 py-1.5 text-xs text-[#374151] placeholder-[#6B7280] outline-none"
-                        placeholder="e.g. Today, 5:00 PM"
+                        type="date"
+                        className="w-full bg-white/30 rounded-lg px-3 py-1.5 text-xs text-[#374151] outline-none cursor-pointer"
                         value={newDeadline}
                         onChange={e => setNewDeadline(e.target.value)}
                       />
@@ -743,56 +763,54 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
                   </button>
                 </div>
               </div>
+
+              {/* Task list container (Only scrollable container) */}
+              <div className="flex-1 overflow-y-auto pr-1 min-h-0">
+                {loadingTasks ? (
+                  <p className="text-center text-sm py-8 text-[#6B7280]">Loading tasks…</p>
+                ) : (
+                  <>
+                    {pending.length > 0 && (
+                      <div className="mb-6">
+                        <p className="text-xs font-mono uppercase tracking-widest mb-2 text-[#6B7280] font-bold">
+                          Pending — {pending.length}
+                        </p>
+                        <div className="flex flex-col gap-1">
+                          {pending.map(t => (
+                            <TaskRow key={t.id} task={t} onComplete={handleComplete} onDelete={handleDelete} />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {done.length > 0 && (
+                      <div className="mb-6">
+                        <p className="text-xs font-mono uppercase tracking-widest mb-2 text-[#6B7280] font-bold">
+                          Completed — {done.length}
+                        </p>
+                        <div className="flex flex-col gap-1 opacity-65">
+                          {done.map(t => (
+                            <TaskRow key={t.id} task={t} onComplete={handleComplete} onDelete={handleDelete} />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {tasks.length === 0 && (
+                      <div className="p-8 text-center flex flex-col items-center justify-center">
+                        <span className="text-3xl mb-3 animate-pulse">✨</span>
+                        <p className="text-sm font-bold mb-1 text-[#111827]">Your board is clear!</p>
+                        <p className="text-xs max-w-xs text-[#6B7280]">Add tasks above to structure your workflow.</p>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
-
-            {loadingTasks ? (
-              <p className="text-center text-sm py-8 text-[#6B7280]">Loading tasks…</p>
-            ) : (
-              <>
-                {pending.length > 0 && (
-                  <div className="mb-8">
-                    <p className="text-xs font-mono uppercase tracking-widest mb-3 text-[#6B7280] font-bold">
-                      Pending — {pending.length}
-                    </p>
-                    <div className="flex flex-col gap-1">
-                      {pending.map(t => (
-                        <TaskRow key={t.id} task={t} onComplete={handleComplete} onDelete={handleDelete} />
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {done.length > 0 && (
-                  <div className="mb-8">
-                    <p className="text-xs font-mono uppercase tracking-widest mb-3 text-[#6B7280] font-bold">
-                      Completed — {done.length}
-                    </p>
-                    <div className="flex flex-col gap-1 opacity-65">
-                      {done.map(t => (
-                        <TaskRow key={t.id} task={t} onComplete={handleComplete} onDelete={handleDelete} />
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {tasks.length === 0 && (
-                  <div className="bg-white/20 backdrop-blur-[28px] p-10 text-center rounded-2xl flex flex-col items-center justify-center">
-                    <span className="text-4xl mb-4 animate-pulse">✨</span>
-                    <p className="text-base font-bold mb-1 text-[#111827]">Your board is clear!</p>
-                    <p className="text-xs max-w-xs text-[#6B7280]">Add tasks above to structure your workflow.</p>
-                  </div>
-                )}
-              </>
-            )}
-
-
-
           </div>
         )}
 
       </div>
-
-
 
     </div>
   );

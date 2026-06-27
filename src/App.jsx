@@ -33,12 +33,13 @@ export default function App() {
         // Returning user — load their context and go straight to app
         profile = await getUserProfile(user.uid); // re-fetch after streak update
         setUserContext(profile);
-        setScreen("loading");
+        setScreen("app");
       }
     }
 
     loadProfile();
   }, [user, loading]);
+
   async function handleLogin() {
     try {
       await signInWithPopup(auth, googleProvider);
@@ -52,22 +53,12 @@ export default function App() {
     await createUserProfile(user.uid, data);
     const profile = await getUserProfile(user.uid);
     setUserContext(profile);
-    setScreen("loading");
-  }
-
-  function handleLoadingDone() {
     setScreen("app");
   }
 
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center"
-      style={{ background: "#0a0a0f", color: "#f0eeff" }}>
-      Loading...
-    </div>
-  );
+  if (loading) return <LoginPage onLogin={handleLogin} />;
 
   if (screen === "login") return <LoginPage onLogin={handleLogin} />;
   if (screen === "onboarding") return <Onboarding onComplete={handleOnboardingComplete} />;
-  if (screen === "loading") return <LoadingScreen onDone={handleLoadingDone} />;
   return <AppShell user={user} userContext={userContext} />;
 }

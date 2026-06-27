@@ -49,19 +49,20 @@ export default function LoginPage({ onLogin }) {
                 console.error(e);
               }
             }}
-            className="w-full flex items-center justify-center gap-3 px-5 py-3 rounded-xl text-sm font-medium transition-all duration-200"
+            className="w-full flex items-center justify-center gap-3 px-5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer"
             style={{
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.12)",
-              color: "#f0eeff",
+              background: "#ffffff",
+              border: "1px solid #ffffff",
+              color: "#0a0a0f",
+              boxShadow: "0 4px 12px rgba(255, 255, 255, 0.1)",
             }}
             onMouseOver={e => {
-              e.currentTarget.style.background = "rgba(255,255,255,0.09)";
-              e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
+              e.currentTarget.style.background = "#e2e2e9";
+              e.currentTarget.style.borderColor = "#e2e2e9";
             }}
             onMouseOut={e => {
-              e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-              e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
+              e.currentTarget.style.background = "#ffffff";
+              e.currentTarget.style.borderColor = "#ffffff";
             }}
           >
             {/* Google G */}
@@ -83,7 +84,7 @@ export default function LoginPage({ onLogin }) {
           {/* Dev bypass */}
           <button
             onClick={onLogin}
-            className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition-all duration-200"
+            className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer"
             style={{
               background: "rgba(61,214,140,0.12)",
               border: "1px solid rgba(61,214,140,0.3)",
@@ -99,7 +100,7 @@ export default function LoginPage({ onLogin }) {
             }}
           >
             <Zap size={15} className="flex-shrink-0" />
-            Continue as Guest (Dev)
+            Continue as Guest (Dev Bypass)
           </button>
         </GlassCard>
 

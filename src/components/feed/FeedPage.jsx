@@ -35,12 +35,19 @@ function formatTimeAgo(timestamp) {
   const now = new Date();
   const seconds = Math.floor((now - date) / 1000);
   if (seconds < 60) return "just now";
+  
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 60) {
+    return minutes === 1 ? "1 minute ago" : `${minutes} minutes ago`;
+  }
+  
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) {
+    return hours === 1 ? "1 hour ago" : `${hours} hours ago`;
+  }
+  
   const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+  return days === 1 ? "1 day ago" : `${days} days ago`;
 }
 
 function FeedPost({ post, onLike }) {
@@ -270,7 +277,8 @@ export default function FeedPage({ user, userContext, isActive }) {
 
       {/* Daily Battle Plan */}
       {planLoading && (
-        <GlassCard className="p-5 mb-6 animate-pulse border border-[rgba(255,255,255,0.06)]">
+        <GlassCard className="p-5 mb-6 animate-pulse border border-[rgba(255,255,255,0.06)] relative overflow-hidden">
+          <div className="absolute left-0 top-0 bottom-0 w-1" style={{ background: "linear-gradient(to bottom, #3dd68c, #a8f0c6)" }} />
           <div className="flex items-center gap-2 mb-3">
             <Zap size={16} className="text-[#3dd68c] animate-bounce" />
             <span className="font-display font-semibold text-sm text-[#f0eeff]">Today's Battle Plan</span>
@@ -280,7 +288,8 @@ export default function FeedPage({ user, userContext, isActive }) {
       )}
 
       {!planLoading && battlePlan && (
-        <GlassCard className="p-5 mb-6 border border-[rgba(255,255,255,0.06)]">
+        <GlassCard className="p-5 mb-6 border border-[rgba(255,255,255,0.06)] relative overflow-hidden">
+          <div className="absolute left-0 top-0 bottom-0 w-1" style={{ background: "linear-gradient(to bottom, #3dd68c, #a8f0c6)" }} />
           <div className="flex items-center gap-2 mb-3">
             <Zap size={16} className="text-[#3dd68c]" />
             <span className="font-display font-semibold text-sm text-[#f0eeff]">Today's Battle Plan</span>
@@ -292,26 +301,42 @@ export default function FeedPage({ user, userContext, isActive }) {
       )}
 
       {/* Snap prompt banner */}
-      <GlassCard className="p-4 mb-6 flex items-center gap-3">
+      <GlassCard 
+        className="p-5 mb-6 flex items-center gap-4 relative overflow-hidden transition-all duration-300 hover:border-[rgba(61,214,140,0.4)]"
+        style={{
+          background: "linear-gradient(135deg, rgba(61,214,140,0.08) 0%, rgba(13,13,20,0.6) 100%)",
+          border: "1px solid rgba(61, 214, 140, 0.25)",
+          boxShadow: "0 0 20px rgba(61,214,140,0.05)"
+        }}
+      >
         <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: "rgba(168,240,198,0.12)" }}
+          className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
+          style={{ 
+            background: "rgba(61,214,140,0.15)",
+            border: "1px solid rgba(61,214,140,0.3)",
+            boxShadow: "0 0 12px rgba(61,214,140,0.2)"
+          }}
         >
-          <Camera size={18} style={{ color: "#a8f0c6" }} />
+          <Camera size={20} style={{ color: "#3dd68c" }} />
         </div>
         <div className="flex-1">
-          <p className="text-sm font-medium" style={{ color: "#f0eeff" }}>
+          <p className="text-sm font-semibold tracking-wide" style={{ color: "#f0eeff" }}>
             Time to Mosaic Up 📸
           </p>
-          <p className="text-xs" style={{ color: "#7a7a9a" }}>
+          <p className="text-xs" style={{ color: "#a8a8c0" }}>
             Show your friends what you're working on right now
           </p>
         </div>
         <button 
           onClick={() => setShowCamera(true)}
-          className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5"
+          className="btn-primary text-xs px-4 py-2 flex items-center gap-1.5 font-bold shadow-md hover:scale-105 active:scale-95 transition-all duration-200"
+          style={{
+            background: "#3dd68c",
+            color: "#0a0a0f",
+            boxShadow: "0 4px 14px rgba(61,214,140,0.4)"
+          }}
         >
-          <Zap size={12} />
+          <Zap size={13} fill="#0a0a0f" />
           Snap
         </button>
       </GlassCard>

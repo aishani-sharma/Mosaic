@@ -155,8 +155,8 @@ export default function TasksPage({ user, userContext, isActive }) {
       {/* XP popup */}
       {xpPopup && (
         <div
-          className="fixed top-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full font-mono font-semibold text-sm animate-slide-up"
-          style={{ background: "rgba(61,214,140,0.2)", color: "#3dd68c", border: "1px solid rgba(61,214,140,0.4)" }}
+          className="fixed top-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full font-mono font-semibold text-sm animate-xp-pop"
+          style={{ background: "rgba(61,214,140,0.2)", color: "#3dd68c", border: "1px solid rgba(61,214,140,0.4)", transform: "translateX(-50%)" }}
         >
           {xpPopup} 🎉
         </div>
@@ -226,9 +226,10 @@ export default function TasksPage({ user, userContext, isActive }) {
             </div>
           )}
           {tasks.length === 0 && (
-            <GlassCard className="p-8 text-center">
-              <p className="text-sm mb-1" style={{ color: "#f0eeff" }}>No tasks yet</p>
-              <p className="text-xs" style={{ color: "#7a7a9a" }}>Add something above to get started</p>
+            <GlassCard className="p-10 text-center flex flex-col items-center justify-center border border-[rgba(255,255,255,0.04)]">
+              <span className="text-4xl mb-4 animate-pulse">✨</span>
+              <p className="text-base font-semibold mb-1" style={{ color: "#f0eeff" }}>Your board is clear!</p>
+              <p className="text-xs max-w-xs" style={{ color: "#7a7a9a" }}>Add a task above or use AI Prioritize to optimize your day.</p>
             </GlassCard>
           )}
         </>

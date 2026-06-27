@@ -52,7 +52,13 @@ export default function CalendarPage({ user, isActive }) {
       type: "task",
     }));
 
-    const mappedCalendar = calendarEvents.map(e => ({
+    const deduplicatedCalendarEvents = calendarEvents.filter(event => 
+      !dbTasks.some(task => 
+        (task.title || "").toLowerCase().trim() === (event.title || "").toLowerCase().trim()
+      )
+    );
+
+    const mappedCalendar = deduplicatedCalendarEvents.map(e => ({
       ...e,
       date: new Date(e.date).toDateString(),
       type: "calendar",

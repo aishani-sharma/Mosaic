@@ -18,19 +18,19 @@ export default function AppShell({ user, userContext }) {
 
       {/* Main content */}
       <main className="flex-1 overflow-y-auto">
-        <div style={{ display: activePage === "feed" ? "block" : "none" }}>
+        <div style={{ display: activePage === "feed" ? "block" : "none" }} className={activePage === "feed" ? "animate-page-enter" : ""}>
           <FeedPage user={user} userContext={userContext} isActive={activePage === "feed"} />
         </div>
-        <div style={{ display: activePage === "tasks" ? "block" : "none" }}>
+        <div style={{ display: activePage === "tasks" ? "block" : "none" }} className={activePage === "tasks" ? "animate-page-enter" : ""}>
           <TasksPage user={user} userContext={userContext} isActive={activePage === "tasks"} />
         </div>
-        <div style={{ display: activePage === "calendar" ? "block" : "none" }}>
+        <div style={{ display: activePage === "calendar" ? "block" : "none" }} className={activePage === "calendar" ? "animate-page-enter" : ""}>
           <CalendarPage user={user} userContext={userContext} isActive={activePage === "calendar"} />
         </div>
-        <div style={{ display: activePage === "pomodoro" ? "block" : "none" }}>
+        <div style={{ display: activePage === "pomodoro" ? "block" : "none" }} className={activePage === "pomodoro" ? "animate-page-enter" : ""}>
           <PomodoroPage user={user} userContext={userContext} isActive={activePage === "pomodoro"} />
         </div>
-        <div style={{ display: activePage === "profile" ? "block" : "none" }}>
+        <div style={{ display: activePage === "profile" ? "block" : "none" }} className={activePage === "profile" ? "animate-page-enter" : ""}>
           <ProfilePage user={user} userContext={userContext} isActive={activePage === "profile"} />
         </div>
       </main>

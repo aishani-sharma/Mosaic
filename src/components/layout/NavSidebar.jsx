@@ -25,8 +25,13 @@ export default function NavSidebar({ activePage, setActivePage }) {
       {/* Logo mark */}
       <div className="mb-6 flex flex-col items-center">
         <div
-          className="w-9 h-9 rounded-xl flex items-center justify-center font-display font-bold text-base"
-          style={{ background: "rgba(61,214,140,0.2)", color: "#3dd68c", border: "1px solid rgba(61,214,140,0.3)" }}
+          className="w-11 h-11 rounded-2xl flex items-center justify-center font-display font-black text-lg transition-all duration-300 hover:scale-105"
+          style={{
+            background: "rgba(61,214,140,0.18)",
+            color: "#3dd68c",
+            border: "1.5px solid rgba(61,214,140,0.4)",
+            boxShadow: "0 0 20px rgba(61,214,140,0.3)",
+          }}
         >
           M
         </div>
@@ -42,7 +47,7 @@ export default function NavSidebar({ activePage, setActivePage }) {
             style={activePage === id ? {
               background: "rgba(61,214,140,0.15)",
               color: "#3dd68c",
-              boxShadow: "0 0 0 1px rgba(61,214,140,0.3)",
+              boxShadow: "0 0 0 1px rgba(61,214,140,0.4), 0 0 12px rgba(61,214,140,0.25)",
             } : {}}
             title={label}
           >

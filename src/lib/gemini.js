@@ -147,7 +147,7 @@ Keep responses under 3 sentences unless asked for more.`;
   const body = {
     systemInstruction: { parts: [{ text: systemText }] },
     contents,
-    generationConfig: { temperature: 0.7, maxOutputTokens: 512 }
+    generationConfig: { temperature: 0.7, maxOutputTokens: 1024 }
   };
 
   const res = await fetchWithRetry(`${API_URL}?key=${GEMINI_API_KEY}`, {
@@ -161,7 +161,16 @@ Keep responses under 3 sentences unless asked for more.`;
     throw new Error(JSON.stringify(err));
   }
   const data = await res.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "No response";
+  const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "No response";
+
+  // Check if response ends mid-sentence
+  const trimmed = replyText.trim();
+  const lastChar = trimmed.slice(-1);
+  if (replyText !== "No response" && !['.', '?', '!', '"'].includes(lastChar)) {
+    console.warn("Warning: Gemini response ends mid-sentence and might be cut off.");
+  }
+
+  return replyText;
 }
 
 // ── Break task into subtasks ───────────────────────────────────────────────

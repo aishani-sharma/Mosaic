@@ -104,8 +104,19 @@ export default function GeminiSidebar({ userContext }) {
         <div ref={bottomRef} />
       </div>
 
+      {/* Gradient Fade Above Input */}
+      <div 
+        className="h-6 pointer-events-none flex-shrink-0" 
+        style={{
+          background: "linear-gradient(to bottom, transparent, #0d0d14)",
+          marginTop: "-24px",
+          position: "relative",
+          zIndex: 10,
+        }}
+      />
+
       {/* Input */}
-      <div className="px-3 pb-4">
+      <div className="px-3 pb-4 relative z-10 bg-[#0d0d14] flex-shrink-0">
         <div
           className="flex items-end gap-2 rounded-xl p-2"
           style={{

@@ -32,47 +32,48 @@ function TaskRow({ task, onComplete, onDelete }) {
   const getTagStyle = (cat) => {
     switch (cat) {
       case "Academic":
-        return { backgroundColor: "#3b4fd8", color: "#8b9dff" };
+        return { backgroundColor: "#e0e7ff", color: "#4f46e5" };
       case "Work":
-        return { backgroundColor: "#2d5a3d", color: "#3dd68c" };
+        return { backgroundColor: "#dcfce7", color: "#16a34a" };
       case "Personal":
-        return { backgroundColor: "#5a2d4a", color: "#d68bc4" };
+        return { backgroundColor: "#fce7f3", color: "#db2777" };
       default:
-        return { backgroundColor: "#2a2d3a", color: "#8b8fa8" };
+        return { backgroundColor: "#f3f4f6", color: "#4b5563" };
     }
   };
 
   const tagStyle = getTagStyle(category);
 
   return (
-    <div className="task-card-group relative flex items-center justify-between py-3.5 border-b border-[#2a2d3a] transition-all duration-150 hover:bg-white/[0.01] px-2">
-      <div className="flex items-center gap-4 flex-1 min-w-0">
+    <div className="task-card-group relative flex items-center justify-between py-1.5 px-2 transition-all duration-150 hover:bg-black/[0.02] rounded-lg">
+      <div className="flex items-center gap-3 flex-1 min-w-0">
         {/* Square Checkbox */}
         <button
           onClick={() => onComplete(task.id, task.completed)}
-          className={`w-[18px] h-[18px] rounded border-2 transition-all flex items-center justify-center flex-shrink-0 cursor-pointer ${task.completed
-            ? "bg-[#3dd68c] border-[#3dd68c]"
-            : "border-[#3dd68c] bg-transparent hover:scale-105"
-            }`}
+          className={`w-[16px] h-[16px] rounded border-2 transition-all flex items-center justify-center flex-shrink-0 cursor-pointer ${
+            task.completed
+              ? "bg-[#3dd68c] border-[#3dd68c]"
+              : "border-[#3dd68c] bg-transparent hover:scale-105"
+          }`}
           title={task.completed ? "Mark incomplete" : "Mark complete"}
         >
-          {task.completed && <Check size={12} strokeWidth={4} className="text-[#0c0e13]" />}
+          {task.completed && <Check size={10} strokeWidth={4} className="text-white" />}
         </button>
 
         {/* Title and Deadline */}
-        <div className="flex items-center gap-3 flex-1 min-w-0">
+        <div className="flex items-center gap-2.5 flex-1 min-w-0">
           <p
-            className="text-[15px] font-semibold truncate transition-all duration-200"
+            className="text-[14px] font-semibold truncate transition-all duration-200"
             style={{
-              color: task.completed ? "#8b8fa8" : "#ffffff",
+              color: task.completed ? "#6B7280" : "#374151",
               textDecoration: task.completed ? "line-through" : "none",
             }}
           >
             {task.title}
           </p>
           {task.deadline && (
-            <span className="flex items-center gap-1 text-[11px] text-[#8b8fa8] flex-shrink-0 font-medium font-mono">
-              <Clock size={11} />
+            <span className="flex items-center gap-1 text-[10px] text-[#6B7280] flex-shrink-0 font-medium font-mono">
+              <Clock size={10} />
               {task.deadline}
             </span>
           )}
@@ -80,19 +81,19 @@ function TaskRow({ task, onComplete, onDelete }) {
       </div>
 
       {/* Right Category Pill & Swipe Trash Button */}
-      <div className="flex items-center gap-3 pl-2">
+      <div className="flex items-center gap-2 pl-2">
         <span
-          className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full"
+          className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
           style={tagStyle}
         >
           {category}
         </span>
         <button
           onClick={() => onDelete(task.id)}
-          className="trash-hover-btn p-1.5 rounded-md hover:bg-red-500/10 text-red-400 transition-colors flex-shrink-0"
+          className="trash-hover-btn p-1.5 rounded-md hover:bg-red-500/10 text-red-500/80 hover:text-red-600 transition-colors flex-shrink-0"
           title="Delete task"
         >
-          <Trash2 size={13} />
+          <Trash2 size={12} />
         </button>
       </div>
     </div>
@@ -486,8 +487,9 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
 
   const displayTasks = viewMode === "dashboard" ? pending : tasks;
 
+
   return (
-    <div className="min-h-screen relative bg-[#0f1117] text-white">
+    <div className={`min-h-screen relative text-[#374151] ${viewMode === "dashboard" ? "h-screen overflow-hidden" : ""}`}>
       {/* XP Popup overlay */}
       {xpPopup && (
         <div
@@ -504,253 +506,75 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
       )}
 
       {/* Main Container */}
-      <div className="max-w-6xl mx-auto px-6 py-8 relative">
-
-        {/* Top Greeting Header Row */}
-        <div className="flex items-start justify-between mb-8">
-          <div>
-            <h1 className="font-display font-bold text-[32px] text-white leading-tight tracking-tight">
-              Good morning, {user?.displayName || "there"}
-            </h1>
-            <p className="text-sm font-semibold text-[#8b8fa8] mt-1 font-mono uppercase tracking-wide">
-              You have {pending.length} tasks today
-            </p>
-          </div>
-          <button
-            onClick={handlePrioritize}
-            disabled={prioritizing || pending.length === 0}
-            className="btn-primary flex items-center gap-2 text-xs py-2 px-3.5 h-9 rounded-lg font-bold"
-          >
-            <Sparkles size={13} strokeWidth={2.5} />
-            {prioritizing ? "Prioritizing..." : "AI Prioritize"}
-          </button>
-        </div>
+      <div className={`max-w-6xl mx-auto px-6 relative ${viewMode === "dashboard" ? "h-full py-4 flex flex-col min-h-0" : "py-8"}`}>
 
         {viewMode === "dashboard" ? (
-          /* =======================================================
-             TWO COLUMN DASHBOARD LAYOUT (Dashboard Tab)
-             ======================================================= */
-          <div className="flex flex-col lg:flex-row gap-8 items-start">
 
-            {/* Left Column (60%): Tasks and Input */}
-            <div className="w-full lg:w-[60%] flex flex-col">
+          /* =======================================================
+             MINIMALIST IMMERSIVE DASHBOARD LAYOUT (WITH FROSTED GLASS PANEL)
+             ======================================================= */
+          <div className="max-w-2xl mx-auto flex flex-col w-full flex-1 min-h-0 mt-2 animate-page-enter">
+            <div
+              className="p-5 md:p-6 flex flex-col w-full flex-1 min-h-0"
+              style={{
+                background: "linear-gradient(to bottom, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04))",
+                backdropFilter: "blur(28px)",
+                WebkitBackdropFilter: "blur(28px)",
+                border: "1px solid rgba(255, 255, 255, 0.18)",
+                borderRadius: "28px",
+              }}
+            >
+              {/* Top Greeting Header Row */}
+              <div className="flex items-start justify-between mb-5 flex-shrink-0">
+                <div>
+                  <h1 className="font-display font-bold text-[26px] text-[#111827] leading-tight tracking-tight">
+                    Good morning, {user?.displayName || "there"}
+                  </h1>
+                  <p className="text-xs font-semibold text-[#6B7280] mt-0.5 font-mono uppercase tracking-wide">
+                    You have {pending.length} tasks today
+                  </p>
+                </div>
+                <button
+                  onClick={handlePrioritize}
+                  disabled={prioritizing || pending.length === 0}
+                  className="btn-primary flex items-center gap-2 text-xs py-1.5 px-3 h-8.5 rounded-lg font-bold flex-shrink-0"
+                >
+                  <Sparkles size={12} strokeWidth={2.5} />
+                  {prioritizing ? "Prioritizing..." : "AI Prioritize"}
+                </button>
+              </div>
 
               {/* Task Add search style input */}
               <div
-                className="mb-6 relative"
+                className={`transition-all duration-300 bg-white/15 backdrop-blur-[28px] border border-white/20 flex flex-col gap-3 mb-4 relative flex-shrink-0 ${
+                  isExpanded || newTask.trim() ? "rounded-2xl p-4" : "rounded-full py-2 px-4"
+                }`}
                 onBlur={(e) => {
                   if (!e.currentTarget.contains(e.relatedTarget) && !newTask.trim()) {
                     setIsExpanded(false);
                   }
                 }}
               >
-                <div
-                  className={`rounded-xl bg-[#1a1d27] border transition-all duration-200 ${isExpanded || newTask.trim()
-                    ? "border-[#3dd68c]"
-                    : "border-[#2a2d3a]"
-                    } p-3 flex flex-col gap-3`}
-                >
-                  {(isExpanded || newTask.trim() !== "") && (
-                    <div className="flex gap-3 items-center animate-page-enter">
-                      <div className="flex-1">
-                        <label className="block text-[9px] uppercase tracking-wider text-[#8b8fa8] mb-1 font-mono font-bold">
-                          Deadline
-                        </label>
-                        <input
-                          type="text"
-                          className="w-full bg-[#0c0e13] border border-[#2a2d3a] rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-[#3dd68c]"
-                          placeholder="e.g. Today, 5:00 PM"
-                          value={newDeadline}
-                          onChange={e => setNewDeadline(e.target.value)}
-                        />
-                      </div>
-                      <div className="w-1/3">
-                        <label className="block text-[9px] uppercase tracking-wider text-[#8b8fa8] mb-1 font-mono font-bold">
-                          Category
-                        </label>
-                        <select
-                          className="w-full bg-[#0c0e13] border border-[#2a2d3a] rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-[#3dd68c] cursor-pointer"
-                          value={newCategory}
-                          onChange={e => setNewCategory(e.target.value)}
-                        >
-                          <option value="auto">Auto ({detectedCategory})</option>
-                          <option value="Academic">Academic</option>
-                          <option value="Personal">Personal</option>
-                          <option value="Work">Work</option>
-                          <option value="General">General</option>
-                        </select>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex gap-2 items-center">
-                    <input
-                      ref={inputRef}
-                      type="text"
-                      className="bg-transparent flex-1 py-1 px-2 text-sm text-white placeholder-[#8b8fa8] outline-none"
-                      placeholder="Add new task..."
-                      value={newTask}
-                      onFocus={() => setIsExpanded(true)}
-                      onChange={e => {
-                        setNewTask(e.target.value);
-                        if (!isExpanded) setIsExpanded(true);
-                      }}
-                      onKeyDown={e => {
-                        if (e.key === "Enter") {
-                          handleAdd();
-                        }
-                      }}
-                    />
-                    <button
-                      onClick={handleAdd}
-                      className="bg-[#3dd68c] hover:bg-[#5ce2a7] transition-all text-[#0c0e13] flex items-center justify-center rounded-lg w-8 h-8 flex-shrink-0"
-                      title="Add task"
-                    >
-                      <Plus size={16} strokeWidth={3} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Section Header */}
-              <div className="flex items-center justify-between border-b border-[#2a2d3a] pb-3 mb-2">
-                <h2 className="text-sm font-bold text-white uppercase tracking-wider font-mono">
-                  Today's Tasks
-                </h2>
-                <button
-                  onClick={onViewAll}
-                  className="text-xs font-bold text-[#3dd68c] hover:text-[#5ce2a7] transition-colors tracking-wide"
-                >
-                  VIEW ALL
-                </button>
-              </div>
-
-              {/* Task rows */}
-              {loadingTasks ? (
-                <p className="text-[#8b8fa8] text-sm py-4 italic">Loading tasks...</p>
-              ) : displayTasks.length > 0 ? (
-                <div className="flex flex-col">
-                  {displayTasks.map(t => (
-                    <TaskRow key={t.id} task={t} onComplete={handleComplete} onDelete={handleDelete} />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-[#8b8fa8] text-sm py-6 italic text-center border-b border-[#2a2d3a] border-dashed">
-                  No pending tasks for today. Add one above or shoot some hoops! 🏀
-                </p>
-              )}
-
-              {/* Gemini plan card in dashboard Mode */}
-              <div className="mt-8">
-                <div
-                  className="bg-[#1a1d27] border border-[#2a2d3a] p-5 rounded-2xl relative overflow-hidden"
-                  style={{ borderLeft: "4px solid #3dd68c" }}
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    <Zap size={16} className="text-[#3dd68c]" />
-                    <span className="font-display font-bold text-xs text-white uppercase tracking-wider">
-                      Today's Battle Plan
-                    </span>
-                  </div>
-                  {planLoading ? (
-                    <div className="flex items-center gap-2 text-xs font-mono text-[#8b8fa8] py-2">
-                      <div className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-t-transparent border-[#3dd68c]" />
-                      Generating your plan...
-                    </div>
-                  ) : battlePlan ? (
-                    <p className="text-sm whitespace-pre-line leading-relaxed text-[#8b8fa8]">
-                      {battlePlan}
-                    </p>
-                  ) : (
-                    <p className="text-sm text-[#8b8fa8] italic py-1">
-                      No active tasks to review. Add tasks to start planning.
-                    </p>
-                  )}
-                </div>
-              </div>
-
-            </div>
-
-            {/* Right Column (40%): compact calendar, bar chart, quick actions */}
-            <div className="w-full lg:w-[40%] flex flex-col">
-              <MiniCalendar tasks={tasks} />
-
-              <ProductivityChart tasks={tasks} />
-
-              {/* Quick Actions Panel */}
-              <div className="bg-[#1a1d27] border border-[#2a2d3a] rounded-2xl p-4 mt-5">
-                <h3 className="text-[12px] font-bold text-white uppercase tracking-wider mb-4">
-                  Quick Actions
-                </h3>
-                <div className="grid grid-cols-3 gap-2.5">
-                  <button
-                    onClick={handleDailyRecap}
-                    className="flex flex-col items-center justify-center p-3 rounded-xl bg-[#0c0e13] border border-[#2a2d3a] hover:border-[#3dd68c] hover:text-[#3dd68c] transition-all text-[11px] font-bold text-[#8b8fa8]"
-                  >
-                    <Zap size={15} className="mb-1.5" />
-                    Daily Recap
-                  </button>
-                  <button
-                    onClick={handleQuickAddFocus}
-                    className="flex flex-col items-center justify-center p-3 rounded-xl bg-[#0c0e13] border border-[#2a2d3a] hover:border-[#3dd68c] hover:text-[#3dd68c] transition-all text-[11px] font-bold text-[#8b8fa8]"
-                  >
-                    <Plus size={15} className="mb-1.5" />
-                    Quick Add
-                  </button>
-                  <button
-                    onClick={() => onNavigate && onNavigate("feed")}
-                    className="flex flex-col items-center justify-center p-3 rounded-xl bg-[#0c0e13] border border-[#2a2d3a] hover:border-[#3dd68c] hover:text-[#3dd68c] transition-all text-[11px] font-bold text-[#8b8fa8]"
-                  >
-                    <Users size={15} className="mb-1.5" />
-                    Collaborate
-                  </button>
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-        ) : (
-          /* =======================================================
-             ALL TASKS VIEW LAYOUT (Tasks Tab)
-             ======================================================= */
-          <div className="max-w-2xl mx-auto flex flex-col">
-
-            {/* Task Add search style input */}
-            <div
-              className="mb-8 relative"
-              onBlur={(e) => {
-                if (!e.currentTarget.contains(e.relatedTarget) && !newTask.trim()) {
-                  setIsExpanded(false);
-                }
-              }}
-            >
-              <div
-                className={`rounded-xl bg-[#1a1d27] border transition-all duration-200 ${isExpanded || newTask.trim()
-                  ? "border-[#3dd68c]"
-                  : "border-[#2a2d3a]"
-                  } p-3 flex flex-col gap-3`}
-              >
                 {(isExpanded || newTask.trim() !== "") && (
                   <div className="flex gap-3 items-center animate-page-enter">
                     <div className="flex-1">
-                      <label className="block text-[9px] uppercase tracking-wider text-[#8b8fa8] mb-1 font-mono font-bold">
+                      <label className="block text-[9px] uppercase tracking-wider text-[#6B7280] mb-1 font-mono font-bold">
                         Deadline
                       </label>
                       <input
                         type="text"
-                        className="w-full bg-[#0c0e13] border border-[#2a2d3a] rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-[#3dd68c]"
+                        className="w-full bg-white/30 rounded-lg px-3 py-1.5 text-xs text-[#374151] placeholder-[#6B7280] outline-none"
                         placeholder="e.g. Today, 5:00 PM"
                         value={newDeadline}
                         onChange={e => setNewDeadline(e.target.value)}
                       />
                     </div>
                     <div className="w-1/3">
-                      <label className="block text-[9px] uppercase tracking-wider text-[#8b8fa8] mb-1 font-mono font-bold">
+                      <label className="block text-[9px] uppercase tracking-wider text-[#6B7280] mb-1 font-mono font-bold">
                         Category
                       </label>
                       <select
-                        className="w-full bg-[#0c0e13] border border-[#2a2d3a] rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-[#3dd68c] cursor-pointer"
+                        className="w-full bg-white/30 rounded-lg px-3 py-1.5 text-xs text-[#374151] outline-none cursor-pointer"
                         value={newCategory}
                         onChange={e => setNewCategory(e.target.value)}
                       >
@@ -764,12 +588,12 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
                   </div>
                 )}
 
-                <div className="flex gap-2 items-center">
+                <div className="flex gap-2 items-center w-full">
                   <input
                     ref={inputRef}
                     type="text"
-                    className="bg-transparent flex-1 py-1 px-2 text-sm text-white placeholder-[#8b8fa8] outline-none"
-                    placeholder="Add new task..."
+                    className="bg-transparent flex-1 py-1 px-1 text-sm text-[#374151] placeholder-[#6B7280] outline-none"
+                    placeholder="+ Add new task..."
                     value={newTask}
                     onFocus={() => setIsExpanded(true)}
                     onChange={e => {
@@ -784,7 +608,135 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
                   />
                   <button
                     onClick={handleAdd}
-                    className="bg-[#3dd68c] hover:bg-[#5ce2a7] transition-all text-[#0c0e13] flex items-center justify-center rounded-lg w-8 h-8 flex-shrink-0"
+                    className="bg-[#3dd68c] hover:bg-[#5ce2a7] transition-all text-[#0c0e13] flex items-center justify-center rounded-full w-8 h-8 flex-shrink-0"
+                    title="Add task"
+                  >
+                    <Plus size={16} strokeWidth={3} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Section Header */}
+              <div className="flex items-center justify-between pb-2 mb-1.5 flex-shrink-0">
+                <h2 className="text-xs font-bold text-[#111827] uppercase tracking-wider font-mono">
+                  Today's Tasks
+                </h2>
+                <button
+                  onClick={onViewAll}
+                  className="text-xs font-bold text-[#3dd68c] hover:text-[#5ce2a7] transition-colors tracking-wide"
+                >
+                  VIEW ALL
+                </button>
+              </div>
+
+              {/* Task rows */}
+              <div className="flex-1 overflow-y-auto pr-1 min-h-0">
+                {loadingTasks ? (
+                  <p className="text-[#6B7280] text-sm py-4 italic">Loading tasks...</p>
+                ) : displayTasks.length > 0 ? (
+                  <div className="flex flex-col gap-1">
+                    {displayTasks.map(t => (
+                      <TaskRow key={t.id} task={t} onComplete={handleComplete} onDelete={handleDelete} />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-[#6B7280] text-sm py-6 italic text-center border-b border-[#6B7280]/20 border-dashed">
+                    No pending tasks for today. Add one above or shoot some hoops! 🏀
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-6 flex-shrink-0">
+              <BasketballGame />
+            </div>
+
+          </div>
+        ) : (
+          /* =======================================================
+             ALL TASKS VIEW LAYOUT (Tasks Tab)
+             ======================================================= */
+          <div className="max-w-2xl mx-auto flex flex-col w-full mt-12 animate-page-enter">
+            {/* Top Greeting Header Row */}
+            <div className="flex items-start justify-between mb-8">
+              <div>
+                <h1 className="font-display font-bold text-[32px] text-[#111827] leading-tight tracking-tight">
+                  All Tasks
+                </h1>
+                <p className="text-sm font-semibold text-[#6B7280] mt-1 font-mono uppercase tracking-wide">
+                  You have {tasks.length} total tasks
+                </p>
+              </div>
+            </div>
+
+            {/* Task Add search style input */}
+            <div
+              className="mb-8 relative"
+              onBlur={(e) => {
+                if (!e.currentTarget.contains(e.relatedTarget) && !newTask.trim()) {
+                  setIsExpanded(false);
+                }
+              }}
+            >
+              <div
+                className={`transition-all duration-300 bg-white/15 backdrop-blur-md border border-white/20 flex flex-col gap-3 ${
+                  isExpanded || newTask.trim() ? "rounded-2xl p-4" : "rounded-full py-2.5 px-5"
+                }`}
+              >
+                {(isExpanded || newTask.trim() !== "") && (
+                  <div className="flex gap-3 items-center animate-page-enter">
+                    <div className="flex-1">
+                      <label className="block text-[9px] uppercase tracking-wider text-[#6B7280] mb-1 font-mono font-bold">
+                        Deadline
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full bg-white/30 rounded-lg px-3 py-1.5 text-xs text-[#374151] placeholder-[#6B7280] outline-none"
+                        placeholder="e.g. Today, 5:00 PM"
+                        value={newDeadline}
+                        onChange={e => setNewDeadline(e.target.value)}
+                      />
+                    </div>
+                    <div className="w-1/3">
+                      <label className="block text-[9px] uppercase tracking-wider text-[#6B7280] mb-1 font-mono font-bold">
+                        Category
+                      </label>
+                      <select
+                        className="w-full bg-white/30 rounded-lg px-3 py-1.5 text-xs text-[#374151] outline-none cursor-pointer"
+                        value={newCategory}
+                        onChange={e => setNewCategory(e.target.value)}
+                      >
+                        <option value="auto">Auto ({detectedCategory})</option>
+                        <option value="Academic">Academic</option>
+                        <option value="Personal">Personal</option>
+                        <option value="Work">Work</option>
+                        <option value="General">General</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex gap-2 items-center w-full">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    className="bg-transparent flex-1 py-1 px-1 text-sm text-[#374151] placeholder-[#6B7280] outline-none"
+                    placeholder="+ Add new task..."
+                    value={newTask}
+                    onFocus={() => setIsExpanded(true)}
+                    onChange={e => {
+                      setNewTask(e.target.value);
+                      if (!isExpanded) setIsExpanded(true);
+                    }}
+                    onKeyDown={e => {
+                      if (e.key === "Enter") {
+                        handleAdd();
+                      }
+                    }}
+                  />
+                  <button
+                    onClick={handleAdd}
+                    className="bg-[#3dd68c] hover:bg-[#5ce2a7] transition-all text-[#0c0e13] flex items-center justify-center rounded-full w-8 h-8 flex-shrink-0"
                     title="Add task"
                   >
                     <Plus size={16} strokeWidth={3} />
@@ -794,15 +746,15 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
             </div>
 
             {loadingTasks ? (
-              <p className="text-center text-sm py-8 text-[#8b8fa8]">Loading tasks…</p>
+              <p className="text-center text-sm py-8 text-[#6B7280]">Loading tasks…</p>
             ) : (
               <>
                 {pending.length > 0 && (
                   <div className="mb-8">
-                    <p className="text-xs font-mono uppercase tracking-widest mb-3 text-[#8b8fa8] font-bold">
+                    <p className="text-xs font-mono uppercase tracking-widest mb-3 text-[#6B7280] font-bold">
                       Pending — {pending.length}
                     </p>
-                    <div className="flex flex-col">
+                    <div className="flex flex-col gap-1">
                       {pending.map(t => (
                         <TaskRow key={t.id} task={t} onComplete={handleComplete} onDelete={handleDelete} />
                       ))}
@@ -812,10 +764,10 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
 
                 {done.length > 0 && (
                   <div className="mb-8">
-                    <p className="text-xs font-mono uppercase tracking-widest mb-3 text-[#8b8fa8] font-bold">
+                    <p className="text-xs font-mono uppercase tracking-widest mb-3 text-[#6B7280] font-bold">
                       Completed — {done.length}
                     </p>
-                    <div className="flex flex-col opacity-65">
+                    <div className="flex flex-col gap-1 opacity-65">
                       {done.map(t => (
                         <TaskRow key={t.id} task={t} onComplete={handleComplete} onDelete={handleDelete} />
                       ))}
@@ -824,52 +776,24 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
                 )}
 
                 {tasks.length === 0 && (
-                  <div className="bg-[#1a1d27] border border-[#2a2d3a] p-10 text-center rounded-2xl flex flex-col items-center justify-center">
+                  <div className="bg-white/20 backdrop-blur-[28px] p-10 text-center rounded-2xl flex flex-col items-center justify-center">
                     <span className="text-4xl mb-4 animate-pulse">✨</span>
-                    <p className="text-base font-bold mb-1 text-white">Your board is clear!</p>
-                    <p className="text-xs max-w-xs text-[#8b8fa8]">Add tasks above to structure your workflow.</p>
+                    <p className="text-base font-bold mb-1 text-[#111827]">Your board is clear!</p>
+                    <p className="text-xs max-w-xs text-[#6B7280]">Add tasks above to structure your workflow.</p>
                   </div>
                 )}
               </>
             )}
 
-            <div style={{ marginTop: 24 }}>
-              <BasketballGame />
-            </div>
+
+
           </div>
         )}
 
       </div>
 
-      {/* Basketball Easter Egg Hoop */}
-      <div
-        className={`absolute top-6 right-6 z-40 p-2 border-2 border-transparent transition-all duration-300 ${hoopGlow ? "hoop-glow" : ""
-          }`}
-        style={{ pointerEvents: "none" }}
-      >
-        <svg className="w-12 h-12" viewBox="0 0 48 48" fill="none">
-          <line x1="12" y1="16" x2="36" y2="16" stroke="#3dd68c" strokeWidth="2.5" strokeLinecap="round" />
-          <line x1="14" y1="18" x2="34" y2="18" stroke="#3dd68c" strokeWidth="1.5" strokeLinecap="round" />
-          <path d="M14,18 L18,36 M34,18 L30,36 M18,36 L30,36" stroke="#3dd68c" strokeWidth="1.5" strokeDasharray="2,2" />
-          <path d="M19,18 L24,36 M29,18 L24,36" stroke="#3dd68c" strokeWidth="1" strokeOpacity="0.7" />
-          <path d="M14,24 Q24,28 34,24 M16,30 Q24,34 32,30" stroke="#3dd68c" strokeWidth="1" strokeOpacity="0.5" />
-        </svg>
-      </div>
 
-      {/* Basketball Easter Egg button */}
-      <button
-        onClick={triggerBasketballAnimation}
-        className={`absolute top-[324px] right-[124px] z-50 text-2xl cursor-pointer select-none transition-transform hover:scale-110 active:scale-95 outline-none bg-none border-none p-0 m-0 ${isAnimating ? "animate-basketball-new" : ""
-          }`}
-        style={{ background: "none", border: "none" }}
-        title="Shoot a hoop!"
-      >
-        🏀
-      </button>
 
-      <div style={{ marginTop: 24 }}>
-        <BasketballGame />
-      </div>
     </div>
   );
 }

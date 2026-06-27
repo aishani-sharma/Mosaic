@@ -40,18 +40,20 @@ export default function GeminiSidebar({ userContext }) {
 
   return (
     <aside
-      className="flex flex-col h-screen"
+      className="flex flex-col h-screen relative z-20"
       style={{
         width: 300,
         flexShrink: 0,
-        background: "#0c0e13",
-        borderLeft: "1px solid #2a2d3a",
+        background: "rgba(20, 30, 40, 0.35)",
+        backdropFilter: "blur(28px)",
+        WebkitBackdropFilter: "blur(28px)",
+        borderLeft: "1px solid rgba(255, 255, 255, 0.15)",
       }}
     >
       {/* Header */}
       <div
-        className="flex items-center gap-2.5 px-4 py-4"
-        style={{ borderBottom: "1px solid #2a2d3a" }}
+        className="flex items-center gap-2.5 px-4 py-4 animate-page-enter"
+        style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.1)" }}
       >
         <div
           className="w-7 h-7 rounded-lg flex items-center justify-center"
@@ -63,14 +65,14 @@ export default function GeminiSidebar({ userContext }) {
           <p className="text-sm font-display font-bold" style={{ color: "#ffffff" }}>
             Mosaic AI
           </p>
-          <p className="text-xs" style={{ color: "#8b8fa8" }}>
+          <p className="text-xs" style={{ color: "rgba(255, 255, 255, 0.6)" }}>
             Your companion
           </p>
         </div>
         <div
           className="ml-auto w-2 h-2 rounded-full"
           style={{ background: "#3dd68c", boxShadow: "0 0 6px #3dd68c" }}
-        />
+        ></div>
       </div>
 
       {/* Messages */}
@@ -91,9 +93,9 @@ export default function GeminiSidebar({ userContext }) {
                       borderBottomRightRadius: 4,
                     }
                   : {
-                      background: "#1a1d27",
+                      background: "rgba(255, 255, 255, 0.08)",
                       color: "#ffffff",
-                      border: "1px solid #2a2d3a",
+                      border: "1px solid rgba(255, 255, 255, 0.12)",
                       borderBottomLeftRadius: 4,
                     }
               }
@@ -106,8 +108,8 @@ export default function GeminiSidebar({ userContext }) {
         {loading && (
           <div className="flex justify-start">
             <div
-              className="px-3 py-2 rounded-xl text-sm border border-[#2a2d3a]"
-              style={{ background: "#1a1d27", color: "#8b8fa8" }}
+              className="px-3 py-2 rounded-xl text-sm border border-white/10"
+              style={{ background: "rgba(255, 255, 255, 0.08)", color: "rgba(255, 255, 255, 0.6)" }}
             >
               <span className="animate-pulse">Thinking…</span>
             </div>
@@ -116,28 +118,19 @@ export default function GeminiSidebar({ userContext }) {
         <div ref={bottomRef} />
       </div>
 
-      {/* Gradient Fade Above Input */}
-      <div 
-        className="h-6 pointer-events-none flex-shrink-0" 
-        style={{
-          background: "linear-gradient(to bottom, transparent, #0c0e13)",
-          marginTop: "-24px",
-          position: "relative",
-          zIndex: 10,
-        }}
-      />
-
       {/* Input */}
-      <div className="px-3 pb-4 relative z-10 bg-[#0c0e13] flex-shrink-0">
+      <div className="px-3 pb-4 relative z-10 bg-transparent flex-shrink-0">
         <div
           className="flex items-end gap-2 rounded-xl p-2"
           style={{
-            background: "#1a1d27",
-            border: "1px solid #2a2d3a",
+            background: "rgba(255, 255, 255, 0.08)",
+            border: "1px solid rgba(255, 255, 255, 0.15)",
+            backdropFilter: "blur(28px)",
+            WebkitBackdropFilter: "blur(28px)",
           }}
         >
           <textarea
-            className="flex-1 bg-transparent text-sm resize-none outline-none leading-relaxed text-white"
+            className="flex-1 bg-transparent text-sm resize-none outline-none leading-relaxed text-white placeholder-white/40"
             style={{ minHeight: 36, maxHeight: 120, fontFamily: "Inter, sans-serif" }}
             placeholder="Ask Mosaic anything…"
             value={input}
@@ -150,14 +143,14 @@ export default function GeminiSidebar({ userContext }) {
             disabled={!input.trim() || loading || cooldown}
             className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-200"
             style={{
-              background: (input.trim() && !loading && !cooldown) ? "#3dd68c" : "#2a2d3a",
-              color: (input.trim() && !loading && !cooldown) ? "#0c0e13" : "#8b8fa8",
+              background: (input.trim() && !loading && !cooldown) ? "#3dd68c" : "rgba(255, 255, 255, 0.08)",
+              color: (input.trim() && !loading && !cooldown) ? "#0c0e13" : "rgba(255, 255, 255, 0.35)",
             }}
           >
             <Send size={14} />
           </button>
         </div>
-        <p className="text-center mt-1.5 text-[10px]" style={{ color: "#8b8fa8" }}>
+        <p className="text-center mt-1.5 text-[10px]" style={{ color: "rgba(255, 255, 255, 0.5)" }}>
           Enter to send
         </p>
       </div>

@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
-const BALL_R = 16;
+const BALL_R = 13;
 const GRAVITY = 0.22;
 const AIR = 0.999;
-const POWER = 0.19;
-const MAX_PULL = 125;
+const POWER = 0.155;
+const MAX_PULL = 90;
 
 function distance(a, b) {
   return Math.hypot(a.x - b.x, a.y - b.y);
@@ -43,6 +43,8 @@ export default function BasketballGame() {
 
   const [size, setSize] = useState({ w: 900, h: 360 });
   const [ball, setBall] = useState({ x: 120, y: 240, rot: 0 });
+  const [squashing, setSquashing] = useState(false);
+  const [groundBouncing, setGroundBouncing] = useState(false);
   const [dragPoint, setDragPoint] = useState(null);
   const [mode, setModeState] = useState("ready");
   const [score, setScore] = useState(0);
@@ -58,11 +60,15 @@ export default function BasketballGame() {
     setModeState(next);
   };
 
+  function groundY(x) {
+    const t = Math.max(0, Math.min(1, x / size.w));
+    return size.h - 45 + Math.sin(t * Math.PI) * 25;
+  }
+
   const startPoint = useMemo(() => {
-    return {
-      x: Math.max(100, size.w * 0.16),
-      y: size.h - 120,
-    };
+    const x = Math.max(100, size.w * 0.16);
+    const y = groundY(x) - 22;
+    return { x, y };
   }, [size]);
 
   const hoop = useMemo(() => {
@@ -85,11 +91,6 @@ export default function BasketballGame() {
       },
     };
   }, [size]);
-
-  function groundY(x) {
-    const t = Math.max(0, Math.min(1, x / size.w));
-    return size.h - 45 + Math.sin(t * Math.PI) * 25;
-  }
 
   useEffect(() => {
     function measure() {
@@ -226,6 +227,9 @@ export default function BasketballGame() {
     velocityRef.current = velocity;
     previousBallRef.current = { ...ballRef.current };
 
+    setSquashing(true);
+    delay(() => setSquashing(false), 150);
+
     setMode("flying");
     rafRef.current = requestAnimationFrame(tick);
   }
@@ -257,7 +261,7 @@ export default function BasketballGame() {
     setFloatingText("+1");
     setNetRipple(true);
 
-    const burst = Array.from({ length: 24 }).map((_, i) => ({
+    const burst = Array.from({ length: 8 }).map((_, i) => ({
       id: `${Date.now()}-${i}`,
       x: (hoop.rimL + hoop.rimR) / 2,
       y: hoop.rimY,
@@ -329,8 +333,24 @@ export default function BasketballGame() {
     const next = {
       x: prev.x + v.x,
       y: prev.y + v.y,
-      rot: prev.rot + Math.hypot(v.x, v.y) * 2.5,
+      rot: prev.rot + Math.hypot(v.x, v.y) * 4.5,
     };
+
+    // Bounce off left wall
+    if (next.x - BALL_R < 0) {
+      next.x = BALL_R;
+      v.x = Math.abs(v.x) * 0.72;
+    }
+    // Bounce off right wall
+    if (next.x + BALL_R > size.w) {
+      next.x = size.w - BALL_R;
+      v.x = -Math.abs(v.x) * 0.72;
+    }
+    // Bounce off ceiling
+    if (next.y - BALL_R < 0) {
+      next.y = BALL_R;
+      v.y = Math.abs(v.y) * 0.5;
+    }
 
     const crossedRimPlane =
       prev.y < hoop.rimY - BALL_R * 0.3 &&
@@ -378,6 +398,9 @@ export default function BasketballGame() {
       next.y = gY - BALL_R;
       v.y = -Math.abs(v.y) * 0.45;
       v.x *= 0.8;
+
+      setGroundBouncing(true);
+      delay(() => setGroundBouncing(false), 120);
 
       if (Math.abs(v.x) < 0.7 && Math.abs(v.y) < 1.3) {
         triggerMiss();
@@ -429,14 +452,7 @@ export default function BasketballGame() {
   }, [mode, ball, startPoint]);
 
   return (
-    <div className={`basketball-widget ${mobileExpanded ? "expanded" : ""}`}>
-      <button
-        className="basketball-mobile-button"
-        type="button"
-        onClick={() => setMobileExpanded((v) => !v)}
-      >
-        🏀 {mobileExpanded ? "Hide Basketball" : "Play Basketball"}
-      </button>
+    <div className="basketball-widget">
 
       <div
         ref={sceneRef}
@@ -488,63 +504,6 @@ export default function BasketballGame() {
             </filter>
           </defs>
 
-          {/* Background Sky */}
-          <rect width={size.w} height={size.h} fill={celebrating ? "url(#celebrateSky)" : "url(#duskSky)"} />
-
-          {/* Orange Sun setting behind hills */}
-          <circle
-            className="sun"
-            cx={size.w * 0.72}
-            cy={size.h * 0.65}
-            r="44"
-            fill="#f97316"
-            opacity="0.8"
-          />
-
-          {/* Far hills */}
-          <path
-            d={`M 0 ${size.h * 0.72}
-                C ${size.w * 0.22} ${size.h * 0.58},
-                  ${size.w * 0.4} ${size.h * 0.78},
-                  ${size.w * 0.55} ${size.h * 0.64}
-                C ${size.w * 0.75} ${size.h * 0.5},
-                  ${size.w * 0.9} ${size.h * 0.72},
-                  ${size.w} ${size.h * 0.6}
-                L ${size.w} ${size.h}
-                L 0 ${size.h} Z`}
-            fill="url(#hillDuskFar)"
-            opacity="0.75"
-          />
-
-          {/* Near hills */}
-          <path
-            d={`M 0 ${size.h - 45}
-                C ${size.w * 0.2} ${size.h - 90},
-                  ${size.w * 0.45} ${size.h - 10},
-                  ${size.w * 0.65} ${size.h - 52}
-                C ${size.w * 0.8} ${size.h - 85},
-                  ${size.w * 0.92} ${size.h - 40},
-                  ${size.w} ${size.h - 70}
-                L ${size.w} ${size.h}
-                L 0 ${size.h} Z`}
-            fill="url(#hillDuskClose)"
-          />
-
-          {/* Green trees */}
-          <g className="tree" transform={`translate(${size.w * 0.76}, ${size.h - 102})`}>
-            <rect x="-4" y="24" width="8" height="34" rx="2" fill="#78350f" />
-            <circle cx="0" cy="12" r="20" fill="#15803d" />
-            <circle cx="-13" cy="20" r="14" fill="#166534" />
-            <circle cx="13" cy="20" r="15" fill="#166534" />
-          </g>
-
-          <g className="tree small" transform={`translate(${size.w * 0.28}, ${size.h - 88})`}>
-            <rect x="-3" y="20" width="6" height="28" rx="2" fill="#78350f" />
-            <circle cx="0" cy="10" r="16" fill="#15803d" />
-            <circle cx="-10" cy="17" r="11" fill="#166534" />
-            <circle cx="10" cy="17" r="12" fill="#166534" />
-          </g>
-
           {/* Predicted trajectory Preview line */}
           {trajectoryPoints.map((p, i) => (
             <circle
@@ -557,110 +516,145 @@ export default function BasketballGame() {
             />
           ))}
 
-          {/* Stick Figure Guy */}
+          {/* Cartoon Basketball Player */}
           <g
             className={`player ${celebrating ? "jump" : ""}`}
             transform={`translate(${startPoint.x - 50}, ${startPoint.y - 94})`}
             filter="url(#softShadow)"
           >
-            {/* Legs */}
-            <line x1="48" y1="72" x2="30" y2="116" stroke="#100b1a" strokeWidth="8" strokeLinecap="round" />
-            <line x1="48" y1="72" x2="70" y2="116" stroke="#100b1a" strokeWidth="8" strokeLinecap="round" />
+            {/* Legs (Skin-colored lines) */}
+            <line x1="40" y1="90" x2="38" y2="108" stroke="#f2c39b" strokeWidth="8" strokeLinecap="round" />
+            <line x1="56" y1="90" x2="58" y2="108" stroke="#f2c39b" strokeWidth="8" strokeLinecap="round" />
 
-            {/* Shoes */}
-            <line x1="30" y1="116" x2="18" y2="119" stroke="#05020c" strokeWidth="7" strokeLinecap="round" />
-            <line x1="70" y1="116" x2="83" y2="119" stroke="#05020c" strokeWidth="7" strokeLinecap="round" />
+            {/* Sneakers (Red and white cute chibi sneakers) */}
+            {/* Left Sneaker */}
+            <rect x="30" y="106" width="16" height="8" rx="3" fill="#ef4444" />
+            <rect x="30" y="112" width="16" height="3" rx="1" fill="#ffffff" />
+            <circle cx="34" cy="109" r="1.5" fill="#ffffff" />
+            
+            {/* Right Sneaker */}
+            <rect x="50" y="106" width="16" height="8" rx="3" fill="#ef4444" />
+            <rect x="50" y="112" width="16" height="3" rx="1" fill="#ffffff" />
+            <circle cx="54" cy="109" r="1.5" fill="#ffffff" />
 
-            {/* Torso/Jersey */}
-            <rect x="31" y="38" width="34" height="46" rx="14" fill="#4f46e5" />
+            {/* Red Shorts */}
+            <rect x="33" y="78" width="14" height="12" rx="2" fill="#ef4444" />
+            <rect x="49" y="78" width="14" height="12" rx="2" fill="#ef4444" />
 
-            {/* Head & Neck */}
-            <line x1="48" y1="36" x2="48" y2="40" stroke="#f2c39b" strokeWidth="6" />
-            <circle cx="48" cy="22" r="18" fill="#f2c39b" />
+            {/* Torso/Hoodie body */}
+            <rect x="31" y="38" width="34" height="42" rx="10" fill="#3dd68c" />
+            
+            {/* Hoodie pocket */}
+            <rect x="37" y="60" width="22" height="12" rx="3" fill="none" stroke="#15803d" strokeWidth="1.5" />
+            <path d="M 37 66 L 41 60 M 59 66 L 55 60" stroke="#15803d" strokeWidth="1.5" />
+            
+            {/* Hood behind neck */}
+            <ellipse cx="48" cy="40" rx="13" ry="5" fill="#15803d" />
+            
+            {/* Drawstring details */}
+            <path d="M 45 42 L 45 50 M 51 42 L 51 50" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" />
 
-            {/* Hair */}
-            <path d="M 32 19 C 36 2, 61 1, 66 20 C 55 10, 43 10, 32 19 Z" fill="#2d1b12" />
+            {/* Neck */}
+            <rect x="45" y="33" width="6" height="7" fill="#f2c39b" />
+
+            {/* Head */}
+            <circle cx="48" cy="19" r="20" fill="#f2c39b" />
+
+            {/* Messy Hair */}
+            <path d="M 25 18 C 25 0, 71 0, 71 18 C 65 8, 55 6, 48 8 C 41 6, 31 8, 25 18 Z" fill="#2d1b12" />
+            <path d="M 32 6 L 35 -1 L 40 4 L 46 -3 L 52 3 L 58 -2 L 64 5" stroke="#2d1b12" strokeWidth="3" strokeLinecap="round" />
+
+            {/* Face Details: Eyes */}
+            <circle cx="40" cy="18" r="3" fill="#111827" />
+            <circle cx="56" cy="18" r="3" fill="#111827" />
+            {/* Eye shines */}
+            <circle cx="39" cy="17" r="1" fill="#ffffff" />
+            <circle cx="55" cy="17" r="1" fill="#ffffff" />
+            
+            {/* Blush cheeks */}
+            <circle cx="35" cy="24" r="3.5" fill="#f87171" opacity="0.5" />
+            <circle cx="61" cy="24" r="3.5" fill="#f87171" opacity="0.5" />
+            
+            {/* Smile */}
+            <path d="M 44 24 Q 48 29 52 24" stroke="#7c2d12" strokeWidth="2.5" fill="none" strokeLinecap="round" />
 
             {/* Dynamic Arms */}
             <line x1={leftArm.x1} y1={leftArm.y1} x2={leftArm.x2} y2={leftArm.y2} stroke="#f2c39b" strokeWidth="8" strokeLinecap="round" />
             <line x1={rightArm.x1} y1={rightArm.y1} x2={rightArm.x2} y2={rightArm.y2} stroke="#f2c39b" strokeWidth="8" strokeLinecap="round" />
-
-            {/* Face Details */}
-            <circle cx="42" cy="21" r="2.2" fill="#111827" />
-            <circle cx="55" cy="21" r="2.2" fill="#111827" />
-            <path d="M 43 29 Q 49 34 55 29" stroke="#7c2d12" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+            
+            {/* Sleeve joint cuffs */}
+            <circle cx={leftArm.x1} cy={leftArm.y1} r="4" fill="#15803d" />
+            <circle cx={rightArm.x1} cy={rightArm.y1} r="4" fill="#15803d" />
           </g>
 
           {/* Basketball Hoop */}
           <g className="hoop" filter="url(#softShadow)">
-            {/* Support pole */}
+            {/* Shorter Support pole */}
             <line
-              x1={hoop.rimR + 42}
+              x1={hoop.rimR + 32}
               y1={hoop.rimY - 25}
-              x2={hoop.rimR + 42}
+              x2={hoop.rimR + 32}
               y2={size.h - 40}
               stroke="#4b5563"
-              strokeWidth="11"
+              strokeWidth="7"
               strokeLinecap="round"
+            />
+            {/* Backboard attachment arm */}
+            <line
+              x1={hoop.backboard.x + 30}
+              y1={hoop.rimY - 40}
+              x2={hoop.rimR + 32}
+              y2={hoop.rimY - 40}
+              stroke="#374151"
+              strokeWidth="5"
             />
 
             {/* Backboard */}
             <rect
               x={hoop.backboard.x}
               y={hoop.backboard.y}
-              width="74"
-              height="56"
-              rx="6"
+              width="58"
+              height="44"
+              rx="5"
               fill="#ffffff"
-              opacity="0.86"
+              opacity="0.9"
               stroke="#374151"
-              strokeWidth="4.5"
-            />
-
-            <rect
-              x={hoop.backboard.x + 18}
-              y={hoop.backboard.y + 16}
-              width="32"
-              height="23"
-              rx="2"
-              fill="none"
-              stroke="#9ca3af"
               strokeWidth="3.5"
             />
 
-            {/* Net mesh mesh */}
+            <rect
+              x={hoop.backboard.x + 14}
+              y={hoop.backboard.y + 12}
+              width="24"
+              height="18"
+              rx="2"
+              fill="none"
+              stroke="#9ca3af"
+              strokeWidth="2.5"
+            />
+
+            {/* Net mesh */}
             <g className={netRipple ? "net ripple" : "net"}>
               <path
-                d={`M ${hoop.rimL + 5} ${hoop.rimY + 5}
-                    L ${hoop.rimL + 13} ${hoop.rimY + 54}
-                    L ${hoop.rimR - 13} ${hoop.rimY + 54}
-                    L ${hoop.rimR - 5} ${hoop.rimY + 5}`}
-                fill="none"
-                stroke="#f3f4f6"
-                strokeWidth="3.5"
-                strokeLinecap="round"
+                d={`M ${hoop.rimL + 5} ${hoop.rimY + 2}
+                    L ${hoop.rimL + 12} ${hoop.rimY + 40}
+                    L ${hoop.rimR - 12} ${hoop.rimY + 40}
+                    L ${hoop.rimR - 5} ${hoop.rimY + 2} Z`}
+                fill="rgba(255, 255, 255, 0.15)"
+                stroke="#ffffff"
+                strokeWidth="1.8"
+                strokeLinejoin="round"
+                opacity="0.85"
               />
-
+              {/* Crossed Net pattern */}
               <path
-                d={`M ${hoop.rimL + 15} ${hoop.rimY + 6}
-                    L ${hoop.rimL + 24} ${hoop.rimY + 54}
-                    M ${hoop.rimL + 30} ${hoop.rimY + 6}
-                    L ${hoop.rimR - 24} ${hoop.rimY + 54}
-                    M ${hoop.rimR - 15} ${hoop.rimY + 6}
-                    L ${hoop.rimR - 24} ${hoop.rimY + 54}`}
-                fill="none"
-                stroke="#d1d5db"
-                strokeWidth="2.5"
-              />
-
-              <path
-                d={`M ${hoop.rimL + 9} ${hoop.rimY + 26}
-                    C ${hoop.rimL + 23} ${hoop.rimY + 34},
-                      ${hoop.rimR - 23} ${hoop.rimY + 34},
-                      ${hoop.rimR - 9} ${hoop.rimY + 26}`}
-                fill="none"
-                stroke="#d1d5db"
-                strokeWidth="2.5"
+                d={`M ${hoop.rimL + 8} ${hoop.rimY + 2} L ${hoop.rimR - 18} ${hoop.rimY + 40}
+                    M ${hoop.rimL + 20} ${hoop.rimY + 2} L ${hoop.rimR - 12} ${hoop.rimY + 40}
+                    M ${hoop.rimR - 8} ${hoop.rimY + 2} L ${hoop.rimL + 18} ${hoop.rimY + 40}
+                    M ${hoop.rimR - 20} ${hoop.rimY + 2} L ${hoop.rimL + 12} ${hoop.rimY + 40}`}
+                stroke="#ffffff"
+                strokeWidth="1.2"
+                opacity="0.75"
               />
             </g>
 
@@ -670,21 +664,19 @@ export default function BasketballGame() {
               y1={hoop.rimY}
               x2={hoop.rimR}
               y2={hoop.rimY}
-              stroke="#f97316"
-              strokeWidth="7"
+              stroke="#ff5e00"
+              strokeWidth="4"
               strokeLinecap="round"
             />
 
-            <circle cx={hoop.rimL} cy={hoop.rimY} r="6" fill="#ea580c" />
-            <circle cx={hoop.rimR} cy={hoop.rimY} r="6" fill="#ea580c" />
+            <circle cx={hoop.rimL} cy={hoop.rimY} r="3.5" fill="#ea580c" />
+            <circle cx={hoop.rimR} cy={hoop.rimY} r="3.5" fill="#ea580c" />
           </g>
         </svg>
 
-        {/* Score & Streak HUD Panel */}
+        {/* Score & Streak HUD Badge */}
         <div className="score-card">
-          <div className="score-label">🏀 Score</div>
-          <div className="score-number">{score}</div>
-          <div className="streak">Streak: {streak} 🔥</div>
+          🏀 {score} &nbsp;•&nbsp; 🔥 {streak}
         </div>
 
         {/* Slingshot Pull Power Indicator */}
@@ -731,40 +723,41 @@ export default function BasketballGame() {
 
         {/* Basketball */}
         <div
-          className={`basketball-ball ${mode === "scored" || mode === "resetting" ? "fade" : ""
-            }`}
+          className={`basketball-ball ${mode === "scored" || mode === "resetting" ? "fade" : ""}`}
           onPointerDown={handleBallPointerDown}
           style={{
-            transform: `translate(${ball.x - BALL_R}px, ${ball.y - BALL_R
-              }px) rotate(${ball.rot}deg)`,
+            transform: `translate(${ball.x - BALL_R}px, ${ball.y - BALL_R}px) rotate(${ball.rot}deg) ${
+              squashing ? "scale(1.2, 0.8)" : groundBouncing ? "scale(1.15, 0.85)" : ""
+            }`,
             width: `${BALL_R * 2}px`,
             height: `${BALL_R * 2}px`,
           }}
         >
-          <span />
-          <span />
-          <span />
+          <svg width="100%" height="100%" viewBox="0 0 32 32">
+            <defs>
+              <radialGradient id="ballGrad" cx="30%" cy="30%" r="70%">
+                <stop offset="0%" stopColor="#ff9f43" />
+                <stop offset="70%" stopColor="#ee5253" />
+                <stop offset="100%" stopColor="#a61b1b" />
+              </radialGradient>
+            </defs>
+            {/* Base orange sphere with gradient */}
+            <circle cx="16" cy="16" r="14.5" fill="url(#ballGrad)" stroke="#7c2d12" strokeWidth="1.5" />
+            {/* Ribs */}
+            <path d="M 16 1.5 A 14.5 14.5 0 0 0 16 30.5" fill="none" stroke="#7c2d12" strokeWidth="1.2" />
+            <path d="M 1.5 16 A 14.5 14.5 0 0 0 30.5 16" fill="none" stroke="#7c2d12" strokeWidth="1.2" />
+            <path d="M 5.5 6 C 11 12, 21 12, 26.5 6" fill="none" stroke="#7c2d12" strokeWidth="1.2" />
+            <path d="M 5.5 26 C 11 20, 21 20, 26.5 26" fill="none" stroke="#7c2d12" strokeWidth="1.2" />
+          </svg>
         </div>
-
-        {/* Slingshot instructional guide */}
-        {mode === "ready" && (
-          <div
-            className="hint"
-            style={{
-              left: startPoint.x + 35,
-              top: startPoint.y - 45,
-            }}
-          >
-            Pull the ball back & release
-          </div>
-        )}
       </div>
 
       <style>{`
         .basketball-widget {
           width: 100%;
-          height: 100%;
-          min-height: 360px;
+          max-width: 620px;
+          height: 260px;
+          margin: 0 auto;
         }
 
         .basketball-mobile-button {
@@ -784,15 +777,13 @@ export default function BasketballGame() {
         .basketball-scene {
           position: relative;
           width: 100%;
-          height: 100%;
-          min-height: 360px;
+          max-width: 620px;
+          height: 260px;
+          min-height: 260px;
           overflow: hidden;
-          border-radius: 24px;
-          background: #bae6fd;
+          background: transparent;
           user-select: none;
           touch-action: none;
-          box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08),
-            0 20px 45px rgba(0, 0, 0, 0.3);
         }
 
         .basketball-scene.celebrating {
@@ -854,72 +845,24 @@ export default function BasketballGame() {
           opacity: 0;
         }
 
-        .basketball-ball span {
-          position: absolute;
-          display: block;
-          background: #7c2d12;
-          opacity: 0.85;
-        }
-
-        .basketball-ball span:nth-child(1) {
-          width: 2px;
-          height: 100%;
-          left: 50%;
-          top: 0;
-          transform: translateX(-50%);
-        }
-
-        .basketball-ball span:nth-child(2) {
-          height: 2px;
-          width: 100%;
-          left: 0;
-          top: 50%;
-          transform: translateY(-50%);
-        }
-
-        .basketball-ball span:nth-child(3) {
-          height: 2px;
-          width: 120%;
-          left: -10%;
-          top: 50%;
-          transform: rotate(35deg);
-        }
-
         .score-card {
           position: absolute;
-          top: 16px;
-          right: 16px;
+          top: 10px;
+          right: 10px;
           z-index: 6;
-          padding: 10px 14px;
-          border-radius: 14px;
-          background: rgba(17, 24, 39, 0.75);
-          backdrop-filter: blur(8px);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          box-shadow: 0 10px 25px rgba(0,0,0,0.25);
-          text-align: right;
-          color: #f3f4f6;
+          padding: 6px 10.5px;
+          border-radius: 10px;
+          background: rgba(255, 255, 255, 0.08);
+          backdrop-filter: blur(28px);
+          WebkitBackdropFilter: "blur(28px)";
+          border: 1px solid rgba(255, 255, 255, 0.18);
+          color: #111827;
+          font-size: 11px;
+          font-weight: 800;
+          display: flex;
+          align-items: center;
+          gap: 8px;
           font-family: 'Outfit', sans-serif;
-        }
-
-        .score-label {
-          font-size: 11px;
-          font-weight: 800;
-          opacity: 0.65;
-          letter-spacing: 0.5px;
-        }
-
-        .score-number {
-          font-size: 26px;
-          font-weight: 900;
-          line-height: 1;
-          margin-top: 2px;
-        }
-
-        .streak {
-          font-size: 11px;
-          font-weight: 800;
-          margin-top: 4px;
-          color: #f97316;
         }
 
         .power-ui {

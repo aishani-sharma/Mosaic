@@ -15,11 +15,13 @@ const navItems = [
 export default function NavSidebar({ activePage, setActivePage, onNewTaskClick }) {
   return (
     <aside
-      className="flex flex-col py-6 h-screen select-none"
+      className="flex flex-col py-6 h-screen select-none relative z-20"
       style={{
         width: 220,
-        background: "#0c0e13",
-        borderRight: "1px solid #2a2d3a",
+        background: "rgba(20, 30, 40, 0.35)",
+        backdropFilter: "blur(28px)",
+        WebkitBackdropFilter: "blur(28px)",
+        borderRight: "1px solid rgba(255, 255, 255, 0.15)",
         flexShrink: 0,
       }}
     >
@@ -29,9 +31,9 @@ export default function NavSidebar({ activePage, setActivePage, onNewTaskClick }
           <div
             className="w-8 h-8 rounded-lg flex items-center justify-center font-display font-black text-sm transition-all duration-300"
             style={{
-              background: "#1a1d27",
+              background: "rgba(255, 255, 255, 0.08)",
               color: "#3dd68c",
-              border: "1.5px solid #2a2d3a",
+              border: "1.5px solid rgba(255, 255, 255, 0.18)",
             }}
           >
             M
@@ -40,7 +42,7 @@ export default function NavSidebar({ activePage, setActivePage, onNewTaskClick }
             Mosaic
           </span>
         </div>
-        <span className="text-[10px] font-semibold text-[#8b8fa8] uppercase tracking-wider mt-1 font-mono">
+        <span className="text-[10px] font-semibold text-white/50 uppercase tracking-wider mt-1 font-mono">
           Premium Productivity
         </span>
       </div>
@@ -56,18 +58,18 @@ export default function NavSidebar({ activePage, setActivePage, onNewTaskClick }
               className="flex items-center gap-3 w-full py-2.5 px-3 rounded-lg text-sm font-semibold transition-all duration-150 text-left outline-none"
               style={{
                 borderLeft: isActive ? "3px solid #3dd68c" : "3px solid transparent",
-                color: isActive ? "#3dd68c" : "#8b8fa8",
-                background: isActive ? "#1a1d27" : "transparent",
+                color: isActive ? "#3dd68c" : "rgba(255, 255, 255, 0.65)",
+                background: isActive ? "rgba(255, 255, 255, 0.08)" : "transparent",
               }}
               onMouseOver={e => {
                 if (!isActive) {
                   e.currentTarget.style.color = "#ffffff";
-                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.02)";
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.04)";
                 }
               }}
               onMouseOut={e => {
                 if (!isActive) {
-                  e.currentTarget.style.color = "#8b8fa8";
+                  e.currentTarget.style.color = "rgba(255, 255, 255, 0.65)";
                   e.currentTarget.style.background = "transparent";
                 }
               }}
@@ -91,12 +93,12 @@ export default function NavSidebar({ activePage, setActivePage, onNewTaskClick }
         </button>
 
         {/* Separator */}
-        <div className="h-px bg-[#2a2d3a] w-full" />
+        <div className="h-px bg-white/10 w-full" />
 
         {/* Settings & Logout Row */}
         <div className="flex items-center justify-between px-1.5">
           <button
-            className="flex items-center gap-2 text-xs font-semibold text-[#8b8fa8] hover:text-white transition-colors outline-none"
+            className="flex items-center gap-2 text-xs font-semibold text-white/60 hover:text-white transition-colors outline-none"
             title="Settings"
           >
             <Settings size={18} />
@@ -111,7 +113,7 @@ export default function NavSidebar({ activePage, setActivePage, onNewTaskClick }
                 console.error("Signout error:", e);
               }
             }}
-            className="p-2 rounded-lg hover:bg-red-500/10 text-[#8b8fa8] hover:text-[#f76a6a] transition-all outline-none"
+            className="p-2 rounded-lg hover:bg-red-500/10 text-white/60 hover:text-[#f76a6a] transition-all outline-none"
             title="Log Out"
           >
             <LogOut size={18} />

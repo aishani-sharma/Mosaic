@@ -1,4 +1,5 @@
 // components/layout/AppShell.jsx
+import Background from "./background";
 import NavSidebar from "./NavSidebar";
 import GeminiSidebar from "./GeminiSidebar";
 import FeedPage from "../feed/FeedPage";
@@ -18,77 +19,79 @@ export default function AppShell({ user, userContext }) {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: "#0f1117" }}>
-      <NavSidebar 
-        activePage={activePage} 
-        setActivePage={setActivePage} 
-        onNewTaskClick={handleNewTaskClick} 
+    <div className="flex h-screen overflow-hidden relative" style={{ background: "#0f1117" }}>
+      <Background />
+
+      <NavSidebar
+        activePage={activePage}
+        setActivePage={setActivePage}
+        onNewTaskClick={handleNewTaskClick}
       />
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto bg-[#0f1117]">
+      <main className={`relative flex-1 z-10 ${activePage === "dashboard" ? "overflow-hidden" : "overflow-y-auto"}`}>
         {/* Dashboard View */}
-        <div 
-          style={{ display: activePage === "dashboard" ? "block" : "none" }} 
+        <div
+          style={{ display: activePage === "dashboard" ? "block" : "none" }}
           className={activePage === "dashboard" ? "animate-page-enter" : ""}
         >
-          <TasksPage 
-            user={user} 
-            userContext={userContext} 
-            isActive={activePage === "dashboard"} 
-            viewMode="dashboard" 
-            onViewAll={() => setActivePage("tasks")} 
+          <TasksPage
+            user={user}
+            userContext={userContext}
+            isActive={activePage === "dashboard"}
+            viewMode="dashboard"
+            onViewAll={() => setActivePage("tasks")}
             focusInputTrigger={focusInputTrigger}
             onNavigate={setActivePage}
           />
         </div>
 
         {/* Tasks List View */}
-        <div 
-          style={{ display: activePage === "tasks" ? "block" : "none" }} 
+        <div
+          style={{ display: activePage === "tasks" ? "block" : "none" }}
           className={activePage === "tasks" ? "animate-page-enter" : ""}
         >
-          <TasksPage 
-            user={user} 
-            userContext={userContext} 
-            isActive={activePage === "tasks"} 
-            viewMode="tasks" 
+          <TasksPage
+            user={user}
+            userContext={userContext}
+            isActive={activePage === "tasks"}
+            viewMode="tasks"
             focusInputTrigger={focusInputTrigger}
             onNavigate={setActivePage}
           />
         </div>
 
         {/* Feed View */}
-        <div 
-          style={{ display: activePage === "feed" ? "block" : "none" }} 
+        <div
+          style={{ display: activePage === "feed" ? "block" : "none" }}
           className={activePage === "feed" ? "animate-page-enter" : ""}
         >
           <FeedPage user={user} userContext={userContext} isActive={activePage === "feed"} />
         </div>
 
         {/* Calendar View */}
-        <div 
-          style={{ display: activePage === "calendar" ? "block" : "none" }} 
+        <div
+          style={{ display: activePage === "calendar" ? "block" : "none" }}
           className={activePage === "calendar" ? "animate-page-enter" : ""}
         >
           <CalendarPage user={user} userContext={userContext} isActive={activePage === "calendar"} />
         </div>
 
         {/* Pomodoro Focus View */}
-        <div 
-          style={{ display: activePage === "pomodoro" ? "block" : "none" }} 
+        <div
+          style={{ display: activePage === "pomodoro" ? "block" : "none" }}
           className={activePage === "pomodoro" ? "animate-page-enter" : ""}
         >
           <PomodoroPage user={user} userContext={userContext} isActive={activePage === "pomodoro"} />
         </div>
 
         {/* Profile View */}
-        <div 
-          style={{ display: activePage === "profile" ? "block" : "none" }} 
+        <div
+          style={{ display: activePage === "profile" ? "block" : "none" }}
           className={activePage === "profile" ? "animate-page-enter" : ""}
         >
           <ProfilePage user={user} userContext={userContext} isActive={activePage === "profile"} />
-        </div>
+        </div> {/* page-content */}
       </main>
 
       <GeminiSidebar userContext={userContext} />

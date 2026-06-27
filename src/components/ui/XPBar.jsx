@@ -8,17 +8,16 @@ export default function XPBar({ xp = 0, level = 1 }) {
       <span className="xp-pill">
         <span>LVL {level}</span>
       </span>
-      <div className="flex-1 h-1.5 rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
+      <div className="flex-1 h-1.5 rounded-full" style={{ background: "#2a2d3a" }}>
         <div
           className="h-full rounded-full transition-all duration-700"
           style={{
             width: `${progress * 100}%`,
-            background: "linear-gradient(90deg, #3dd68c, #a8f0c6)",
-            boxShadow: "0 0 8px rgba(61,214,140,0.6)",
+            background: "#3dd68c",
           }}
         />
       </div>
-      <span className="font-mono text-xs" style={{ color: "#7a7a9a" }}>
+      <span className="font-mono text-xs" style={{ color: "#8b8fa8" }}>
         {xp % xpToNext}/{xpToNext} XP
       </span>
     </div>

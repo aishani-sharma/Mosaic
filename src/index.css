@@ -8,8 +8,8 @@
   }
 
   body {
-    background-color: #0a0a0f;
-    color: #f0eeff;
+    background-color: #0f1117;
+    color: #ffffff;
     font-family: "Inter", sans-serif;
     -webkit-font-smoothing: antialiased;
     overflow: hidden; /* app shell handles scroll internally */
@@ -24,28 +24,26 @@
   }
 
   ::-webkit-scrollbar {
-    width: 4px;
+    width: 6px;
+    height: 6px;
   }
   ::-webkit-scrollbar-track {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(61, 214, 140, 0.3);
-    border-radius: 2px;
+    background: #2a2d3a;
+    border-radius: 3px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(61, 214, 140, 0.6);
+    background: #3e4256;
   }
 }
 
 @layer components {
-  /* Glass card — the signature surface used everywhere */
+  /* Solid theme cards replacing glassmorphism */
   .glass-card {
-    background: rgba(255, 255, 255, 0.04);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 -1px 0 rgba(61, 214, 140, 0.4), 0 4px 24px rgba(0, 0, 0, 0.4);
+    background: #1a1d27;
+    border: 1px solid #2a2d3a;
     border-radius: 16px;
   }
 
@@ -53,8 +51,8 @@
     @apply glass-card transition-all duration-200;
   }
   .glass-card-hover:hover {
-    background: rgba(255, 255, 255, 0.07);
-    box-shadow: 0 -1px 0 rgba(61, 214, 140, 0.6), 0 4px 32px rgba(0, 0, 0, 0.5);
+    background: #202432;
+    border-color: #3e4256;
     transform: translateY(-1px);
   }
 
@@ -62,11 +60,11 @@
   .btn-primary {
     @apply px-5 py-2.5 rounded-lg font-body font-medium text-sm transition-all duration-200;
     background: #3dd68c;
-    color: #f0eeff;
+    color: #0c0e13;
   }
   .btn-primary:hover {
     background: #5ce2a7;
-    box-shadow: 0 0 20px rgba(61, 214, 140, 0.4);
+    box-shadow: 0 0 16px rgba(61, 214, 140, 0.3);
     transform: translateY(-1px);
   }
   .btn-primary:active {
@@ -75,80 +73,80 @@
 
   .btn-ghost {
     @apply px-5 py-2.5 rounded-lg font-body font-medium text-sm transition-all duration-200;
-    color: #7a7a9a;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #8b8fa8;
+    background: #1a1d27;
+    border: 1px solid #2a2d3a;
   }
   .btn-ghost:hover {
-    color: #f0eeff;
-    border-color: rgba(255, 255, 255, 0.16);
-    background: rgba(255, 255, 255, 0.04);
+    color: #ffffff;
+    border-color: #3e4256;
+    background: #202432;
   }
 
   /* Nav icon button */
   .nav-icon {
     @apply w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200 cursor-pointer;
-    color: #7a7a9a;
+    color: #8b8fa8;
   }
   .nav-icon:hover {
-    background: rgba(255, 255, 255, 0.06);
-    color: #f0eeff;
+    background: #1a1d27;
+    color: #ffffff;
   }
   .nav-icon.active {
-    background: rgba(61, 214, 140, 0.15);
+    background: #1a1d27;
     color: #3dd68c;
-    box-shadow: 0 0 0 1px rgba(61, 214, 140, 0.3);
+    box-shadow: 0 0 0 1px #2a2d3a;
   }
 
   /* XP / streak pill */
   .xp-pill {
     @apply flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium;
-    background: rgba(61, 214, 140, 0.15);
+    background: rgba(61, 214, 140, 0.1);
     color: #3dd68c;
-    border: 1px solid rgba(61, 214, 140, 0.3);
+    border: 1px solid rgba(61, 214, 140, 0.2);
   }
 
   .streak-pill {
     @apply flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium;
-    background: rgba(168, 240, 198, 0.12);
-    color: #a8f0c6;
-    border: 1px solid rgba(168, 240, 198, 0.3);
+    background: rgba(79, 156, 249, 0.1);
+    color: #4f9cf9;
+    border: 1px solid rgba(79, 156, 249, 0.2);
   }
 
   /* Task priority badges */
   .priority-high {
     @apply text-xs px-2 py-0.5 rounded-full font-medium;
-    background: rgba(247, 106, 106, 0.15);
+    background: rgba(247, 106, 106, 0.12);
     color: #f76a6a;
-    border: 1px solid rgba(247, 106, 106, 0.3);
+    border: 1px solid rgba(247, 106, 106, 0.2);
   }
   .priority-med {
     @apply text-xs px-2 py-0.5 rounded-full font-medium;
-    background: rgba(168, 240, 198, 0.12);
-    color: #a8f0c6;
-    border: 1px solid rgba(168, 240, 198, 0.3);
+    background: rgba(79, 156, 249, 0.1);
+    color: #4f9cf9;
+    border: 1px solid rgba(79, 156, 249, 0.2);
   }
   .priority-low {
     @apply text-xs px-2 py-0.5 rounded-full font-medium;
-    background: rgba(61, 214, 140, 0.12);
+    background: rgba(61, 214, 140, 0.1);
     color: #3dd68c;
-    border: 1px solid rgba(61, 214, 140, 0.3);
+    border: 1px solid rgba(61, 214, 140, 0.2);
   }
 
   /* Input */
   .input-glass {
     @apply w-full px-4 py-3 rounded-xl text-sm outline-none transition-all duration-200;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: #f0eeff;
+    background: #1a1d27;
+    border: 1px solid #2a2d3a;
+    color: #ffffff;
     font-family: "Inter", sans-serif;
   }
   .input-glass::placeholder {
-    color: #7a7a9a;
+    color: #8b8fa8;
   }
   .input-glass:focus {
-    border-color: rgba(61, 214, 140, 0.5);
-    background: rgba(255, 255, 255, 0.06);
-    box-shadow: 0 0 0 3px rgba(61, 214, 140, 0.1);
+    border-color: #3dd68c;
+    background: #1a1d27;
   }
 }
 
@@ -191,4 +189,66 @@
 
 .animate-xp-pop {
   animation: xpPop 2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Category pills */
+.tag-academic {
+  background-color: #3b4fd8 !important;
+  color: #8b9dff !important;
+}
+.tag-work {
+  background-color: #2d5a3d !important;
+  color: #3dd68c !important;
+}
+.tag-personal {
+  background-color: #5a2d4a !important;
+  color: #d68bc4 !important;
+}
+.tag-general {
+  background-color: #2a2d3a !important;
+  color: #8b8fa8 !important;
+}
+
+/* Swipe style delete btn hover */
+.trash-hover-btn {
+  opacity: 0;
+  transform: translateX(12px);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.task-card-group:hover .trash-hover-btn {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Basketball arc animation keyframes (parabolic trajectory) */
+.animate-basketball-new {
+  animation: basketball-arc-new 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  pointer-events: none;
+}
+
+@keyframes basketball-arc-new {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: translate3d(50px, -200px, 0) scale(0.95) rotate(360deg);
+    opacity: 1;
+  }
+  80% {
+    transform: translate3d(100px, -300px, 0) scale(0.85) rotate(720deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(100px, -300px, 0) scale(0.6) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* Hoop glow box-shadow */
+.hoop-glow {
+  box-shadow: 0 0 16px #3dd68c;
+  background: rgba(61, 214, 140, 0.1);
+  border-radius: 50%;
+  transition: all 0.2s ease-in-out;
 }

@@ -121,8 +121,9 @@ Keep it concise. Plain text, no markdown headers.
 
 // ── Quote of the day ───────────────────────────────────────────────────────
 export async function getQuoteOfDay() {
-  const prompt = `Give me one short productivity or motivation quote (under 20 words). 
-Return ONLY: { "quote": "...", "author": "..." } as JSON, no markdown.`;
+  const randomSeed = Math.random().toString(36).substring(7);
+  const prompt = `Give me one short unique productivity or motivation quote (under 20 words). Seed: ${randomSeed}. 
+Return ONLY: { "quote": "...", "author": "..." } as JSON, no markdown. Make sure it is completely random and different.`;
   const raw = await callGemini(prompt);
   try {
     const clean = raw.replace(/```json|```/g, "").trim();

@@ -2,11 +2,19 @@
 import { useState, useRef, useEffect } from "react";
 import { Send, Sparkles } from "lucide-react";
 import { useGeminiChat } from "../../hooks/useGemini";
-import GlassCard from "../ui/GlassCard";
+
+function renderMessage(text) {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '$1')  // bold
+    .replace(/\*(.*?)\*/g, '$1')       // italic
+    .replace(/#{1,6}\s/g, '')          // headers
+    .replace(/`(.*?)`/g, '$1');        // inline code
+}
 
 export default function GeminiSidebar({ userContext }) {
   const { messages, sendMessage, loading } = useGeminiChat(userContext);
   const [input, setInput] = useState("");
+  const [cooldown, setCooldown] = useState(false);
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -15,9 +23,12 @@ export default function GeminiSidebar({ userContext }) {
 
   function handleSend() {
     const trimmed = input.trim();
-    if (!trimmed || loading) return;
+    if (!trimmed || loading || cooldown) return;
     setInput("");
     sendMessage(trimmed);
+
+    setCooldown(true);
+    setTimeout(() => setCooldown(false), 1500);
   }
 
   function handleKey(e) {
@@ -33,32 +44,32 @@ export default function GeminiSidebar({ userContext }) {
       style={{
         width: 300,
         flexShrink: 0,
-        background: "#0d0d14",
-        borderLeft: "1px solid rgba(255,255,255,0.06)",
+        background: "#0c0e13",
+        borderLeft: "1px solid #2a2d3a",
       }}
     >
       {/* Header */}
       <div
         className="flex items-center gap-2.5 px-4 py-4"
-        style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+        style={{ borderBottom: "1px solid #2a2d3a" }}
       >
         <div
           className="w-7 h-7 rounded-lg flex items-center justify-center"
-          style={{ background: "rgba(61,214,140,0.2)" }}
+          style={{ background: "rgba(61,214,140,0.1)", border: "1px solid rgba(61,214,140,0.25)" }}
         >
           <Sparkles size={14} style={{ color: "#3dd68c" }} />
         </div>
         <div>
-          <p className="text-sm font-display font-semibold" style={{ color: "#f0eeff" }}>
+          <p className="text-sm font-display font-bold" style={{ color: "#ffffff" }}>
             Mosaic AI
           </p>
-          <p className="text-xs" style={{ color: "#7a7a9a" }}>
+          <p className="text-xs" style={{ color: "#8b8fa8" }}>
             Your companion
           </p>
         </div>
         <div
           className="ml-auto w-2 h-2 rounded-full"
-          style={{ background: "#4ade80", boxShadow: "0 0 6px #4ade80" }}
+          style={{ background: "#3dd68c", boxShadow: "0 0 6px #3dd68c" }}
         />
       </div>
 
@@ -74,19 +85,20 @@ export default function GeminiSidebar({ userContext }) {
               style={
                 msg.role === "user"
                   ? {
-                      background: "rgba(61,214,140,0.2)",
-                      color: "#f0eeff",
+                      background: "rgba(61,214,140,0.12)",
+                      color: "#ffffff",
+                      border: "1px solid rgba(61,214,140,0.25)",
                       borderBottomRightRadius: 4,
                     }
                   : {
-                      background: "rgba(255,255,255,0.05)",
-                      color: "#d4d0f0",
-                      border: "1px solid rgba(255,255,255,0.08)",
+                      background: "#1a1d27",
+                      color: "#ffffff",
+                      border: "1px solid #2a2d3a",
                       borderBottomLeftRadius: 4,
                     }
               }
             >
-              {msg.text}
+              {renderMessage(msg.text)}
             </div>
           </div>
         ))}
@@ -94,8 +106,8 @@ export default function GeminiSidebar({ userContext }) {
         {loading && (
           <div className="flex justify-start">
             <div
-              className="px-3 py-2 rounded-xl text-sm"
-              style={{ background: "rgba(255,255,255,0.05)", color: "#7a7a9a" }}
+              className="px-3 py-2 rounded-xl text-sm border border-[#2a2d3a]"
+              style={{ background: "#1a1d27", color: "#8b8fa8" }}
             >
               <span className="animate-pulse">Thinking…</span>
             </div>
@@ -108,7 +120,7 @@ export default function GeminiSidebar({ userContext }) {
       <div 
         className="h-6 pointer-events-none flex-shrink-0" 
         style={{
-          background: "linear-gradient(to bottom, transparent, #0d0d14)",
+          background: "linear-gradient(to bottom, transparent, #0c0e13)",
           marginTop: "-24px",
           position: "relative",
           zIndex: 10,
@@ -116,17 +128,17 @@ export default function GeminiSidebar({ userContext }) {
       />
 
       {/* Input */}
-      <div className="px-3 pb-4 relative z-10 bg-[#0d0d14] flex-shrink-0">
+      <div className="px-3 pb-4 relative z-10 bg-[#0c0e13] flex-shrink-0">
         <div
           className="flex items-end gap-2 rounded-xl p-2"
           style={{
-            background: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(255,255,255,0.08)",
+            background: "#1a1d27",
+            border: "1px solid #2a2d3a",
           }}
         >
           <textarea
-            className="flex-1 bg-transparent text-sm resize-none outline-none leading-relaxed"
-            style={{ color: "#f0eeff", minHeight: 36, maxHeight: 120, fontFamily: "Inter, sans-serif" }}
+            className="flex-1 bg-transparent text-sm resize-none outline-none leading-relaxed text-white"
+            style={{ minHeight: 36, maxHeight: 120, fontFamily: "Inter, sans-serif" }}
             placeholder="Ask Mosaic anything…"
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -135,17 +147,17 @@ export default function GeminiSidebar({ userContext }) {
           />
           <button
             onClick={handleSend}
-            disabled={!input.trim() || loading}
+            disabled={!input.trim() || loading || cooldown}
             className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-200"
             style={{
-              background: input.trim() ? "#3dd68c" : "rgba(255,255,255,0.06)",
-              color: input.trim() ? "#fff" : "#7a7a9a",
+              background: (input.trim() && !loading && !cooldown) ? "#3dd68c" : "#2a2d3a",
+              color: (input.trim() && !loading && !cooldown) ? "#0c0e13" : "#8b8fa8",
             }}
           >
             <Send size={14} />
           </button>
         </div>
-        <p className="text-center mt-1.5 text-xs" style={{ color: "#3a3a5a" }}>
+        <p className="text-center mt-1.5 text-[10px]" style={{ color: "#8b8fa8" }}>
           Enter to send
         </p>
       </div>

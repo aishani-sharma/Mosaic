@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { getQuoteOfDay } from "../../lib/gemini";
 
-
 const FALLBACK = { quote: "Do it now. Sometimes 'later' becomes 'never'.", author: "Unknown" };
 const DISPLAY_MS = 3000;
 
@@ -30,52 +29,42 @@ export default function LoadingScreen({ onDone }) {
     <div
       className="fixed inset-0 flex flex-col items-center justify-center z-50"
       style={{
-        background: "#0a0a0f",
+        background: "#0f1117",
         opacity: fading ? 0 : 1,
         transition: "opacity 0.6s ease",
       }}
     >
-      <div
-        className="absolute w-96 h-96 rounded-full pointer-events-none"
-        style={{
-          background: "radial-gradient(circle, rgba(61,214,140,0.12) 0%, transparent 70%)",
-          top: "50%", left: "50%",
-          transform: "translate(-50%, -50%)",
-        }}
-      />
-
       <div className="animate-fade-in flex flex-col items-center gap-6 relative">
         <div
-          className="w-16 h-16 rounded-2xl flex items-center justify-center font-display font-bold text-2xl"
+          className="w-16 h-16 rounded-2xl flex items-center justify-center font-display font-black text-2xl"
           style={{
-            background: "rgba(61,214,140,0.15)",
-            border: "1px solid rgba(61,214,140,0.4)",
+            background: "#1a1d27",
+            border: "1.5px solid #2a2d3a",
             color: "#3dd68c",
-            boxShadow: "0 0 32px rgba(61,214,140,0.3)",
           }}
         >
           M
         </div>
 
         <div className="text-center max-w-sm px-8">
-          <p className="font-display text-lg font-medium mb-2" style={{ color: "#f0eeff" }}>
+          <p className="font-display text-lg font-bold mb-2" style={{ color: "#ffffff" }}>
             "{quote.quote}"
           </p>
           {quote.author && (
-            <p className="text-sm font-mono" style={{ color: "#7a7a9a" }}>
+            <p className="text-xs font-mono font-semibold" style={{ color: "#8b8fa8" }}>
               — {quote.author}
             </p>
           )}
         </div>
 
         <div
-          className="w-24 h-0.5 rounded-full overflow-hidden"
-          style={{ background: "rgba(255,255,255,0.08)" }}
+          className="w-24 h-1.5 rounded-full overflow-hidden"
+          style={{ background: "#2a2d3a" }}
         >
           <div
             className="h-full rounded-full"
             style={{
-              background: "linear-gradient(90deg, #3dd68c, #a8f0c6)",
+              background: "#3dd68c",
               animation: `loadBar ${DISPLAY_MS}ms ease-in-out forwards`,
             }}
           />

@@ -8,7 +8,7 @@ const navItems = [
   { id: "tasks", icon: ListTodo, label: "Tasks" },
   { id: "calendar", icon: Calendar, label: "Calendar" },
   { id: "pomodoro", icon: Timer, label: "Focus" },
-  { id: "feed", icon: Users, label: "Feed" },
+  { id: "feed", icon: Users, label: "Moments" },
   { id: "profile", icon: User, label: "Profile" },
 ];
 

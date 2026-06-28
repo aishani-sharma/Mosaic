@@ -1,9 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 const BALL_R = 13;
-const GRAVITY = 0.22;
+const GRAVITY = 0.20;
 const AIR = 0.999;
-const POWER = 0.155;
 const MAX_PULL = 90;
 
 function distance(a, b) {
@@ -60,22 +59,31 @@ export default function BasketballGame() {
     setModeState(next);
   };
 
+  const POWER = Math.max(0.15, size.w * 0.00022);
+
   function groundY(x) {
     const t = Math.max(0, Math.min(1, x / size.w));
-    return size.h - 45 + Math.sin(t * Math.PI) * 25;
+    return size.h - 125 + Math.sin(t * Math.PI) * 25;
   }
 
   const startPoint = useMemo(() => {
-    const x = Math.max(100, size.w * 0.16);
+    // Keep the boy 5% off the left edge, but minimum 85px to avoid arm/drag-line clipping
+    const x = Math.max(85, size.w * 0.05);
     const y = groundY(x) - 22;
     return { x, y };
   }, [size]);
 
   const hoop = useMemo(() => {
-    const rimY = Math.max(120, size.h * 0.42);
-    // Widened rim from 55px to 70px to make it slightly easier to hit
-    const rimL = size.w - 200;
-    const rimR = size.w - 130;
+    // Keep the hoop's backboard right edge 2% off the right edge (minimum 25px to avoid clipping)
+    const backboardOffset = Math.max(25, size.w * 0.02);
+    const backboardW = 58;
+    const backboardH = 44;
+    const backboardX = size.w - backboardOffset - backboardW;
+    const rimR = backboardX - 10;
+    const rimL = rimR - 80; // Widened rim from 70px to 80px to make it easier to score!
+
+    const basketX = (rimL + rimR) / 2;
+    const rimY = Math.max(90, groundY(basketX) - 130); // 130px above the ground curve, clamped to min 90px
 
     return {
       rimY,
@@ -84,12 +92,21 @@ export default function BasketballGame() {
       leftRim: { x: rimL, y: rimY },
       rightRim: { x: rimR, y: rimY },
       backboard: {
-        x: rimR + 10,
+        x: backboardX,
         y: rimY - 85,
-        w: 15,
-        h: 100,
+        w: backboardW,
+        h: backboardH,
       },
     };
+  }, [size]);
+
+  const groundPath = useMemo(() => {
+    let d = `M 0 ${size.h}`;
+    for (let x = 0; x <= size.w; x += 10) {
+      d += ` L ${x} ${groundY(x)}`;
+    }
+    d += ` L ${size.w} ${size.h} Z`;
+    return d;
   }, [size]);
 
   useEffect(() => {
@@ -291,16 +308,16 @@ export default function BasketballGame() {
     delay(() => setNetRipple(false), 650);
     delay(() => setConfetti([]), 1100);
     delay(() => setFloatingText(""), 1100);
-    resetToHands(1000);
+    resetToHands(600);
   }
 
   function triggerMiss() {
     cancelAnimationFrame(rafRef.current);
     setStreak(0);
-    resetToHands(800);
+    resetToHands(400);
   }
 
-  function bounceFromRim(point, nextBall, velocity) {
+  function bounceFromRim(point, nextBall, velocity, collisionR = BALL_R + 2) {
     const dx = nextBall.x - point.x;
     const dy = nextBall.y - point.y;
     const d = Math.hypot(dx, dy) || 1;
@@ -314,8 +331,8 @@ export default function BasketballGame() {
       velocity.x = (velocity.x - 2 * dot * nx) * 0.8;
       velocity.y = (velocity.y - 2 * dot * ny) * 0.8;
 
-      nextBall.x = point.x + nx * (BALL_R + 6);
-      nextBall.y = point.y + ny * (BALL_R + 6);
+      nextBall.x = point.x + nx * collisionR;
+      nextBall.y = point.y + ny * collisionR;
     }
   }
 
@@ -356,11 +373,14 @@ export default function BasketballGame() {
       prev.y < hoop.rimY - BALL_R * 0.3 &&
       next.y >= hoop.rimY - BALL_R * 0.3;
 
-    const insideHoop =
-      next.x > hoop.rimL + BALL_R * 0.05 &&
-      next.x < hoop.rimR - BALL_R * 0.05;
-
     const fallingDown = v.y > 0;
+
+    let insideHoop = false;
+    if (crossedRimPlane) {
+      const fraction = (hoop.rimY - BALL_R * 0.3 - prev.y) / (next.y - prev.y || 1);
+      const crossX = prev.x + (next.x - prev.x) * fraction;
+      insideHoop = crossX > hoop.rimL + BALL_R * 0.05 && crossX < hoop.rimR - BALL_R * 0.05;
+    }
 
     if (
       !scoredThisShotRef.current &&
@@ -375,29 +395,29 @@ export default function BasketballGame() {
     if (circleRectCollision(next, hoop.backboard)) {
       if (prev.x < hoop.backboard.x) {
         next.x = hoop.backboard.x - BALL_R - 1;
-        v.x = -Math.abs(v.x) * 0.72;
+        v.x = -Math.abs(v.x) * 0.8;
       } else {
         next.x = hoop.backboard.x + hoop.backboard.w + BALL_R + 1;
-        v.x = Math.abs(v.x) * 0.72;
+        v.x = Math.abs(v.x) * 0.8;
       }
 
-      v.y *= 0.86;
+      v.y *= 0.88;
     }
 
-    if (distance(next, hoop.leftRim) < BALL_R + 6) {
-      bounceFromRim(hoop.leftRim, next, v);
+    if (distance(next, hoop.leftRim) < BALL_R + 2) {
+      bounceFromRim(hoop.leftRim, next, v, BALL_R + 2);
     }
 
-    if (distance(next, hoop.rightRim) < BALL_R + 6) {
-      bounceFromRim(hoop.rightRim, next, v);
+    if (distance(next, hoop.rightRim) < BALL_R + 2) {
+      bounceFromRim(hoop.rightRim, next, v, BALL_R + 2);
     }
 
     const gY = groundY(next.x);
 
     if (next.y + BALL_R > gY) {
       next.y = gY - BALL_R;
-      v.y = -Math.abs(v.y) * 0.45;
-      v.x *= 0.8;
+      v.y = -Math.abs(v.y) * 0.72;
+      v.x *= 0.85;
 
       setGroundBouncing(true);
       delay(() => setGroundBouncing(false), 120);
@@ -515,6 +535,13 @@ export default function BasketballGame() {
               opacity={Math.max(0.12, p.opacity * 0.65)}
             />
           ))}
+          {/* Ground Court Area */}
+          <path
+            d={groundPath}
+            fill="rgba(255, 255, 255, 0.04)"
+            stroke="rgba(255, 255, 255, 0.15)"
+            strokeWidth="2"
+          />
 
           {/* Cartoon Basketball Player */}
           <g
@@ -591,10 +618,10 @@ export default function BasketballGame() {
           <g className="hoop" filter="url(#softShadow)">
             {/* Shorter Support pole */}
             <line
-              x1={hoop.rimR + 32}
+              x1={hoop.backboard.x + hoop.backboard.w / 2}
               y1={hoop.rimY - 25}
-              x2={hoop.rimR + 32}
-              y2={size.h - 40}
+              x2={hoop.backboard.x + hoop.backboard.w / 2}
+              y2={groundY(hoop.backboard.x + hoop.backboard.w / 2)}
               stroke="#4b5563"
               strokeWidth="7"
               strokeLinecap="round"
@@ -603,7 +630,7 @@ export default function BasketballGame() {
             <line
               x1={hoop.backboard.x + 30}
               y1={hoop.rimY - 40}
-              x2={hoop.rimR + 32}
+              x2={hoop.backboard.x + hoop.backboard.w / 2}
               y2={hoop.rimY - 40}
               stroke="#374151"
               strokeWidth="5"
@@ -753,10 +780,11 @@ export default function BasketballGame() {
 
       <style>{`
         .basketball-widget {
+          position: absolute;
+          inset: 0;
           width: 100%;
-          max-width: 620px;
-          height: 260px;
-          margin: 0 auto;
+          height: 100%;
+          z-index: 0;
         }
 
         .basketball-mobile-button {
@@ -776,9 +804,7 @@ export default function BasketballGame() {
         .basketball-scene {
           position: relative;
           width: 100%;
-          max-width: 620px;
-          height: 260px;
-          min-height: 260px;
+          height: 100%;
           overflow: hidden;
           background: transparent;
           user-select: none;
@@ -824,6 +850,8 @@ export default function BasketballGame() {
 
         .basketball-ball {
           position: absolute;
+          top: 0;
+          left: 0;
           border-radius: 999px;
           background: radial-gradient(circle at 35% 28%, #fb923c, #ea580c 72%);
           border: 2px solid #9a3412;
@@ -1009,23 +1037,6 @@ export default function BasketballGame() {
         }
 
         @media (max-width: 768px) {
-          .basketball-widget {
-            min-height: auto;
-          }
-
-          .basketball-mobile-button {
-            display: block;
-          }
-
-          .basketball-widget:not(.expanded) .basketball-scene {
-            display: none;
-          }
-
-          .basketball-scene {
-            height: 320px;
-            margin-top: 12px;
-          }
-
           .hint {
             display: none;
           }

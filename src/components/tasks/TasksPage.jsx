@@ -83,11 +83,10 @@ function TaskRow({ task, onComplete, onDelete }) {
         {/* Square Checkbox */}
         <button
           onClick={() => onComplete(task.id, task.completed)}
-          className={`w-[16px] h-[16px] rounded border-2 transition-all flex items-center justify-center flex-shrink-0 cursor-pointer ${
-            task.completed
-              ? "bg-[#3dd68c] border-[#3dd68c]"
-              : "border-[#3dd68c] bg-transparent hover:scale-105"
-          }`}
+          className={`w-[16px] h-[16px] rounded border-2 transition-all flex items-center justify-center flex-shrink-0 cursor-pointer ${task.completed
+            ? "bg-[#3dd68c] border-[#3dd68c]"
+            : "border-[#3dd68c] bg-transparent hover:scale-105"
+            }`}
           title={task.completed ? "Mark incomplete" : "Mark complete"}
         >
           {task.completed && <Check size={10} strokeWidth={4} className="text-white" />}
@@ -464,13 +463,13 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
   async function handleComplete(taskId, currentlyDone) {
     const newDone = !currentlyDone;
     const now = new Date().toISOString();
-    await updateTask(taskId, { 
+    await updateTask(taskId, {
       completed: newDone,
       completedAt: newDone ? now : null,
       updatedAt: now
     });
-    setTasks(prev => prev.map(t => t.id === taskId ? { 
-      ...t, 
+    setTasks(prev => prev.map(t => t.id === taskId ? {
+      ...t,
       completed: newDone,
       completedAt: newDone ? now : null,
       updatedAt: now
@@ -564,55 +563,60 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
         </div>
       )}
 
+      {/* Background Basketball Game */}
+      {viewMode === "dashboard" && (
+        <BasketballGame />
+      )}
+
       {/* Main Container */}
-      <div className="max-w-6xl mx-auto px-6 relative h-full py-4 flex flex-col min-h-0">
+      <div
+        className={`max-w-6xl mx-auto px-6 relative h-full py-4 flex flex-col min-h-0 z-10 ${viewMode === "dashboard" ? "pointer-events-none" : ""
+          }`}
+      >
 
         {viewMode === "dashboard" ? (
+          <>
+            <div className="max-w-2xl mx-auto flex flex-col w-full mt-2 animate-page-enter pointer-events-auto">
+              <div
+                className="p-5 md:p-6 flex flex-col w-full"
+                style={{
+                  background: "linear-gradient(to bottom, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04))",
+                  backdropFilter: "blur(28px)",
+                  WebkitBackdropFilter: "blur(28px)",
+                  border: "1px solid rgba(255, 255, 255, 0.18)",
+                  borderRadius: "28px",
+                }}
+              >
+                {/* Reminder Banner System */}
+                {(() => {
+                  const getTaskPriorityValue = (p) => {
+                    if (p === "high") return 3;
+                    if (p === "med") return 2;
+                    if (p === "low") return 1;
+                    return 0;
+                  };
 
-          /* =======================================================
-             MINIMALIST IMMERSIVE DASHBOARD LAYOUT (WITH FROSTED GLASS PANEL)
-             ======================================================= */
-          <div className="max-w-2xl mx-auto flex flex-col w-full flex-1 min-h-0 mt-2 animate-page-enter">
-            <div
-              className="p-5 md:p-6 flex flex-col w-full flex-1 min-h-0"
-              style={{
-                background: "linear-gradient(to bottom, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04))",
-                backdropFilter: "blur(28px)",
-                WebkitBackdropFilter: "blur(28px)",
-                border: "1px solid rgba(255, 255, 255, 0.18)",
-                borderRadius: "28px",
-              }}
-            >
-              {/* Reminder Banner System */}
-              {(() => {
-                const getTaskPriorityValue = (p) => {
-                  if (p === "high") return 3;
-                  if (p === "med") return 2;
-                  if (p === "low") return 1;
-                  return 0;
-                };
+                  const activeBanners = pending
+                    .filter(t => !dismissedBanners.has(t.id))
+                    .filter(t => isDueToday(t.deadline) || isDueTomorrow(t.deadline))
+                    .map(t => ({
+                      ...t,
+                      isToday: isDueToday(t.deadline),
+                      isTomorrow: isDueTomorrow(t.deadline),
+                    }))
+                    .sort((a, b) => {
+                      if (a.isToday && !b.isToday) return -1;
+                      if (!a.isToday && b.isToday) return 1;
+                      const pA = getTaskPriorityValue(a.priority);
+                      const pB = getTaskPriorityValue(b.priority);
+                      if (pA !== pB) return pB - pA;
+                      return a.title.localeCompare(b.title);
+                    })
+                    .slice(0, 2);
 
-                const activeBanners = pending
-                  .filter(t => !dismissedBanners.has(t.id))
-                  .filter(t => isDueToday(t.deadline) || isDueTomorrow(t.deadline))
-                  .map(t => ({
-                    ...t,
-                    isToday: isDueToday(t.deadline),
-                    isTomorrow: isDueTomorrow(t.deadline),
-                  }))
-                  .sort((a, b) => {
-                    if (a.isToday && !b.isToday) return -1;
-                    if (!a.isToday && b.isToday) return 1;
-                    const pA = getTaskPriorityValue(a.priority);
-                    const pB = getTaskPriorityValue(b.priority);
-                    if (pA !== pB) return pB - pA;
-                    return a.title.localeCompare(b.title);
-                  })
-                  .slice(0, 2);
-
-                return activeBanners.map(banner => {
-                  const bannerStyle = banner.isToday
-                    ? {
+                  return activeBanners.map(banner => {
+                    const bannerStyle = banner.isToday
+                      ? {
                         background: "rgba(247,106,106,0.15)",
                         border: "1px solid rgba(247,106,106,0.4)",
                         color: "#f76a6a",
@@ -623,9 +627,10 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
                         borderRadius: "16px",
                         marginBottom: "12px",
                         justifyContent: "space-between",
-                        gap: "12px"
+                        gap: "12px",
+                        pointerEvents: "auto"
                       }
-                    : {
+                      : {
                         background: "rgba(247,194,106,0.15)",
                         border: "1px solid rgba(247,194,106,0.4)",
                         color: "#f7c26a",
@@ -636,162 +641,160 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
                         borderRadius: "16px",
                         marginBottom: "12px",
                         justifyContent: "space-between",
-                        gap: "12px"
+                        gap: "12px",
+                        pointerEvents: "auto"
                       };
 
-                  return (
-                    <GlassCard key={banner.id} style={bannerStyle} className="flex-shrink-0">
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <span className="text-base flex-shrink-0">{banner.isToday ? "⚠️" : "📅"}</span>
-                        <span className="text-sm font-semibold truncate flex-1 leading-none pt-[1px]">
-                          {banner.isToday
-                            ? `${banner.title} is due TODAY — don't miss it!`
-                            : `${banner.title} is due tomorrow — plan ahead!`}
-                        </span>
-                      </div>
-                      <button
-                        onClick={() => {
-                          setDismissedBanners(prev => {
-                            const next = new Set(prev);
-                            next.add(banner.id);
-                            return next;
-                          });
-                        }}
-                        className="p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors flex-shrink-0 text-current opacity-70 hover:opacity-100"
-                        title="Dismiss banner"
-                      >
-                        <X size={14} />
-                      </button>
-                    </GlassCard>
-                  );
-                });
-              })()}
+                    return (
+                      <GlassCard key={banner.id} style={bannerStyle} className="flex-shrink-0">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <span className="text-base flex-shrink-0">{banner.isToday ? "⚠️" : "📅"}</span>
+                          <span className="text-sm font-semibold truncate flex-1 leading-none pt-[1px]">
+                            {banner.isToday
+                              ? `${banner.title} is due TODAY — don't miss it!`
+                              : `${banner.title} is due tomorrow — plan ahead!`}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setDismissedBanners(prev => {
+                              const next = new Set(prev);
+                              next.add(banner.id);
+                              return next;
+                            });
+                          }}
+                          className="p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors flex-shrink-0 text-current opacity-70 hover:opacity-100"
+                          title="Dismiss banner"
+                        >
+                          <X size={14} />
+                        </button>
+                      </GlassCard>
+                    );
+                  });
+                })()}
 
-              {/* Top Greeting Header Row */}
-              <div className="flex items-start justify-between mb-5 flex-shrink-0">
-                <div>
-                  <h1 className="font-display font-bold text-[26px] text-[#111827] leading-tight tracking-tight">
-                    Good morning, {user?.displayName || "there"}
-                  </h1>
-                  <p className="text-xs font-semibold text-[#6B7280] mt-0.5 font-mono uppercase tracking-wide">
-                    You have {pending.length} tasks today
-                  </p>
-                </div>
-                <button
-                  onClick={handlePrioritize}
-                  disabled={prioritizing || pending.length === 0}
-                  className="btn-primary flex items-center gap-2 text-xs py-1.5 px-3 h-8.5 rounded-lg font-bold flex-shrink-0"
-                >
-                  <Sparkles size={12} strokeWidth={2.5} />
-                  {prioritizing ? "Prioritizing..." : "AI Prioritize"}
-                </button>
-              </div>
-
-              {/* Task Add search style input */}
-              <div
-                className={`transition-all duration-300 bg-white/15 backdrop-blur-[28px] border border-white/20 flex flex-col gap-3 mb-4 relative flex-shrink-0 ${
-                  isExpanded || newTask.trim() ? "rounded-2xl p-4" : "rounded-full py-2 px-4"
-                }`}
-                onBlur={(e) => {
-                  if (!e.currentTarget.contains(e.relatedTarget) && !newTask.trim()) {
-                    setIsExpanded(false);
-                  }
-                }}
-              >
-                {(isExpanded || newTask.trim() !== "") && (
-                  <div className="flex gap-3 items-center animate-page-enter">
-                    <div className="flex-1">
-                      <label className="block text-[9px] uppercase tracking-wider text-[#6B7280] mb-1 font-mono font-bold">
-                        Deadline
-                      </label>
-                      <input
-                        type="date"
-                        className="w-full bg-white/30 rounded-lg px-3 py-1.5 text-xs text-[#374151] outline-none cursor-pointer"
-                        value={newDeadline}
-                        onChange={e => setNewDeadline(e.target.value)}
-                      />
-                    </div>
-                    <div className="w-1/3">
-                      <label className="block text-[9px] uppercase tracking-wider text-[#6B7280] mb-1 font-mono font-bold">
-                        Category
-                      </label>
-                      <select
-                        className="w-full bg-white/30 rounded-lg px-3 py-1.5 text-xs text-[#374151] outline-none cursor-pointer"
-                        value={newCategory}
-                        onChange={e => setNewCategory(e.target.value)}
-                      >
-                        <option value="auto">Auto ({detectedCategory})</option>
-                        <option value="Academic">Academic</option>
-                        <option value="Personal">Personal</option>
-                        <option value="Work">Work</option>
-                        <option value="General">General</option>
-                      </select>
-                    </div>
+                {/* Top Greeting Header Row */}
+                <div className="flex items-start justify-between mb-5 flex-shrink-0">
+                  <div>
+                    <h1 className="font-display font-bold text-[26px] text-[#111827] leading-tight tracking-tight">
+                      Good morning, {user?.displayName || "there"}
+                    </h1>
+                    <p className="text-xs font-semibold text-[#6B7280] mt-0.5 font-mono uppercase tracking-wide">
+                      You have {pending.length} tasks today
+                    </p>
                   </div>
-                )}
-
-                <div className="flex gap-2 items-center w-full">
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    className="bg-transparent flex-1 py-1 px-1 text-sm text-[#374151] placeholder-[#6B7280] outline-none"
-                    placeholder="+ Add new task..."
-                    value={newTask}
-                    onFocus={() => setIsExpanded(true)}
-                    onChange={e => {
-                      setNewTask(e.target.value);
-                      if (!isExpanded) setIsExpanded(true);
-                    }}
-                    onKeyDown={e => {
-                      if (e.key === "Enter") {
-                        handleAdd();
-                      }
-                    }}
-                  />
                   <button
-                    onClick={handleAdd}
-                    className="bg-[#3dd68c] hover:bg-[#5ce2a7] transition-all text-[#0c0e13] flex items-center justify-center rounded-full w-8 h-8 flex-shrink-0"
-                    title="Add task"
+                    onClick={handlePrioritize}
+                    disabled={prioritizing || pending.length === 0}
+                    className="btn-primary flex items-center gap-2 text-xs py-1.5 px-3 h-8.5 rounded-lg font-bold flex-shrink-0"
                   >
-                    <Plus size={16} strokeWidth={3} />
+                    <Sparkles size={12} strokeWidth={2.5} />
+                    {prioritizing ? "Prioritizing..." : "AI Prioritize"}
                   </button>
                 </div>
-              </div>
 
-              {/* Section Header */}
-              <div className="flex items-center justify-between pb-2 mb-1.5 flex-shrink-0">
-                <h2 className="text-xs font-bold text-[#111827] uppercase tracking-wider font-mono">
-                  Today's Tasks
-                </h2>
-                <button
-                  onClick={onViewAll}
-                  className="text-xs font-bold text-[#3dd68c] hover:text-[#5ce2a7] transition-colors tracking-wide"
+                {/* Task Add search style input */}
+                <div
+                  className={`transition-all duration-300 bg-white/15 backdrop-blur-[28px] border border-white/20 flex flex-col gap-3 mb-4 relative flex-shrink-0 ${isExpanded || newTask.trim() ? "rounded-2xl p-4" : "rounded-full py-2 px-4"
+                    }`}
+                  onBlur={(e) => {
+                    if (!e.currentTarget.contains(e.relatedTarget) && !newTask.trim()) {
+                      setIsExpanded(false);
+                    }
+                  }}
                 >
-                  VIEW ALL
-                </button>
-              </div>
+                  {(isExpanded || newTask.trim() !== "") && (
+                    <div className="flex gap-3 items-center animate-page-enter">
+                      <div className="flex-1">
+                        <label className="block text-[9px] uppercase tracking-wider text-[#6B7280] mb-1 font-mono font-bold">
+                          Deadline
+                        </label>
+                        <input
+                          type="date"
+                          className="w-full bg-white/30 rounded-lg px-3 py-1.5 text-xs text-[#374151] outline-none cursor-pointer"
+                          value={newDeadline}
+                          onChange={e => setNewDeadline(e.target.value)}
+                        />
+                      </div>
+                      <div className="w-1/3">
+                        <label className="block text-[9px] uppercase tracking-wider text-[#6B7280] mb-1 font-mono font-bold">
+                          Category
+                        </label>
+                        <select
+                          className="w-full bg-white/30 rounded-lg px-3 py-1.5 text-xs text-[#374151] outline-none cursor-pointer"
+                          value={newCategory}
+                          onChange={e => setNewCategory(e.target.value)}
+                        >
+                          <option value="auto">Auto ({detectedCategory})</option>
+                          <option value="Academic">Academic</option>
+                          <option value="Personal">Personal</option>
+                          <option value="Work">Work</option>
+                          <option value="General">General</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
 
-              {/* Task rows */}
-              <div className="flex-1 overflow-y-auto pr-1 min-h-0">
-                {loadingTasks ? (
-                  <p className="text-[#6B7280] text-sm py-4 italic">Loading tasks...</p>
-                ) : displayTasks.length > 0 ? (
-                  <div className="flex flex-col gap-1">
-                    {displayTasks.map(t => (
-                      <TaskRow key={t.id} task={t} onComplete={handleComplete} onDelete={handleDelete} />
-                    ))}
+                  <div className="flex gap-2 items-center w-full">
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      className="bg-transparent flex-1 py-1 px-1 text-sm text-[#374151] placeholder-[#6B7280] outline-none"
+                      placeholder="+ Add new task..."
+                      value={newTask}
+                      onFocus={() => setIsExpanded(true)}
+                      onChange={e => {
+                        setNewTask(e.target.value);
+                        if (!isExpanded) setIsExpanded(true);
+                      }}
+                      onKeyDown={e => {
+                        if (e.key === "Enter") {
+                          handleAdd();
+                        }
+                      }}
+                    />
+                    <button
+                      onClick={handleAdd}
+                      className="bg-[#3dd68c] hover:bg-[#5ce2a7] transition-all text-[#0c0e13] flex items-center justify-center rounded-full w-8 h-8 flex-shrink-0"
+                      title="Add task"
+                    >
+                      <Plus size={16} strokeWidth={3} />
+                    </button>
                   </div>
-                ) : (
-                  <p className="text-[#6B7280] text-sm py-6 italic text-center border-b border-[#6B7280]/20 border-dashed">
-                    No pending tasks for today. Add one above or shoot some hoops! 🏀
-                  </p>
-                )}
+                </div>
+
+                {/* Section Header */}
+                <div className="flex items-center justify-between pb-2 mb-1.5 flex-shrink-0">
+                  <h2 className="text-xs font-bold text-[#111827] uppercase tracking-wider font-mono">
+                    Today's Tasks
+                  </h2>
+                  <button
+                    onClick={onViewAll}
+                    className="text-xs font-bold text-[#3dd68c] hover:text-[#5ce2a7] transition-colors tracking-wide"
+                  >
+                    VIEW ALL
+                  </button>
+                </div>
+
+                {/* Task rows */}
+                <div className="flex-1 overflow-y-auto pr-1 min-h-0">
+                  {loadingTasks ? (
+                    <p className="text-[#6B7280] text-sm py-4 italic">Loading tasks...</p>
+                  ) : displayTasks.length > 0 ? (
+                    <div className="flex flex-col gap-1">
+                      {displayTasks.map(t => (
+                        <TaskRow key={t.id} task={t} onComplete={handleComplete} onDelete={handleDelete} />
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-[#6B7280] text-sm py-6 italic text-center border-b border-[#6B7280]/20 border-dashed">
+                      No pending tasks for today. Add one above or shoot some hoops! 🏀
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
-
-            <BasketballGame />
-
-          </div>
+          </>
         ) : (
           /* =======================================================
              ALL TASKS VIEW LAYOUT (Tasks Tab)
@@ -821,9 +824,8 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
 
               {/* Task Add search style input */}
               <div
-                className={`transition-all duration-300 bg-white/15 backdrop-blur-[28px] border border-white/20 flex flex-col gap-3 mb-4 relative flex-shrink-0 ${
-                  isExpanded || newTask.trim() ? "rounded-2xl p-4" : "rounded-full py-2 px-4"
-                }`}
+                className={`transition-all duration-300 bg-white/15 backdrop-blur-[28px] border border-white/20 flex flex-col gap-3 mb-4 relative flex-shrink-0 ${isExpanded || newTask.trim() ? "rounded-2xl p-4" : "rounded-full py-2 px-4"
+                  }`}
                 onBlur={(e) => {
                   if (!e.currentTarget.contains(e.relatedTarget) && !newTask.trim()) {
                     setIsExpanded(false);

@@ -4,7 +4,7 @@ import GlassCard from "../ui/GlassCard";
 import XPBar from "../ui/XPBar";
 import StreakBadge from "../ui/StreakBadge";
 import { User, Edit3 } from "lucide-react";
-import { updateUserProfile } from "../../lib/firestore";
+import { updateUserProfile, getUserTasks } from "../../lib/firestore";
 
 const ROLES = ["Engineering Student", "Medical Student", "Working Professional", "Entrepreneur", "Other"];
 const FOCUS_AREAS = ["Academics", "Work Projects", "Personal Goals", "Health & Fitness", "Finance", "Side Projects"];
@@ -16,6 +16,31 @@ export default function ProfilePage({ user, userContext, isActive }) {
   const [role, setRole] = useState(ctx.role ?? "");
   const [focusAreas, setFocusAreas] = useState(ctx.focusAreas ?? []);
   const [workHours, setWorkHours] = useState(ctx.workHours ?? "");
+  const [userTasks, setUserTasks] = useState([]);
+
+  useEffect(() => {
+    if (!user?.uid || !isActive) return;
+    getUserTasks(user.uid)
+      .then(setUserTasks)
+      .catch(err => console.error("Error loading tasks for profile:", err));
+  }, [user?.uid, isActive]);
+
+  const isToday = (dateVal) => {
+    if (!dateVal) return false;
+    let date;
+    if (typeof dateVal.toDate === "function") {
+      date = dateVal.toDate();
+    } else {
+      date = new Date(dateVal);
+    }
+    if (isNaN(date.getTime())) return false;
+    return date.toDateString() === new Date().toDateString();
+  };
+
+  const completedTodayCount = userTasks.filter(t => {
+    if (!t.completed) return false;
+    return isToday(t.completedAt) || isToday(t.updatedAt);
+  }).length;
 
   useEffect(() => {
     if (userContext) {
@@ -194,13 +219,91 @@ export default function ProfilePage({ user, userContext, isActive }) {
       </GlassCard>
 
       {/* Streak */}
-      <GlassCard className="p-4 flex items-center justify-between">
+      <GlassCard className="p-4 flex items-center justify-between mb-5">
         <div>
-          <p className="font-display font-semibold mb-1" style={{ color: "#f0eeff" }}>Daily streak</p>
-          <p className="text-xs" style={{ color: "#7a7a9a" }}>Complete at least one task per day</p>
+          <p className="font-display font-semibold mb-1" style={{ color: "#f0eeff" }}>Daily Habit Streak</p>
+          <p className="text-xs" style={{ color: "#7a7a9a" }}>Complete tasks every day to maintain your streak</p>
         </div>
         <StreakBadge streak={profileData.streak ?? 0} />
       </GlassCard>
+
+      {/* Goals & Habits Section */}
+      <div className="mt-6">
+        <h2 className="font-display font-bold text-lg mb-4" style={{ color: "#f0eeff" }}>Goals & Habits</h2>
+
+        {/* Today's Goal Card */}
+        <GlassCard className="p-4 mb-4">
+          <div className="flex justify-between items-start mb-2">
+            <div>
+              <p className="font-display font-semibold text-sm" style={{ color: "#f0eeff" }}>Today's Goal</p>
+              <p className="text-xs" style={{ color: "#7a7a9a" }}>Complete 3 tasks today</p>
+            </div>
+            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(61,214,140,0.1)", color: "#3dd68c" }}>
+              Daily
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between mb-1.5 mt-4">
+            <span className="text-xs font-mono font-medium" style={{ color: completedTodayCount >= 3 ? "#3dd68c" : "#7a7a9a" }}>
+              {completedTodayCount}/3 tasks completed today
+            </span>
+            <span className="text-xs font-mono font-semibold" style={{ color: "#3dd68c" }}>
+              {Math.min(Math.round((completedTodayCount / 3) * 100), 100)}%
+            </span>
+          </div>
+          <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden border border-white/5">
+            <div
+              className="bg-[#3dd68c] h-full rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${Math.min((completedTodayCount / 3) * 100, 100)}%` }}
+            />
+          </div>
+        </GlassCard>
+
+        {/* 21-Day Activity Calendar Card */}
+        <GlassCard className="p-4">
+          <p className="text-xs font-mono uppercase tracking-widest mb-3" style={{ color: "#7a7a9a" }}>21-day activity</p>
+          <div className="flex justify-center py-2">
+            <div className="grid grid-cols-7 gap-2">
+              {(() => {
+                const getPast21Days = () => {
+                  const days = [];
+                  for (let i = 20; i >= 0; i--) {
+                    const d = new Date();
+                    d.setDate(d.getDate() - i);
+                    d.setHours(0, 0, 0, 0);
+                    days.push(d);
+                  }
+                  return days;
+                };
+
+                const hasTaskCreatedOn = (date, tasksList) => {
+                  const dateStr = date.toDateString();
+                  return tasksList.some(t => {
+                    if (!t.createdAt) return false;
+                    const tDate = typeof t.createdAt.toDate === "function" ? t.createdAt.toDate() : new Date(t.createdAt);
+                    return tDate.toDateString() === dateStr;
+                  });
+                };
+
+                return getPast21Days().map((date, idx) => {
+                  const active = hasTaskCreatedOn(date, userTasks);
+                  return (
+                    <div
+                      key={idx}
+                      className="w-8 h-8 rounded-md transition-all duration-200 hover:scale-110 flex items-center justify-center"
+                      style={{
+                        backgroundColor: active ? "#3dd68c" : "rgba(255, 255, 255, 0.05)",
+                        border: active ? "none" : "1px solid rgba(255,255,255,0.05)",
+                      }}
+                      title={`${date.toLocaleDateString("en-US", { month: 'short', day: 'numeric' })}: ${active ? 'Active' : 'No tasks'}`}
+                    />
+                  );
+                });
+              })()}
+            </div>
+          </div>
+        </GlassCard>
+      </div>
     </div>
   );
 }

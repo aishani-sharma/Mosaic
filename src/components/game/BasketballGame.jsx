@@ -531,7 +531,7 @@ export default function BasketballGame() {
             <rect x="30" y="106" width="16" height="8" rx="3" fill="#ef4444" />
             <rect x="30" y="112" width="16" height="3" rx="1" fill="#ffffff" />
             <circle cx="34" cy="109" r="1.5" fill="#ffffff" />
-            
+
             {/* Right Sneaker */}
             <rect x="50" y="106" width="16" height="8" rx="3" fill="#ef4444" />
             <rect x="50" y="112" width="16" height="3" rx="1" fill="#ffffff" />
@@ -542,17 +542,17 @@ export default function BasketballGame() {
             <rect x="49" y="78" width="14" height="12" rx="2" fill="#ef4444" />
 
             {/* Torso/Hoodie body */}
-            <rect x="31" y="38" width="34" height="42" rx="10" fill="#3dd68c" />
-            
+            <rect x="31" y="38" width="34" height="42" rx="10" fill="#1a3a9f" />
+
             {/* Hoodie pocket */}
-            <rect x="37" y="60" width="22" height="12" rx="3" fill="none" stroke="#15803d" strokeWidth="1.5" />
-            <path d="M 37 66 L 41 60 M 59 66 L 55 60" stroke="#15803d" strokeWidth="1.5" />
-            
+            <rect x="37" y="60" width="22" height="12" rx="3" fill="none" stroke="#4a6fd4" strokeWidth="1.5" />
+            <path d="M 37 66 L 41 60 M 59 66 L 55 60" stroke="#4a6fd4" strokeWidth="1.5" />
+
             {/* Hood behind neck */}
-            <ellipse cx="48" cy="40" rx="13" ry="5" fill="#15803d" />
-            
+            <ellipse cx="48" cy="40" rx="13" ry="5" fill="#0f2d6b" />
+
             {/* Drawstring details */}
-            <path d="M 45 42 L 45 50 M 51 42 L 51 50" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" />
+            <path d="M 45 42 L 45 50 M 51 42 L 51 50" stroke="#4a6fd4" strokeWidth="1.5" strokeLinecap="round" />
 
             {/* Neck */}
             <rect x="45" y="33" width="6" height="7" fill="#f2c39b" />
@@ -570,21 +570,21 @@ export default function BasketballGame() {
             {/* Eye shines */}
             <circle cx="39" cy="17" r="1" fill="#ffffff" />
             <circle cx="55" cy="17" r="1" fill="#ffffff" />
-            
+
             {/* Blush cheeks */}
             <circle cx="35" cy="24" r="3.5" fill="#f87171" opacity="0.5" />
             <circle cx="61" cy="24" r="3.5" fill="#f87171" opacity="0.5" />
-            
+
             {/* Smile */}
             <path d="M 44 24 Q 48 29 52 24" stroke="#7c2d12" strokeWidth="2.5" fill="none" strokeLinecap="round" />
 
             {/* Dynamic Arms */}
             <line x1={leftArm.x1} y1={leftArm.y1} x2={leftArm.x2} y2={leftArm.y2} stroke="#f2c39b" strokeWidth="8" strokeLinecap="round" />
             <line x1={rightArm.x1} y1={rightArm.y1} x2={rightArm.x2} y2={rightArm.y2} stroke="#f2c39b" strokeWidth="8" strokeLinecap="round" />
-            
+
             {/* Sleeve joint cuffs */}
-            <circle cx={leftArm.x1} cy={leftArm.y1} r="4" fill="#15803d" />
-            <circle cx={rightArm.x1} cy={rightArm.y1} r="4" fill="#15803d" />
+            <circle cx={leftArm.x1} cy={leftArm.y1} r="4" fill="#0f2d6b" />
+            <circle cx={rightArm.x1} cy={rightArm.y1} r="4" fill="#0f2d6b" />
           </g>
 
           {/* Basketball Hoop */}
@@ -726,9 +726,8 @@ export default function BasketballGame() {
           className={`basketball-ball ${mode === "scored" || mode === "resetting" ? "fade" : ""}`}
           onPointerDown={handleBallPointerDown}
           style={{
-            transform: `translate(${ball.x - BALL_R}px, ${ball.y - BALL_R}px) rotate(${ball.rot}deg) ${
-              squashing ? "scale(1.2, 0.8)" : groundBouncing ? "scale(1.15, 0.85)" : ""
-            }`,
+            transform: `translate(${ball.x - BALL_R}px, ${ball.y - BALL_R}px) rotate(${ball.rot}deg) ${squashing ? "scale(1.2, 0.8)" : groundBouncing ? "scale(1.15, 0.85)" : ""
+              }`,
             width: `${BALL_R * 2}px`,
             height: `${BALL_R * 2}px`,
           }}

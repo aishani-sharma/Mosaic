@@ -26,6 +26,39 @@ function parseTaskDate(t) {
   return new Date();
 }
 
+function parseDeadlineDate(deadline) {
+  if (!deadline) return null;
+  const clean = deadline.trim().toLowerCase();
+  if (clean.includes("today")) {
+    return new Date();
+  }
+  if (clean.includes("tomorrow")) {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow;
+  }
+  const normalized = clean.replace(/(\d+)(st|nd|rd|th)/gi, "$1");
+  const parsed = new Date(normalized);
+  if (!isNaN(parsed.getTime())) {
+    return parsed;
+  }
+  return null;
+}
+
+function isDueToday(deadline) {
+  const parsed = parseDeadlineDate(deadline);
+  if (!parsed) return false;
+  return parsed.toDateString() === new Date().toDateString();
+}
+
+function isDueTomorrow(deadline) {
+  const parsed = parseDeadlineDate(deadline);
+  if (!parsed) return false;
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return parsed.toDateString() === tomorrow.toDateString();
+}
+
 function TaskRow({ task, onComplete, onDelete }) {
   const category = task.category || "General";
 
@@ -278,6 +311,7 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
   const prioritizeRef = useRef(false);
   const inputRef = useRef(null);
   const [tasks, setTasks] = useState([]);
+  const [dismissedBanners, setDismissedBanners] = useState(new Set());
   const [newTask, setNewTask] = useState("");
   const [newDeadline, setNewDeadline] = useState("");
   const [newCategory, setNewCategory] = useState("auto");
@@ -429,8 +463,18 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
 
   async function handleComplete(taskId, currentlyDone) {
     const newDone = !currentlyDone;
-    await updateTask(taskId, { completed: newDone });
-    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, completed: newDone } : t));
+    const now = new Date().toISOString();
+    await updateTask(taskId, { 
+      completed: newDone,
+      completedAt: newDone ? now : null,
+      updatedAt: now
+    });
+    setTasks(prev => prev.map(t => t.id === taskId ? { 
+      ...t, 
+      completed: newDone,
+      completedAt: newDone ? now : null,
+      updatedAt: now
+    } : t));
 
     if (newDone && user?.uid) {
       const result = await awardXP(user.uid);
@@ -539,6 +583,90 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
                 borderRadius: "28px",
               }}
             >
+              {/* Reminder Banner System */}
+              {(() => {
+                const getTaskPriorityValue = (p) => {
+                  if (p === "high") return 3;
+                  if (p === "med") return 2;
+                  if (p === "low") return 1;
+                  return 0;
+                };
+
+                const activeBanners = pending
+                  .filter(t => !dismissedBanners.has(t.id))
+                  .filter(t => isDueToday(t.deadline) || isDueTomorrow(t.deadline))
+                  .map(t => ({
+                    ...t,
+                    isToday: isDueToday(t.deadline),
+                    isTomorrow: isDueTomorrow(t.deadline),
+                  }))
+                  .sort((a, b) => {
+                    if (a.isToday && !b.isToday) return -1;
+                    if (!a.isToday && b.isToday) return 1;
+                    const pA = getTaskPriorityValue(a.priority);
+                    const pB = getTaskPriorityValue(b.priority);
+                    if (pA !== pB) return pB - pA;
+                    return a.title.localeCompare(b.title);
+                  })
+                  .slice(0, 2);
+
+                return activeBanners.map(banner => {
+                  const bannerStyle = banner.isToday
+                    ? {
+                        background: "rgba(247,106,106,0.15)",
+                        border: "1px solid rgba(247,106,106,0.4)",
+                        color: "#f76a6a",
+                        padding: "12px 16px",
+                        display: "flex",
+                        flexDirection: "row",
+                        alignItems: "center",
+                        borderRadius: "16px",
+                        marginBottom: "12px",
+                        justifyContent: "space-between",
+                        gap: "12px"
+                      }
+                    : {
+                        background: "rgba(247,194,106,0.15)",
+                        border: "1px solid rgba(247,194,106,0.4)",
+                        color: "#f7c26a",
+                        padding: "12px 16px",
+                        display: "flex",
+                        flexDirection: "row",
+                        alignItems: "center",
+                        borderRadius: "16px",
+                        marginBottom: "12px",
+                        justifyContent: "space-between",
+                        gap: "12px"
+                      };
+
+                  return (
+                    <GlassCard key={banner.id} style={bannerStyle} className="flex-shrink-0">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <span className="text-base flex-shrink-0">{banner.isToday ? "⚠️" : "📅"}</span>
+                        <span className="text-sm font-semibold truncate flex-1 leading-none pt-[1px]">
+                          {banner.isToday
+                            ? `${banner.title} is due TODAY — don't miss it!`
+                            : `${banner.title} is due tomorrow — plan ahead!`}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setDismissedBanners(prev => {
+                            const next = new Set(prev);
+                            next.add(banner.id);
+                            return next;
+                          });
+                        }}
+                        className="p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors flex-shrink-0 text-current opacity-70 hover:opacity-100"
+                        title="Dismiss banner"
+                      >
+                        <X size={14} />
+                      </button>
+                    </GlassCard>
+                  );
+                });
+              })()}
+
               {/* Top Greeting Header Row */}
               <div className="flex items-start justify-between mb-5 flex-shrink-0">
                 <div>
@@ -661,9 +789,7 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
               </div>
             </div>
 
-            <div className="mt-6 flex-shrink-0">
-              <BasketballGame />
-            </div>
+            <BasketballGame />
 
           </div>
         ) : (

@@ -1,6 +1,6 @@
 // components/layout/GeminiSidebar.jsx
 import { useState, useRef, useEffect } from "react";
-import { Send, Sparkles } from "lucide-react";
+import { Send, Sparkles, Mic } from "lucide-react";
 import { useGeminiChat } from "../../hooks/useGemini";
 
 function renderMessage(text) {
@@ -15,7 +15,46 @@ export default function GeminiSidebar({ userContext, isOpen, onClose }) {
   const { messages, sendMessage, loading } = useGeminiChat(userContext);
   const [input, setInput] = useState("");
   const [cooldown, setCooldown] = useState(false);
+  const [listening, setListening] = useState(false);
   const bottomRef = useRef(null);
+  const recognitionRef = useRef(null);
+
+  function handleMicClick() {
+    if (!('SpeechRecognition' in window) && !('webkitSpeechRecognition' in window)) {
+      alert('Voice input requires Chrome or Edge');
+      return;
+    }
+
+    if (listening) {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+      setListening(false);
+    } else {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setInput(transcript);
+      };
+
+      recognition.onend = () => {
+        setListening(false);
+      };
+
+      recognition.onerror = (event) => {
+        console.error("Speech recognition error:", event.error);
+        setListening(false);
+      };
+
+      recognitionRef.current = recognition;
+      recognition.start();
+      setListening(true);
+    }
+  }
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -40,6 +79,16 @@ export default function GeminiSidebar({ userContext, isOpen, onClose }) {
 
   return (
     <>
+      <style>{`
+        @keyframes mic-pulse {
+          0%, 100% { box-shadow: 0 0 0 0px rgba(247,106,106,0.4); }
+          50% { box-shadow: 0 0 0 6px rgba(247,106,106,0.1); }
+        }
+        @keyframes pulse {
+          0%, 100% { box-shadow: 0 0 0 0px rgba(247,106,106,0.4); }
+          50% { box-shadow: 0 0 0 6px rgba(247,106,106,0.1); }
+        }
+      `}</style>
       {/* Translucent Backdrop Click-to-Close Overlay */}
       {isOpen && (
         <div
@@ -138,6 +187,31 @@ export default function GeminiSidebar({ userContext, isOpen, onClose }) {
               WebkitBackdropFilter: "blur(28px)",
             }}
           >
+            <button
+              type="button"
+              onClick={handleMicClick}
+              className="rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-200"
+              style={
+                listening
+                  ? {
+                      width: "32px",
+                      height: "32px",
+                      color: "#f76a6a",
+                      background: "transparent",
+                      boxShadow: "0 0 0 4px rgba(247,106,106,0.3)",
+                      animation: "pulse 1s infinite"
+                    }
+                  : {
+                      width: "32px",
+                      height: "32px",
+                      color: "#7a7a9a",
+                      background: "transparent"
+                    }
+              }
+              title={listening ? "Stop listening" : "Start voice input"}
+            >
+              <Mic size={16} />
+            </button>
             <textarea
               className="flex-1 bg-transparent text-sm resize-none outline-none leading-relaxed text-white placeholder-white/40"
               style={{ minHeight: 36, maxHeight: 120, fontFamily: "Inter, sans-serif" }}

@@ -97,13 +97,15 @@ export default function AppShell({ user, userContext }) {
       </main>
 
       {/* Floating AI Button (Bottom Right) */}
-      <button
-        onClick={() => setIsAiOpen(prev => !prev)}
-        className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full flex items-center justify-center bg-[#3dd68c] hover:bg-[#5ce2a7] text-[#0c0e13] shadow-lg hover:shadow-[#3dd68c]/25 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer border border-[#3dd68c]/10"
-        title="Open AI Companion"
-      >
-        <Sparkles size={20} strokeWidth={2.5} />
-      </button>
+      {!isAiOpen && (
+        <button
+          onClick={() => setIsAiOpen(prev => !prev)}
+          className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full flex items-center justify-center bg-[#3dd68c] hover:bg-[#5ce2a7] text-[#0c0e13] shadow-lg hover:shadow-[#3dd68c]/25 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer border border-[#3dd68c]/10"
+          title="Open AI Companion"
+        >
+          <Sparkles size={20} strokeWidth={2.5} />
+        </button>
+      )}
 
       <GeminiSidebar 
         userContext={userContext} 

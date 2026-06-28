@@ -40,7 +40,7 @@ export default function LoadingScreen({ onDone }) {
           style={{
             background: "#1a1d27",
             border: "1.5px solid #2a2d3a",
-            color: "#3dd68c",
+            color: "#64BDE3",
           }}
         >
           M
@@ -64,7 +64,7 @@ export default function LoadingScreen({ onDone }) {
           <div
             className="h-full rounded-full"
             style={{
-              background: "#3dd68c",
+              background: "#64BDE3",
               animation: `loadBar ${DISPLAY_MS}ms ease-in-out forwards`,
             }}
           />

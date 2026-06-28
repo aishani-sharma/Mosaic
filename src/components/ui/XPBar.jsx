@@ -13,7 +13,7 @@ export default function XPBar({ xp = 0, level = 1 }) {
           className="h-full rounded-full transition-all duration-700"
           style={{
             width: `${progress * 100}%`,
-            background: "#3dd68c",
+            background: "#64BDE3",
           }}
         />
       </div>

@@ -148,7 +148,7 @@ export default function PomodoroPage({ user, userContext, isActive }) {
     return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
   }
 
-  const accent = isBreak ? "#15803d" : "#111827";
+  const accent = isBreak ? "#4f9cf9" : "#111827";
 
   return (
     <div className="max-w-md mx-auto px-4 py-6 text-[#111827] animate-page-enter">
@@ -180,14 +180,14 @@ export default function PomodoroPage({ user, userContext, isActive }) {
                 <stop offset="100%" stopColor={skyColors.bottom} style={{ transition: "stop-color 1s ease" }} />
               </linearGradient>
               <linearGradient id="islandGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#4ade80" />
-                <stop offset="30%" stopColor="#22c55e" />
+                <stop offset="0%" stopColor="#64BDE3" />
+                <stop offset="30%" stopColor="#64BDE3" />
                 <stop offset="70%" stopColor="#854d0e" />
                 <stop offset="100%" stopColor="#713f12" />
               </linearGradient>
               <radialGradient id="islandGlow" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#3dd68c" stopOpacity="0.3" />
-                <stop offset="100%" stopColor="#3dd68c" stopOpacity="0" />
+                <stop offset="0%" stopColor="#64BDE3" stopOpacity="0.3" />
+                <stop offset="100%" stopColor="#64BDE3" stopOpacity="0" />
               </radialGradient>
             </defs>
 
@@ -199,7 +199,7 @@ export default function PomodoroPage({ user, userContext, isActive }) {
 
             {/* Floating Island Base */}
             <path d="M 35 130 C 35 116, 165 116, 165 130 C 165 144, 140 154, 100 154 C 60 154, 35 144, 35 130 Z" fill="url(#islandGrad)" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
-            <ellipse cx="100" cy="128" rx="61" ry="9" fill="#166534" opacity="0.85" />
+            <ellipse cx="100" cy="128" rx="61" ry="9" fill="#2563eb" opacity="0.85" />
 
             {/* Static Rock (Always Displays) */}
             <path d="M 142 133 C 139 133, 137 127, 144 126 C 150 125, 152 131, 146 133 Z" fill="#9ca3af" stroke="#4b5563" strokeWidth="0.8" />
@@ -218,8 +218,8 @@ export default function PomodoroPage({ user, userContext, isActive }) {
             {stage === 0 && (
               <g>
                 <path d="M 100 128 Q 98 116 100 110" stroke="#713f12" strokeWidth="2.2" strokeLinecap="round" />
-                <path d="M 100 115 Q 92 110 93 118" fill="#4ade80" />
-                <path d="M 100 110 Q 108 105 109 113" fill="#22c55e" />
+                <path d="M 100 115 Q 92 110 93 118" fill="#64BDE3" />
+                <path d="M 100 110 Q 108 105 109 113" fill="#64BDE3" />
               </g>
             )}
 
@@ -227,8 +227,8 @@ export default function PomodoroPage({ user, userContext, isActive }) {
             {stage === 1 && (
               <g>
                 <path d="M 100 128 Q 100 110 100 90" stroke="#713f12" strokeWidth="3.5" strokeLinecap="round" />
-                <circle cx="100" cy="84" r="15" fill="#166534" />
-                <circle cx="94" cy="80" r="10" fill="#22c55e" opacity="0.9" />
+                <circle cx="100" cy="84" r="15" fill="#2563eb" />
+                <circle cx="94" cy="80" r="10" fill="#64BDE3" opacity="0.9" />
               </g>
             )}
 
@@ -241,9 +241,9 @@ export default function PomodoroPage({ user, userContext, isActive }) {
                 <path d="M 100 96 Q 115 88 118 91" stroke="#713f12" strokeWidth="3" fill="none" strokeLinecap="round" />
                 {/* Large Canopy */}
                 <circle cx="100" cy="78" r="24" fill="#14532d" opacity="0.88" />
-                <circle cx="85" cy="82" r="17" fill="#166534" opacity="0.9" />
-                <circle cx="115" cy="82" r="17" fill="#166534" opacity="0.9" />
-                <circle cx="100" cy="62" r="15" fill="#22c55e" opacity="0.95" />
+                <circle cx="85" cy="82" r="17" fill="#2563eb" opacity="0.9" />
+                <circle cx="115" cy="82" r="17" fill="#2563eb" opacity="0.9" />
+                <circle cx="100" cy="62" r="15" fill="#64BDE3" opacity="0.95" />
               </g>
             )}
 
@@ -336,7 +336,7 @@ export default function PomodoroPage({ user, userContext, isActive }) {
           <button
             onClick={() => setRunning((r) => !r)}
             className="btn-primary flex items-center gap-2 px-8 rounded-xl font-bold cursor-pointer"
-            style={{ background: isBreak ? "#22c55e" : "#3dd68c" }}
+            style={{ background: isBreak ? "#64BDE3" : "#64BDE3" }}
           >
             {running ? <Pause size={16} /> : <Play size={16} />}
             {running ? "Pause" : "Start"}
@@ -363,7 +363,7 @@ export default function PomodoroPage({ user, userContext, isActive }) {
                 onClick={() => setActiveSound(s.id)}
                 className={`px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer border transition-all duration-200 ${
                   activeSound === s.id
-                    ? "bg-[#3dd68c] border-[#3dd68c] text-[#0c0e13]"
+                    ? "bg-[#64BDE3] border-[#64BDE3] text-[#0c0e13]"
                     : "bg-white/15 border-[#111827]/10 text-[#111827] hover:bg-black/5"
                 }`}
               >
@@ -421,7 +421,7 @@ export default function PomodoroPage({ user, userContext, isActive }) {
       {/* statistics Row */}
       <div className="grid grid-cols-3 gap-3 w-full max-w-sm mt-5 mx-auto">
         <div className="flex flex-col items-center justify-center p-3 rounded-2xl bg-white/10 backdrop-blur-[28px] border border-white/15 text-[#111827] shadow-sm">
-          <span className="text-[10px] uppercase tracking-wider font-bold opacity-60 mb-0.5">🍅 Sessions</span>
+          <span className="text-[10px] uppercase tracking-wider font-bold opacity-60 mb-0.5">Sessions</span>
           <span className="font-mono font-bold text-lg">{sessions}</span>
         </div>
         <div className="flex flex-col items-center justify-center p-3 rounded-2xl bg-white/10 backdrop-blur-[28px] border border-white/15 text-[#111827] shadow-sm">
@@ -429,7 +429,7 @@ export default function PomodoroPage({ user, userContext, isActive }) {
           <span className="font-mono font-bold text-lg">{totalMinutes}m</span>
         </div>
         <div className="flex flex-col items-center justify-center p-3 rounded-2xl bg-white/10 backdrop-blur-[28px] border border-white/15 text-[#111827] shadow-sm">
-          <span className="text-[10px] uppercase tracking-wider font-bold opacity-60 mb-0.5">🔥 Streak</span>
+          <span className="text-[10px] uppercase tracking-wider font-bold opacity-60 mb-0.5">Streak</span>
           <span className="font-mono font-bold text-lg">{streak}</span>
         </div>
       </div>

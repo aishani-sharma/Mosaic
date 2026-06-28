@@ -3,16 +3,15 @@ import { useState, useEffect, useRef } from "react";
 import GlassCard from "../ui/GlassCard";
 import StreakBadge from "../ui/StreakBadge";
 import XPBar from "../ui/XPBar";
-import { Camera, Zap, X, Loader2, Search, Users, UserPlus, UserCheck, Flame } from "lucide-react";
-import { getFeedPosts, createPost, getUserTasks, updateUserProfile } from "../../lib/firestore";
+import { Camera, Zap, X, Loader2, Search, Users, UserPlus, UserCheck, Flame, CheckCircle, PartyPopper, Rocket, Trophy, AlertCircle } from "lucide-react";
+import { getFeedPosts, createPost, updateUserProfile } from "../../lib/firestore";
 import { db } from "../../lib/firebase";
 import { doc, updateDoc, increment, collection, getDocs } from "firebase/firestore";
-import { generateDailyPlan } from "../../lib/gemini";
 import cozyCafeBg from "../../assets/cozy_cafe.png";
 
 function Avatar({ name, size = 36 }) {
   const initials = name?.slice(0, 1).toUpperCase() ?? "?";
-  const colors = ["#3dd68c", "#a8f0c6", "#6af7c2", "#f76a6a"];
+  const colors = ["#64BDE3", "#bdd9fb", "#6af7c2", "#f76a6a"];
   const color = colors[name?.charCodeAt(0) % colors.length] ?? colors[0];
   return (
     <div
@@ -53,11 +52,17 @@ function formatTimeAgo(timestamp) {
 
 // Map username and streak to achievements
 function getBadge(username, streakVal) {
-  if (streakVal >= 7) return `🔥 ${streakVal} Day Streak`;
+  if (streakVal >= 7) {
+    return (
+      <span className="flex items-center gap-1">
+        <Flame size={10} className="text-[#64BDE3]" /> {streakVal} Day Streak
+      </span>
+    );
+  }
   const charCode = username?.charCodeAt(0) || 0;
-  if (charCode % 3 === 0) return "💻 Builder";
-  if (charCode % 3 === 1) return "📚 Learner";
-  return "🏸 Athlete";
+  if (charCode % 3 === 0) return "Builder";
+  if (charCode % 3 === 1) return "Learner";
+  return "Athlete";
 }
 
 function FeedPost({ post, onReact }) {
@@ -85,7 +90,10 @@ function FeedPost({ post, onReact }) {
             </span>
           </div>
           <p className="text-sm font-medium leading-relaxed text-[#c8c4e8]">
-            ✅ {post.taskTitle}
+            <span className="inline-flex items-center gap-1.5">
+              <CheckCircle size={14} className="text-[#64BDE3] shrink-0" />
+              {post.taskTitle}
+            </span>
           </p>
         </div>
       </div>
@@ -107,10 +115,10 @@ function FeedPost({ post, onReact }) {
       {/* Productivity Reactions Row */}
       <div className="flex items-center gap-2 pt-1 flex-wrap">
         {[
-          { key: "clap", label: "👏" },
-          { key: "fire", label: "🔥" },
-          { key: "rocket", label: "🚀" },
-          { key: "hundred", label: "💯" },
+          { key: "clap", label: <PartyPopper size={12} className="text-amber-400" /> },
+          { key: "fire", label: <Flame size={12} className="text-[#64BDE3]" /> },
+          { key: "rocket", label: <Rocket size={12} className="text-indigo-400" /> },
+          { key: "hundred", label: <Trophy size={12} className="text-yellow-400" /> },
         ].map((r) => (
           <button 
             key={r.key}
@@ -130,8 +138,7 @@ export default function FeedPage({ user, userContext, isActive }) {
   const [activeSection, setActiveSection] = useState("moments"); // moments or friends
   const [posts, setPosts] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
-  const [battlePlan, setBattlePlan] = useState(null);
-  const [planLoading, setPlanLoading] = useState(false);
+
   
   // Camera & Dialog states
   const [showCamera, setShowCamera] = useState(false);
@@ -182,35 +189,6 @@ export default function FeedPage({ user, userContext, isActive }) {
       setAlertActive(true);
       localStorage.setItem("last_alert_date", today);
     }
-
-    const getPlan = async () => {
-      if (!user?.uid) return;
-      
-      const todayStr = new Date().toDateString();
-      const cachedDate = localStorage.getItem("battlePlanDate");
-      const cachedText = localStorage.getItem("battlePlanText");
-      
-      if (cachedDate === todayStr && cachedText) {
-        setBattlePlan(cachedText);
-        return;
-      }
-      
-      setPlanLoading(true);
-      try {
-        const tasks = await getUserTasks(user.uid);
-        const incomplete = tasks.filter(t => !t.completed);
-        const plan = await generateDailyPlan(incomplete, userContext || {});
-        setBattlePlan(plan);
-        localStorage.setItem("battlePlanDate", todayStr);
-        localStorage.setItem("battlePlanText", plan);
-      } catch (err) {
-        console.error("Error generating daily battle plan:", err);
-      } finally {
-        setPlanLoading(false);
-      }
-    };
-
-    getPlan();
   }, [isActive, user?.uid, userContext]);
 
   // Handle local user's follow state initialization
@@ -377,11 +355,7 @@ export default function FeedPage({ user, userContext, isActive }) {
 
   return (
     <div className="relative min-h-screen pb-12">
-      {/* Cozy Cafe background scenery */}
-      <div 
-        className="fixed inset-0 z-0 bg-cover bg-center transition-all duration-1000"
-        style={{ backgroundImage: `url(${cozyCafeBg})`, filter: "brightness(0.55) saturate(0.9)" }}
-      />
+
 
       <div className="max-w-xl mx-auto px-4 py-6 relative z-10 animate-page-enter">
         {/* Header Title */}
@@ -402,21 +376,21 @@ export default function FeedPage({ user, userContext, isActive }) {
             onClick={() => setActiveSection("moments")}
             className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer ${
               activeSection === "moments"
-                ? "bg-[#3dd68c] text-[#0c0e13]"
+                ? "bg-[#64BDE3] text-[#0c0e13]"
                 : "bg-white/10 text-white hover:bg-white/15"
             }`}
           >
-            📸 Moments
+            <Camera size={13} /> Moments
           </button>
           <button
             onClick={() => setActiveSection("friends")}
             className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer ${
               activeSection === "friends"
-                ? "bg-[#3dd68c] text-[#0c0e13]"
+                ? "bg-[#64BDE3] text-[#0c0e13]"
                 : "bg-white/10 text-white hover:bg-white/15"
             }`}
           >
-            👥 Friends
+            <Users size={13} /> Friends
           </button>
         </div>
 
@@ -436,7 +410,7 @@ export default function FeedPage({ user, userContext, isActive }) {
                 }}
               >
                 <div className="min-w-0 flex-1 pr-3">
-                  <p className="text-xs font-bold font-mono uppercase tracking-wider text-amber-400">⚠️ Mosaic Moment Alert</p>
+                  <p className="text-xs font-bold font-mono uppercase tracking-wider text-amber-400">Mosaic Moment Alert</p>
                   <p className="text-xs text-amber-200/90 mt-0.5 leading-snug">
                     Post what you are building within the next <strong className="font-mono text-white text-sm">{formatCountdown(alertSeconds)}</strong>!
                   </p>
@@ -450,53 +424,30 @@ export default function FeedPage({ user, userContext, isActive }) {
               </div>
             )}
 
-            {/* Daily Battle Plan */}
-            {planLoading && (
-              <GlassCard className="p-5 animate-pulse border border-[rgba(255,255,255,0.06)] relative overflow-hidden">
-                <div className="absolute left-0 top-0 bottom-0 w-1" style={{ background: "linear-gradient(to bottom, #3dd68c, #a8f0c6)" }} />
-                <div className="flex items-center gap-2 mb-3">
-                  <Zap size={16} className="text-[#3dd68c] animate-bounce" />
-                  <span className="font-display font-semibold text-sm text-[#f0eeff]">Today's Battle Plan</span>
-                </div>
-                <p className="text-xs font-mono text-[#7a7a9a]">Generating your plan...</p>
-              </GlassCard>
-            )}
 
-            {!planLoading && battlePlan && (
-              <GlassCard className="p-5 border border-[rgba(255,255,255,0.06)] relative overflow-hidden">
-                <div className="absolute left-0 top-0 bottom-0 w-1" style={{ background: "linear-gradient(to bottom, #3dd68c, #a8f0c6)" }} />
-                <div className="flex items-center gap-2 mb-3">
-                  <Zap size={16} className="text-[#3dd68c]" />
-                  <span className="font-display font-semibold text-sm text-[#f0eeff]">Today's Battle Plan</span>
-                </div>
-                <p className="text-sm whitespace-pre-line leading-relaxed text-[#c8c4e8]">
-                  {battlePlan}
-                </p>
-              </GlassCard>
-            )}
 
             {/* Redesigned Snap Prompt Banner */}
             <GlassCard 
-              className="p-5 flex items-center gap-4 relative overflow-hidden transition-all duration-300 hover:border-[rgba(61,214,140,0.4)]"
+              className="p-5 flex items-center gap-4 relative overflow-hidden transition-all duration-300 hover:border-[rgba(100, 189, 227,0.4)]"
               style={{
-                background: "linear-gradient(135deg, rgba(61,214,140,0.08) 0%, rgba(13,13,20,0.6) 100%)",
-                border: "1px solid rgba(61, 214, 140, 0.25)",
-                boxShadow: "0 0 20px rgba(61,214,140,0.05)"
+                background: "linear-gradient(135deg, rgba(100, 189, 227,0.08) 0%, rgba(13,13,20,0.6) 100%)",
+                border: "1px solid rgba(100, 189, 227, 0.25)",
+                boxShadow: "0 0 20px rgba(100, 189, 227,0.05)"
               }}
             >
               <div
                 className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
                 style={{ 
-                  background: "rgba(61,214,140,0.15)",
-                  border: "1px solid rgba(61,214,140,0.3)",
-                  boxShadow: "0 0 12px rgba(61,214,140,0.2)"
+                  background: "rgba(100, 189, 227,0.15)",
+                  border: "1px solid rgba(100, 189, 227,0.3)",
+                  boxShadow: "0 0 12px rgba(100, 189, 227,0.2)"
                 }}
               >
-                <Camera size={20} style={{ color: "#3dd68c" }} />
+                <Camera size={20} style={{ color: "#64BDE3" }} />
               </div>
               <div className="flex-1">
                 <p className="text-sm font-semibold tracking-wide text-white">
-                  📸 Today's Mosaic Moment
+                  Today's Mosaic Moment
                 </p>
                 <p className="text-xs text-white/70">
                   Share what you're building today.
@@ -506,9 +457,9 @@ export default function FeedPage({ user, userContext, isActive }) {
                 onClick={() => setShowCamera(true)}
                 className="btn-primary text-xs px-4 py-2 flex items-center gap-1.5 font-bold shadow-md hover:scale-105 active:scale-95 transition-all duration-200"
                 style={{
-                  background: "#3dd68c",
+                  background: "#64BDE3",
                   color: "#0a0a0f",
-                  boxShadow: "0 4px 14px rgba(61,214,140,0.4)"
+                  boxShadow: "0 4px 14px rgba(100, 189, 227,0.4)"
                 }}
               >
                 <Zap size={13} fill="#0a0a0f" />
@@ -523,7 +474,7 @@ export default function FeedPage({ user, userContext, isActive }) {
               </p>
               {loadingPosts ? (
                 <div className="text-center py-12">
-                  <Loader2 className="animate-spin mx-auto mb-2 text-[#3dd68c]" size={24} />
+                  <Loader2 className="animate-spin mx-auto mb-2 text-[#64BDE3]" size={24} />
                   <p className="text-xs font-mono text-slate-500">Loading wins feed…</p>
                 </div>
               ) : posts.length === 0 ? (
@@ -546,7 +497,7 @@ export default function FeedPage({ user, userContext, isActive }) {
             {/* Search users card */}
             <GlassCard className="p-5 flex flex-col gap-4">
               <div className="flex items-center gap-2">
-                <Users size={16} className="text-[#3dd68c]" />
+                <Users size={16} className="text-[#64BDE3]" />
                 <span className="font-display font-semibold text-sm text-[#f0eeff]">Find Friends</span>
               </div>
               <div className="relative">
@@ -554,7 +505,7 @@ export default function FeedPage({ user, userContext, isActive }) {
                 <input
                   type="text"
                   placeholder="Search users by name..."
-                  className="w-full bg-white/5 hover:bg-white/10 focus:bg-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-white/40 outline-none border border-white/10 focus:border-[#3dd68c] transition-all"
+                  className="w-full bg-white/5 hover:bg-white/10 focus:bg-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-white/40 outline-none border border-white/10 focus:border-[#64BDE3] transition-all"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                 />
@@ -578,7 +529,7 @@ export default function FeedPage({ user, userContext, isActive }) {
                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 hover:scale-105 active:scale-95 ${
                               following
                                 ? "bg-white/10 border border-white/10 text-white"
-                                : "bg-[#3dd68c] text-[#0c0e13]"
+                                : "bg-[#64BDE3] text-[#0c0e13]"
                             }`}
                           >
                             {following ? (
@@ -695,7 +646,7 @@ export default function FeedPage({ user, userContext, isActive }) {
                 disabled={!!cameraError}
                 onClick={handleTakeSnap}
                 className="btn-primary text-xs px-4 py-2 flex items-center gap-1.5"
-                style={{ background: "#3dd68c" }}
+                style={{ background: "#64BDE3" }}
               >
                 <Camera size={14} /> Take Snap
               </button>
@@ -737,7 +688,7 @@ export default function FeedPage({ user, userContext, isActive }) {
                   type="text"
                   required
                   disabled={posting}
-                  className="input-glass w-full py-2.5 px-3 text-sm rounded-xl outline-none border border-[rgba(255,255,255,0.08)] focus:border-[#3dd68c] transition-colors text-white"
+                  className="input-glass w-full py-2.5 px-3 text-sm rounded-xl outline-none border border-[rgba(255,255,255,0.08)] focus:border-[#64BDE3] transition-colors text-white"
                   placeholder="e.g., Solved 3 Leetcode questions, Worked on project UI"
                   value={taskTitle}
                   onChange={e => setTaskTitle(e.target.value)}
@@ -761,7 +712,7 @@ export default function FeedPage({ user, userContext, isActive }) {
                   type="submit"
                   disabled={posting || !taskTitle.trim()}
                   className="btn-primary text-xs px-5 py-2 flex items-center gap-1.5"
-                  style={{ background: "#3dd68c" }}
+                  style={{ background: "#64BDE3" }}
                 >
                   {posting ? (
                     <>

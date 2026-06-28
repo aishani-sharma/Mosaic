@@ -294,7 +294,7 @@ export default function BasketballGame() {
 
       if (next >= 3) {
         setCelebrating(true);
-        setFloatingText("ON FIRE! 🔥");
+        setFloatingText("ON FIRE!");
 
         delay(() => {
           setCelebrating(false);
@@ -703,7 +703,7 @@ export default function BasketballGame() {
 
         {/* Score & Streak HUD Badge */}
         <div className="score-card">
-          🏀 {score} &nbsp;•&nbsp; 🔥 {streak}
+          Score: {score} &nbsp;•&nbsp; Streak: {streak}
         </div>
 
         {/* Slingshot Pull Power Indicator */}

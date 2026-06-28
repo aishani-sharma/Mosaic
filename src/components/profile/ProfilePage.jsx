@@ -83,7 +83,7 @@ export default function ProfilePage({ user, userContext, isActive }) {
       <GlassCard className="p-6 mb-5 flex flex-col items-center text-center">
         <div
           className="w-20 h-20 rounded-2xl flex items-center justify-center mb-4 font-display font-bold text-3xl"
-          style={{ background: "rgba(61,214,140,0.15)", color: "#3dd68c", border: "1.5px solid rgba(61,214,140,0.3)" }}
+          style={{ background: "rgba(100, 189, 227,0.15)", color: "#64BDE3", border: "1.5px solid rgba(100, 189, 227,0.3)" }}
         >
           {user?.displayName?.slice(0, 1) ?? <User size={32} />}
         </div>
@@ -100,7 +100,7 @@ export default function ProfilePage({ user, userContext, isActive }) {
       <div className="grid grid-cols-2 gap-3 mb-5">
         {stats.map(s => (
           <GlassCard key={s.label} className="p-4 text-center">
-            <p className="font-mono font-semibold text-2xl mb-1" style={{ color: "#3dd68c" }}>{s.value}</p>
+            <p className="font-mono font-semibold text-2xl mb-1" style={{ color: "#64BDE3" }}>{s.value}</p>
             <p className="text-xs" style={{ color: "#7a7a9a" }}>{s.label}</p>
           </GlassCard>
         ))}
@@ -119,7 +119,7 @@ export default function ProfilePage({ user, userContext, isActive }) {
                 setIsEditing(true);
               }}
               className="flex items-center gap-1 text-xs"
-              style={{ color: "#3dd68c" }}
+              style={{ color: "#64BDE3" }}
             >
               <Edit3 size={12} /> Edit
             </button>
@@ -161,9 +161,9 @@ export default function ProfilePage({ user, userContext, isActive }) {
                       }}
                       className="px-2.5 py-1 rounded-lg text-xs transition-all duration-200"
                       style={{
-                        background: isSelected ? "rgba(61,214,140,0.15)" : "rgba(255,255,255,0.03)",
-                        border: `1px solid ${isSelected ? "rgba(61,214,140,0.4)" : "rgba(255,255,255,0.08)"}`,
-                        color: isSelected ? "#3dd68c" : "#7a7a9a",
+                        background: isSelected ? "rgba(100, 189, 227,0.15)" : "rgba(255,255,255,0.03)",
+                        border: `1px solid ${isSelected ? "rgba(100, 189, 227,0.4)" : "rgba(255,255,255,0.08)"}`,
+                        color: isSelected ? "#64BDE3" : "#7a7a9a",
                       }}
                     >
                       {f}
@@ -196,7 +196,7 @@ export default function ProfilePage({ user, userContext, isActive }) {
               <button
                 onClick={handleSave}
                 className="btn-primary px-4 py-1.5 text-xs font-semibold"
-                style={{ background: "#3dd68c" }}
+                style={{ background: "#64BDE3" }}
               >
                 Save
               </button>
@@ -238,22 +238,22 @@ export default function ProfilePage({ user, userContext, isActive }) {
               <p className="font-display font-semibold text-sm" style={{ color: "#f0eeff" }}>Today's Goal</p>
               <p className="text-xs" style={{ color: "#7a7a9a" }}>Complete 3 tasks today</p>
             </div>
-            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(61,214,140,0.1)", color: "#3dd68c" }}>
+            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(100, 189, 227,0.1)", color: "#64BDE3" }}>
               Daily
             </span>
           </div>
 
           <div className="flex items-center justify-between mb-1.5 mt-4">
-            <span className="text-xs font-mono font-medium" style={{ color: completedTodayCount >= 3 ? "#3dd68c" : "#7a7a9a" }}>
+            <span className="text-xs font-mono font-medium" style={{ color: completedTodayCount >= 3 ? "#64BDE3" : "#7a7a9a" }}>
               {completedTodayCount}/3 tasks completed today
             </span>
-            <span className="text-xs font-mono font-semibold" style={{ color: "#3dd68c" }}>
+            <span className="text-xs font-mono font-semibold" style={{ color: "#64BDE3" }}>
               {Math.min(Math.round((completedTodayCount / 3) * 100), 100)}%
             </span>
           </div>
           <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden border border-white/5">
             <div
-              className="bg-[#3dd68c] h-full rounded-full transition-all duration-500 ease-out"
+              className="bg-[#64BDE3] h-full rounded-full transition-all duration-500 ease-out"
               style={{ width: `${Math.min((completedTodayCount / 3) * 100, 100)}%` }}
             />
           </div>
@@ -292,7 +292,7 @@ export default function ProfilePage({ user, userContext, isActive }) {
                       key={idx}
                       className="w-8 h-8 rounded-md transition-all duration-200 hover:scale-110 flex items-center justify-center"
                       style={{
-                        backgroundColor: active ? "#3dd68c" : "rgba(255, 255, 255, 0.05)",
+                        backgroundColor: active ? "#64BDE3" : "rgba(255, 255, 255, 0.05)",
                         border: active ? "none" : "1px solid rgba(255,255,255,0.05)",
                       }}
                       title={`${date.toLocaleDateString("en-US", { month: 'short', day: 'numeric' })}: ${active ? 'Active' : 'No tasks'}`}

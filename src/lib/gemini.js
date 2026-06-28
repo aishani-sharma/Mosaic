@@ -176,12 +176,15 @@ Keep responses under 3 sentences unless asked for more.`;
 
 // ── Break task into subtasks ───────────────────────────────────────────────
 export async function breakdownTask(taskTitle, deadline) {
-  const prompt = `Break this task into 3–5 actionable subtasks:
+  const prompt = `You are a productivity assistant. Break down this specific task into 4 to 6 concrete, actionable steps that are different from each other.
+
 Task: "${taskTitle}"
 Deadline: ${deadline || "not specified"}
 
-Return ONLY JSON array: [{ "subtask": "...", "estimatedMinutes": <number> }]
-No markdown, no explanation.`;
+Return ONLY a JSON array with no markdown, no explanation, no code blocks. Example format:
+[{"subtask": "Research options online", "estimatedMinutes": 20}, {"subtask": "Make a list of requirements", "estimatedMinutes": 15}]
+
+Each subtask must be a distinct action step. Do not repeat the task title as a subtask.`;
 
   const raw = await callGemini(prompt);
   try {

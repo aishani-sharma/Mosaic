@@ -5,7 +5,7 @@ import { auth, googleProvider } from "../lib/firebase";
 import scenery from "../assets/scenery.png";
 import { Zap, Sparkles } from "lucide-react";
 
-export default function LoginPage({ onLogin }) {
+export default function LoginPage({ onLogin, onGuestLogin }) {
   const [showModal, setShowModal] = useState(false);
 
   return (
@@ -154,8 +154,8 @@ export default function LoginPage({ onLogin }) {
 
             {/* Developer Bypass Link */}
             <button
-              onClick={onLogin}
-              className="mt-6 flex items-center gap-1.5 text-xs font-bold text-[#15803d] hover:text-[#166534] transition-colors outline-none cursor-pointer"
+              onClick={onGuestLogin}
+              className="mt-6 flex items-center gap-1.5 text-xs font-bold text-[#4f9cf9] hover:text-[#2563eb] transition-colors outline-none cursor-pointer"
             >
               <Zap size={13} />
               <span>Continue as Guest (Dev Bypass)</span>

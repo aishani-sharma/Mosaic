@@ -1,7 +1,7 @@
 // components/calendar/CalendarPage.jsx
 import { useState, useEffect, useMemo } from "react";
 import GlassCard from "../ui/GlassCard";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import { getUserTasks } from "../../lib/firestore";
 import { requestCalendarAccess, fetchCalendarEvents, createCalendarEvent } from "../../lib/googleCalendar";
 
@@ -132,7 +132,7 @@ export default function CalendarPage({ user, isActive }) {
 
   const selectedTasks = tasks.filter(t => t.date === selected);
 
-  const priorityColor = { high: "#f76a6a", med: "#a8f0c6", low: "#3dd68c" };
+  const priorityColor = { high: "#f76a6a", med: "#bdd9fb", low: "#64BDE3" };
 
   if (loading) {
     return (
@@ -150,12 +150,12 @@ export default function CalendarPage({ user, isActive }) {
           <button
             onClick={handleConnectCalendar}
             className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5"
-            style={{ background: "#3dd68c" }}
+            style={{ background: "#64BDE3" }}
           >
             Connect Google Calendar
           </button>
         ) : (
-          <span className="text-xs font-mono py-1 px-2.5 rounded-full" style={{ background: "rgba(61,214,140,0.1)", color: "#3dd68c", border: "1px solid rgba(61,214,140,0.2)" }}>
+          <span className="text-xs font-mono py-1 px-2.5 rounded-full" style={{ background: "rgba(100, 189, 227,0.1)", color: "#64BDE3", border: "1px solid rgba(100, 189, 227,0.2)" }}>
             Google Calendar Connected
           </span>
         )}
@@ -193,20 +193,20 @@ export default function CalendarPage({ user, isActive }) {
                 onClick={() => setSelected(dateStr)}
                 className="flex flex-col items-center py-1.5 rounded-lg transition-all"
                 style={{
-                  background: isSel ? "rgba(61,214,140,0.2)" : isToday ? "rgba(255,255,255,0.05)" : "transparent",
-                  border: isSel ? "1px solid rgba(61,214,140,0.4)" : "1px solid transparent",
+                  background: isSel ? "rgba(100, 189, 227,0.2)" : isToday ? "rgba(255,255,255,0.05)" : "transparent",
+                  border: isSel ? "1px solid rgba(100, 189, 227,0.4)" : "1px solid transparent",
                 }}
               >
-                <span className="text-sm font-mono" style={{ color: isToday ? "#3dd68c" : "#f0eeff", fontWeight: isToday ? 600 : 400 }}>
+                <span className="text-sm font-mono" style={{ color: isToday ? "#64BDE3" : "#f0eeff", fontWeight: isToday ? 600 : 400 }}>
                   {day}
                 </span>
                 <div className="flex gap-0.5 mt-0.5">
                   {dots.slice(0, 3).map((t, j) => {
                     if (t.type === "calendar") {
-                      return <span key={j} className="text-[8px]" title={t.title}>📅</span>;
+                      return <span key={j} className="text-[8px] flex items-center" title={t.title}><Calendar size={10} className="text-[#64BDE3]" /></span>;
                     }
                     return (
-                      <div key={j} className="w-1.5 h-1.5 rounded-full" style={{ background: priorityColor[t.priority] || "#3dd68c" }} title={t.title} />
+                      <div key={j} className="w-1.5 h-1.5 rounded-full" style={{ background: priorityColor[t.priority] || "#64BDE3" }} title={t.title} />
                     );
                   })}
                 </div>
@@ -231,9 +231,9 @@ export default function CalendarPage({ user, isActive }) {
               <GlassCard key={i} className="p-3 flex items-center gap-3 justify-between">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
                   {t.type === "calendar" ? (
-                    <span className="text-sm flex-shrink-0">📅</span>
+                    <Calendar size={14} className="text-[#64BDE3] flex-shrink-0" />
                   ) : (
-                    <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: priorityColor[t.priority] || "#3dd68c" }} />
+                    <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: priorityColor[t.priority] || "#64BDE3" }} />
                   )}
                   <span className="text-sm truncate" style={{ color: "#f0eeff" }}>{t.title}</span>
                 </div>
@@ -241,7 +241,7 @@ export default function CalendarPage({ user, isActive }) {
                 <div className="flex items-center gap-3 flex-shrink-0">
                   {t.type !== "calendar" ? (
                     <>
-                      <span className="text-xs capitalize font-medium" style={{ color: priorityColor[t.priority] || "#3dd68c" }}>
+                      <span className="text-xs capitalize font-medium" style={{ color: priorityColor[t.priority] || "#64BDE3" }}>
                         {t.priority}
                       </span>
                       {accessToken && (
@@ -259,7 +259,7 @@ export default function CalendarPage({ user, isActive }) {
                             }
                           }}
                           className="btn-primary text-[10px] py-1 px-2.5 font-semibold flex items-center gap-1"
-                          style={{ background: "#3dd68c" }}
+                          style={{ background: "#64BDE3" }}
                         >
                           + Add to Calendar
                         </button>

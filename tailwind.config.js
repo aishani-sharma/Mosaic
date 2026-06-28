@@ -9,8 +9,8 @@ export default {
         glass: "rgba(255,255,255,0.04)",
         border: "rgba(255,255,255,0.08)",
         accent: {
-          pri: "#3dd68c",
-          sec: "#a8f0c6",
+          pri: "#64BDE3",
+          sec: "#bdd9fb",
           danger: "#f76a6a",
         },
         text: {
@@ -27,8 +27,8 @@ export default {
         glass: "12px",
       },
       boxShadow: {
-        glass: "0 -1px 0 rgba(61,214,140,0.4), 0 4px 24px rgba(0,0,0,0.4)",
-        glow: "0 0 24px rgba(61,214,140,0.25)",
+        glass: "0 -1px 0 rgba(100, 189, 227,0.4), 0 4px 24px rgba(0,0,0,0.4)",
+        glow: "0 0 24px rgba(100, 189, 227,0.25)",
       },
       animation: {
         "fade-in": "fadeIn 0.4s ease forwards",

@@ -59,12 +59,12 @@
   /* Accent button */
   .btn-primary {
     @apply px-5 py-2.5 rounded-lg font-body font-medium text-sm transition-all duration-200;
-    background: #3dd68c;
+    background: #64BDE3;
     color: #0c0e13;
   }
   .btn-primary:hover {
-    background: #5ce2a7;
-    box-shadow: 0 0 16px rgba(61, 214, 140, 0.3);
+    background: #78C9EB;
+    box-shadow: 0 0 16px rgba(100, 189, 227, 0.3);
     transform: translateY(-1px);
   }
   .btn-primary:active {
@@ -94,16 +94,16 @@
   }
   .nav-icon.active {
     background: #1a1d27;
-    color: #3dd68c;
+    color: #64BDE3;
     box-shadow: 0 0 0 1px #2a2d3a;
   }
 
   /* XP / streak pill */
   .xp-pill {
     @apply flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium;
-    background: rgba(61, 214, 140, 0.1);
-    color: #3dd68c;
-    border: 1px solid rgba(61, 214, 140, 0.2);
+    background: rgba(100, 189, 227, 0.1);
+    color: #64BDE3;
+    border: 1px solid rgba(100, 189, 227, 0.2);
   }
 
   .streak-pill {
@@ -128,9 +128,9 @@
   }
   .priority-low {
     @apply text-xs px-2 py-0.5 rounded-full font-medium;
-    background: rgba(61, 214, 140, 0.1);
-    color: #3dd68c;
-    border: 1px solid rgba(61, 214, 140, 0.2);
+    background: rgba(100, 189, 227, 0.1);
+    color: #64BDE3;
+    border: 1px solid rgba(100, 189, 227, 0.2);
   }
 
   /* Input */
@@ -145,7 +145,7 @@
     color: #8b8fa8;
   }
   .input-glass:focus {
-    border-color: #3dd68c;
+    border-color: #64BDE3;
     background: #1a1d27;
   }
 }
@@ -198,7 +198,7 @@
 }
 .tag-work {
   background-color: #2d5a3d !important;
-  color: #3dd68c !important;
+  color: #64BDE3 !important;
 }
 .tag-personal {
   background-color: #5a2d4a !important;
@@ -247,8 +247,8 @@
 
 /* Hoop glow box-shadow */
 .hoop-glow {
-  box-shadow: 0 0 16px #3dd68c;
-  background: rgba(61, 214, 140, 0.1);
+  box-shadow: 0 0 16px #64BDE3;
+  background: rgba(100, 189, 227, 0.1);
   border-radius: 50%;
   transition: all 0.2s ease-in-out;
 }

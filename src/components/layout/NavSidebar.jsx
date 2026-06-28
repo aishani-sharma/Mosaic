@@ -32,7 +32,7 @@ export default function NavSidebar({ activePage, setActivePage, onNewTaskClick }
             className="w-8 h-8 rounded-lg flex items-center justify-center font-display font-black text-sm transition-all duration-300"
             style={{
               background: "rgba(255, 255, 255, 0.08)",
-              color: "#3dd68c",
+              color: "#64BDE3",
               border: "1.5px solid rgba(255, 255, 255, 0.18)",
             }}
           >
@@ -57,8 +57,8 @@ export default function NavSidebar({ activePage, setActivePage, onNewTaskClick }
               onClick={() => setActivePage(id)}
               className="flex items-center gap-3 w-full py-2.5 px-3 rounded-lg text-sm font-semibold transition-all duration-150 text-left outline-none"
               style={{
-                borderLeft: isActive ? "3px solid #3dd68c" : "3px solid transparent",
-                color: isActive ? "#3dd68c" : "rgba(255, 255, 255, 0.65)",
+                borderLeft: isActive ? "3px solid #64BDE3" : "3px solid transparent",
+                color: isActive ? "#64BDE3" : "rgba(255, 255, 255, 0.65)",
                 background: isActive ? "rgba(255, 255, 255, 0.08)" : "transparent",
               }}
               onMouseOver={e => {
@@ -86,7 +86,7 @@ export default function NavSidebar({ activePage, setActivePage, onNewTaskClick }
         {/* + New Task button */}
         <button
           onClick={onNewTaskClick}
-          className="w-full bg-[#3dd68c] hover:bg-[#5ce2a7] text-[#0c0e13] font-bold py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all text-xs hover:scale-[1.02] active:scale-[0.98] outline-none"
+          className="w-full bg-[#64BDE3] hover:bg-[#78C9EB] text-[#0c0e13] font-bold py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all text-xs hover:scale-[1.02] active:scale-[0.98] outline-none"
         >
           <Plus size={14} strokeWidth={3} />
           <span>New Task</span>

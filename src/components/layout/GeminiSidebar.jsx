@@ -115,9 +115,9 @@ export default function GeminiSidebar({ userContext, isOpen, onClose }) {
         >
           <div
             className="w-7 h-7 rounded-lg flex items-center justify-center"
-            style={{ background: "rgba(61,214,140,0.1)", border: "1px solid rgba(61,214,140,0.25)" }}
+            style={{ background: "rgba(100, 189, 227,0.1)", border: "1px solid rgba(100, 189, 227,0.25)" }}
           >
-            <Sparkles size={14} style={{ color: "#3dd68c" }} />
+            <Sparkles size={14} style={{ color: "#64BDE3" }} />
           </div>
           <div>
             <p className="text-sm font-display font-bold" style={{ color: "#ffffff" }}>
@@ -129,7 +129,7 @@ export default function GeminiSidebar({ userContext, isOpen, onClose }) {
           </div>
           <div
             className="ml-auto w-2 h-2 rounded-full"
-            style={{ background: "#3dd68c", boxShadow: "0 0 6px #3dd68c" }}
+            style={{ background: "#64BDE3", boxShadow: "0 0 6px #64BDE3" }}
           ></div>
         </div>
 
@@ -145,9 +145,9 @@ export default function GeminiSidebar({ userContext, isOpen, onClose }) {
                 style={
                   msg.role === "user"
                     ? {
-                        background: "rgba(61,214,140,0.12)",
+                        background: "rgba(100, 189, 227,0.12)",
                         color: "#ffffff",
-                        border: "1px solid rgba(61,214,140,0.25)",
+                        border: "1px solid rgba(100, 189, 227,0.25)",
                         borderBottomRightRadius: 4,
                       }
                     : {
@@ -226,7 +226,7 @@ export default function GeminiSidebar({ userContext, isOpen, onClose }) {
               disabled={!input.trim() || loading || cooldown}
               className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-200"
               style={{
-                background: (input.trim() && !loading && !cooldown) ? "#3dd68c" : "rgba(255, 255, 255, 0.08)",
+                background: (input.trim() && !loading && !cooldown) ? "#64BDE3" : "rgba(255, 255, 255, 0.08)",
                 color: (input.trim() && !loading && !cooldown) ? "#0c0e13" : "rgba(255, 255, 255, 0.35)",
               }}
             >

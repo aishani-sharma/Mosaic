@@ -7,7 +7,21 @@ import { Camera, Zap, X, Loader2, Search, Users, UserPlus, UserCheck, Flame, Che
 import { getFeedPosts, createPost, updateUserProfile } from "../../lib/firestore";
 import { db } from "../../lib/firebase";
 import { doc, updateDoc, increment, collection, getDocs } from "firebase/firestore";
-import cozyCafeBg from "../../assets/cozy_cafe.png";
+
+const DEMO_POSTS = [
+  { id: "demo1", displayName: "Priya K", taskTitle: "Finished system design mock interview", photoURL: null, createdAt: null, reactions: { clap: 12, fire: 8, rocket: 5, hundred: 3 }, streak: 14, isDemo: true },
+  { id: "demo2", displayName: "Arjun M", taskTitle: "Submitted internship application to Google", photoURL: null, createdAt: null, reactions: { clap: 24, fire: 19, rocket: 11, hundred: 7 }, streak: 7, isDemo: true },
+  { id: "demo3", displayName: "Rhea S", taskTitle: "Completed 2 hours of DSA revision", photoURL: null, createdAt: null, reactions: { clap: 6, fire: 14, rocket: 2, hundred: 9 }, streak: 3, isDemo: true },
+  { id: "demo4", displayName: "Karan V", taskTitle: "Pushed first open source PR", photoURL: null, createdAt: null, reactions: { clap: 31, fire: 22, rocket: 18, hundred: 12 }, streak: 21, isDemo: true },
+];
+
+const SUGGESTED = [
+  { name: "Meera T", role: "CS Student", mutual: 3 },
+  { name: "Dev P", role: "Working Professional", mutual: 1 },
+  { name: "Ananya R", role: "Engineering Student", mutual: 5 },
+  { name: "Rohan K", role: "Entrepreneur", mutual: 2 },
+  { name: "Sia B", role: "Medical Student", mutual: 0 },
+];
 
 function Avatar({ name, size = 36 }) {
   const initials = name?.slice(0, 1).toUpperCase() ?? "?";
@@ -23,29 +37,36 @@ function Avatar({ name, size = 36 }) {
   );
 }
 
-function formatTimeAgo(timestamp) {
+function formatTimeAgo(timestamp, isDemo, demoId) {
+  if (isDemo) {
+    if (demoId === "demo1") return "2h ago";
+    if (demoId === "demo2") return "5h ago";
+    if (demoId === "demo3") return "Yesterday";
+    if (demoId === "demo4") return "2 days ago";
+    return "just now";
+  }
   if (!timestamp) return "just now";
-  
-  const date = typeof timestamp.toDate === "function" 
-    ? timestamp.toDate() 
+
+  const date = typeof timestamp.toDate === "function"
+    ? timestamp.toDate()
     : (timestamp.seconds ? new Date(timestamp.seconds * 1000) : new Date(timestamp));
-    
+
   if (isNaN(date.getTime())) return "just now";
-  
+
   const now = new Date();
   const seconds = Math.floor((now - date) / 1000);
   if (seconds < 60) return "just now";
-  
+
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) {
     return minutes === 1 ? "1 minute ago" : `${minutes} minutes ago`;
   }
-  
+
   const hours = Math.floor(minutes / 60);
   if (hours < 24) {
     return hours === 1 ? "1 hour ago" : `${hours} hours ago`;
   }
-  
+
   const days = Math.floor(hours / 24);
   return days === 1 ? "1 day ago" : `${days} days ago`;
 }
@@ -55,7 +76,7 @@ function getBadge(username, streakVal) {
   if (streakVal >= 7) {
     return (
       <span className="flex items-center gap-1">
-        <Flame size={10} className="text-[#64BDE3]" /> {streakVal} Day Streak
+        <Flame size={10} className="text-[#7eb8f7]" /> {streakVal} Day Streak
       </span>
     );
   }
@@ -70,7 +91,7 @@ function FeedPost({ post, onReact }) {
   const rx = post.reactions || { clap: 0, fire: 0, rocket: 0, hundred: 0 };
 
   return (
-    <GlassCard hover className="p-4 flex flex-col gap-3">
+    <div className="flex flex-col gap-3 py-4 border-b border-white/[0.06]">
       <div className="flex items-start gap-3">
         <Avatar name={post.displayName} />
         <div className="flex-1 min-w-0">
@@ -86,29 +107,41 @@ function FeedPost({ post, onReact }) {
               )}
             </div>
             <span className="text-[11px] text-[#7a7a9a] shrink-0">
-              {formatTimeAgo(post.createdAt)}
+              {formatTimeAgo(post.createdAt, post.isDemo, post.id)}
             </span>
           </div>
           <p className="text-sm font-medium leading-relaxed text-[#c8c4e8]">
             <span className="inline-flex items-center gap-1.5">
-              <CheckCircle size={14} className="text-[#64BDE3] shrink-0" />
+              <CheckCircle size={14} className="text-[#7eb8f7] shrink-0" />
               {post.taskTitle}
             </span>
           </p>
         </div>
       </div>
 
-      {post.photoURL && (
-        <div 
-          className="relative w-full rounded-xl overflow-hidden border border-[rgba(255,255,255,0.06)] bg-black" 
-          style={{ maxHeight: 320 }}
+      {post.photoURL ? (
+        <div
+          className="relative w-full rounded-xl overflow-hidden border border-[rgba(255,255,255,0.06)] bg-black"
+          style={{ maxHeight: 400 }}
         >
-          <img 
-            src={post.photoURL} 
-            alt="Proof snap" 
-            className="w-full object-cover" 
-            style={{ maxHeight: 320 }}
+          <img
+            src={post.photoURL}
+            alt="Proof snap"
+            className="w-full object-cover"
+            style={{ maxHeight: 400 }}
           />
+        </div>
+      ) : (
+        <div
+          className="w-full h-[120px] rounded-xl flex items-center justify-center px-6 text-center select-none"
+          style={{
+            background: "linear-gradient(135deg, rgba(126,184,247,0.08) 0%, rgba(255,255,255,0.02) 100%)",
+            border: "1px solid rgba(255,255,255,0.03)"
+          }}
+        >
+          <span className="text-sm font-semibold text-white tracking-wide leading-relaxed">
+            {post.taskTitle}
+          </span>
         </div>
       )}
 
@@ -116,30 +149,33 @@ function FeedPost({ post, onReact }) {
       <div className="flex items-center gap-2 pt-1 flex-wrap">
         {[
           { key: "clap", label: <PartyPopper size={12} className="text-amber-400" /> },
-          { key: "fire", label: <Flame size={12} className="text-[#64BDE3]" /> },
+          { key: "fire", label: <Flame size={12} className="text-[#7eb8f7]" /> },
           { key: "rocket", label: <Rocket size={12} className="text-indigo-400" /> },
           { key: "hundred", label: <Trophy size={12} className="text-yellow-400" /> },
         ].map((r) => (
-          <button 
+          <button
             key={r.key}
-            onClick={() => onReact(post.id, r.key)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/5 bg-white/5 text-xs text-[#7a7a9a] hover:bg-white/10 hover:text-white transition-all cursor-pointer active:scale-125" 
+            onClick={() => {
+              if (post.isDemo) return;
+              onReact(post.id, r.key);
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/5 bg-white/5 text-xs text-[#7a7a9a] hover:bg-white/10 hover:text-white transition-all cursor-pointer active:scale-125"
           >
             <span>{r.label}</span>
             <span className="font-mono text-[10px] font-bold text-white/70">{rx[r.key] || 0}</span>
           </button>
         ))}
       </div>
-    </GlassCard>
+    </div>
   );
 }
 
-export default function FeedPage({ user, userContext, isActive }) {
+export default function FeedPage({ user, userContext, isActive, onNavigate }) {
   const [activeSection, setActiveSection] = useState("moments"); // moments or friends
   const [posts, setPosts] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
 
-  
+
   // Camera & Dialog states
   const [showCamera, setShowCamera] = useState(false);
   const [cameraError, setCameraError] = useState("");
@@ -148,7 +184,7 @@ export default function FeedPage({ user, userContext, isActive }) {
   const [showPostDialog, setShowPostDialog] = useState(false);
   const [taskTitle, setTaskTitle] = useState("");
   const [posting, setPosting] = useState(false);
-  
+
   // Scheduled post alert states (daily post within 2 mins alert)
   const [alertActive, setAlertActive] = useState(false);
   const [alertSeconds, setAlertSeconds] = useState(120);
@@ -157,6 +193,14 @@ export default function FeedPage({ user, userContext, isActive }) {
   const [allUsers, setAllUsers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [followingIds, setFollowingIds] = useState([]);
+  const [followedSuggested, setFollowedSuggested] = useState({});
+
+  const handleToggleSuggested = (name) => {
+    setFollowedSuggested(prev => ({
+      ...prev,
+      [name]: !prev[name]
+    }));
+  };
 
   const videoRef = useRef(null);
 
@@ -250,14 +294,14 @@ export default function FeedPage({ user, userContext, isActive }) {
       const canvas = document.createElement("canvas");
       canvas.width = video.videoWidth || 640;
       canvas.height = video.videoHeight || 480;
-      
+
       const ctx = canvas.getContext("2d");
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      
+
       try {
         const base64Img = canvas.toDataURL("image/jpeg", 0.85);
         setCapturedPhoto(base64Img);
-        
+
         if (stream) {
           stream.getTracks().forEach(track => track.stop());
           setStream(null);
@@ -274,7 +318,7 @@ export default function FeedPage({ user, userContext, isActive }) {
   const handlePost = async (e) => {
     if (e) e.preventDefault();
     if (!taskTitle.trim() || !user?.uid || posting) return;
-    
+
     setPosting(true);
     try {
       await createPost(
@@ -283,14 +327,14 @@ export default function FeedPage({ user, userContext, isActive }) {
         taskTitle.trim(),
         capturedPhoto
       );
-      
+
       setCapturedPhoto(null);
       setTaskTitle("");
       setShowPostDialog(false);
-      
+
       // Stop the 2-minute alert upon posting
       setAlertActive(false);
-      
+
       await loadPosts();
     } catch (err) {
       console.error("Failed to create post:", err);
@@ -353,255 +397,359 @@ export default function FeedPage({ user, userContext, isActive }) {
     return `${m}:${String(s).padStart(2, "0")}`;
   };
 
+  const allPosts = [...DEMO_POSTS, ...posts];
+
   return (
     <div className="relative min-h-screen pb-12">
+      <div className="flex gap-6 max-w-5xl mx-auto px-4 py-6 relative z-10 animate-page-enter">
 
+        {/* LEFT COLUMN (Main Feed or Friends List) */}
+        <div className="flex-1 max-w-[680px] min-w-0 flex flex-col gap-4">
 
-      <div className="max-w-xl mx-auto px-4 py-6 relative z-10 animate-page-enter">
-        {/* Header Title */}
-        <div className="flex items-center justify-between mb-5 flex-shrink-0">
-          <div>
-            <h1 className="font-display font-bold text-[26px] text-white leading-tight tracking-tight drop-shadow-md">
-              Mosaic Moments
-            </h1>
-            <p className="text-xs font-semibold text-white/70 mt-0.5 font-mono uppercase tracking-wide">
-              Connect &amp; Share Wins
-            </p>
-          </div>
-        </div>
-
-        {/* Tab Switcher */}
-        <div className="flex gap-2 mb-6 justify-center">
-          <button
-            onClick={() => setActiveSection("moments")}
-            className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer ${
-              activeSection === "moments"
-                ? "bg-[#64BDE3] text-[#0c0e13]"
-                : "bg-white/10 text-white hover:bg-white/15"
-            }`}
-          >
-            <Camera size={13} /> Moments
-          </button>
-          <button
-            onClick={() => setActiveSection("friends")}
-            className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer ${
-              activeSection === "friends"
-                ? "bg-[#64BDE3] text-[#0c0e13]"
-                : "bg-white/10 text-white hover:bg-white/15"
-            }`}
-          >
-            <Users size={13} /> Friends
-          </button>
-        </div>
-
-        {activeSection === "moments" ? (
-          /* =======================================================
-             MOMENTS FEED TAB
-             ======================================================= */
-          <div className="flex flex-col gap-4">
-            {/* Scheduled posting alert */}
-            {alertActive && (
-              <div 
-                className="p-4 rounded-2xl border flex items-center justify-between animate-pulse shadow-lg"
-                style={{
-                  background: "rgba(245, 158, 11, 0.15)",
-                  borderColor: "rgba(245, 158, 11, 0.4)",
-                  color: "#fef3c7"
-                }}
+          {/* Top header row with underline tabs and Snap button */}
+          <div className="flex items-center justify-between border-b border-white/[0.06] pb-4 mb-2 flex-shrink-0">
+            <div className="flex gap-6">
+              <button
+                onClick={() => setActiveSection("moments")}
+                className={`pb-2 text-sm font-bold tracking-wide relative cursor-pointer outline-none transition-colors bg-transparent border-none ${activeSection === "moments" ? "text-[#7eb8f7]" : "text-white/60 hover:text-white"
+                  }`}
               >
-                <div className="min-w-0 flex-1 pr-3">
-                  <p className="text-xs font-bold font-mono uppercase tracking-wider text-amber-400">Mosaic Moment Alert</p>
-                  <p className="text-xs text-amber-200/90 mt-0.5 leading-snug">
-                    Post what you are building within the next <strong className="font-mono text-white text-sm">{formatCountdown(alertSeconds)}</strong>!
-                  </p>
-                </div>
-                <button 
-                  onClick={() => setShowCamera(true)}
-                  className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-[#0c0e13] font-bold text-xs cursor-pointer shadow-md hover:scale-105 active:scale-95 transition-all"
-                >
-                  Post Now
-                </button>
-              </div>
-            )}
+                Moments
+                {activeSection === "moments" && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#7eb8f7]" />
+                )}
+              </button>
+              <button
+                onClick={() => setActiveSection("friends")}
+                className={`pb-2 text-sm font-bold tracking-wide relative cursor-pointer outline-none transition-colors bg-transparent border-none ${activeSection === "friends" ? "text-[#7eb8f7]" : "text-white/60 hover:text-white"
+                  }`}
+              >
+                Friends
+                {activeSection === "friends" && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#7eb8f7]" />
+                )}
+              </button>
+            </div>
 
-
-
-            {/* Redesigned Snap Prompt Banner */}
-            <GlassCard 
-              className="p-5 flex items-center gap-4 relative overflow-hidden transition-all duration-300 hover:border-[rgba(100, 189, 227,0.4)]"
+            <button
+              onClick={() => setShowCamera(true)}
+              className="btn-primary text-xs px-4 py-2 flex items-center gap-1.5 font-bold shadow-md hover:scale-105 active:scale-95 transition-all duration-200"
               style={{
-                background: "linear-gradient(135deg, rgba(100, 189, 227,0.08) 0%, rgba(13,13,20,0.6) 100%)",
-                border: "1px solid rgba(100, 189, 227, 0.25)",
-                boxShadow: "0 0 20px rgba(100, 189, 227,0.05)"
+                background: "#7eb8f7",
+                color: "#0a0a0f",
+                boxShadow: "0 4px 14px rgba(126, 184, 247, 0.3)"
               }}
             >
-              <div
-                className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
-                style={{ 
-                  background: "rgba(100, 189, 227,0.15)",
-                  border: "1px solid rgba(100, 189, 227,0.3)",
-                  boxShadow: "0 0 12px rgba(100, 189, 227,0.2)"
-                }}
-              >
-                <Camera size={20} style={{ color: "#64BDE3" }} />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold tracking-wide text-white">
-                  Today's Mosaic Moment
-                </p>
-                <p className="text-xs text-white/70">
-                  Share what you're building today.
-                </p>
-              </div>
-              <button 
-                onClick={() => setShowCamera(true)}
-                className="btn-primary text-xs px-4 py-2 flex items-center gap-1.5 font-bold shadow-md hover:scale-105 active:scale-95 transition-all duration-200"
-                style={{
-                  background: "#64BDE3",
-                  color: "#0a0a0f",
-                  boxShadow: "0 4px 14px rgba(100, 189, 227,0.4)"
-                }}
-              >
-                <Zap size={13} fill="#0a0a0f" />
-                Snap
-              </button>
-            </GlassCard>
-
-            {/* Feed list */}
-            <div className="flex flex-col gap-4">
-              <p className="text-xs font-mono uppercase tracking-widest text-[#7a7a9a]">
-                Moments Feed
-              </p>
-              {loadingPosts ? (
-                <div className="text-center py-12">
-                  <Loader2 className="animate-spin mx-auto mb-2 text-[#64BDE3]" size={24} />
-                  <p className="text-xs font-mono text-slate-500">Loading wins feed…</p>
-                </div>
-              ) : posts.length === 0 ? (
-                <GlassCard className="p-8 text-center">
-                  <p className="text-sm mb-1" style={{ color: "#f0eeff" }}>No posts yet</p>
-                  <p className="text-xs" style={{ color: "#7a7a9a" }}>Be the first to share your snap!</p>
-                </GlassCard>
-              ) : (
-                posts.map(post => (
-                  <FeedPost key={post.id} post={post} onReact={handleReact} />
-                ))
-              )}
-            </div>
+              <Camera size={13} fill="#0a0a0f" />
+              Snap
+            </button>
           </div>
-        ) : (
-          /* =======================================================
-             FRIENDS SYSTEM TAB
-             ======================================================= */
-          <div className="flex flex-col gap-5 animate-page-enter">
-            {/* Search users card */}
-            <GlassCard className="p-5 flex flex-col gap-4">
-              <div className="flex items-center gap-2">
-                <Users size={16} className="text-[#64BDE3]" />
-                <span className="font-display font-semibold text-sm text-[#f0eeff]">Find Friends</span>
-              </div>
-              <div className="relative">
-                <Search size={16} className="absolute left-3.5 top-3.5 text-[#7a7a9a]" />
-                <input
-                  type="text"
-                  placeholder="Search users by name..."
-                  className="w-full bg-white/5 hover:bg-white/10 focus:bg-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-white/40 outline-none border border-white/10 focus:border-[#64BDE3] transition-all"
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                />
+
+          {activeSection === "moments" ? (
+            /* =======================================================
+               MOMENTS FEED TAB
+               ======================================================= */
+            <div className="flex flex-col gap-4">
+
+              {/* Stories style horizontal row */}
+              <div className="flex gap-4 overflow-x-auto pb-4 mb-2 border-b border-white/[0.06] scrollbar-none flex-shrink-0 select-none">
+                {/* Real User Snap trigger */}
+                <div
+                  onClick={() => setShowCamera(true)}
+                  className="flex flex-col items-center gap-1.5 cursor-pointer flex-shrink-0 group"
+                >
+                  <div className="w-14 h-14 rounded-full border-2 border-[#7eb8f7] p-0.5 flex items-center justify-center transition-transform group-hover:scale-105">
+                    <Avatar name={user?.displayName || "You"} size={48} />
+                  </div>
+                  <span className="text-[10px] text-white/70 font-medium max-w-[60px] truncate">Your Snap</span>
+                </div>
+
+                {/* 5 Demo Stories */}
+                {[
+                  { name: "Priya K" },
+                  { name: "Arjun M" },
+                  { name: "Rhea S" },
+                  { name: "Karan V" },
+                  { name: "Meera T" },
+                ].map((story, i) => (
+                  <div key={i} className="flex flex-col items-center gap-1.5 flex-shrink-0">
+                    <div className="w-14 h-14 rounded-full border-2 border-[#7eb8f7]/40 p-0.5 flex items-center justify-center">
+                      <Avatar name={story.name} size={48} />
+                    </div>
+                    <span className="text-[10px] text-white/70 font-medium max-w-[60px] truncate">{story.name}</span>
+                  </div>
+                ))}
               </div>
 
-              {searchQuery && (
-                <div className="flex flex-col gap-2 max-h-60 overflow-y-auto">
-                  {filteredSearchUsers.length === 0 ? (
-                    <p className="text-xs text-[#7a7a9a] text-center py-2">No matching users found</p>
-                  ) : (
-                    filteredSearchUsers.map(u => {
-                      const following = followingIds.includes(u.id);
+              {/* Scheduled posting alert */}
+              {alertActive && (
+                <div
+                  className="p-4 rounded-2xl border flex items-center justify-between animate-pulse shadow-lg mb-2"
+                  style={{
+                    background: "rgba(245, 158, 11, 0.15)",
+                    borderColor: "rgba(245, 158, 11, 0.4)",
+                    color: "#fef3c7"
+                  }}
+                >
+                  <div className="min-w-0 flex-1 pr-3">
+                    <p className="text-xs font-bold font-mono uppercase tracking-wider text-amber-400">Mosaic Moment Alert</p>
+                    <p className="text-xs text-amber-200/90 mt-0.5 leading-snug">
+                      Post what you are building within the next <strong className="font-mono text-white text-sm">{formatCountdown(alertSeconds)}</strong>!
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setShowCamera(true)}
+                    className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-[#0c0e13] font-bold text-xs cursor-pointer shadow-md hover:scale-105 active:scale-95 transition-all"
+                  >
+                    Post Now
+                  </button>
+                </div>
+              )}
+
+              {/* Feed list */}
+              <div className="flex flex-col">
+                {loadingPosts ? (
+                  <div className="text-center py-12">
+                    <Loader2 className="animate-spin mx-auto mb-2 text-[#7eb8f7]" size={24} />
+                    <p className="text-xs font-mono text-slate-500">Loading wins feed…</p>
+                  </div>
+                ) : (
+                  allPosts.map(post => (
+                    <FeedPost key={post.id} post={post} onReact={handleReact} />
+                  ))
+                )}
+              </div>
+            </div>
+          ) : (
+            /* =======================================================
+               FRIENDS SYSTEM TAB
+               ======================================================= */
+            <div className="flex flex-col gap-5 animate-page-enter">
+              {/* Search users card */}
+              <GlassCard className="p-5 flex flex-col gap-4">
+                <div className="flex items-center gap-2">
+                  <Users size={16} className="text-[#7eb8f7]" />
+                  <span className="font-display font-semibold text-sm text-[#f0eeff]">Find Friends</span>
+                </div>
+                <div className="relative">
+                  <Search size={16} className="absolute left-3.5 top-3.5 text-[#7a7a9a]" />
+                  <input
+                    type="text"
+                    placeholder="Search users by name..."
+                    className="w-full bg-white/5 hover:bg-white/10 focus:bg-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-white/40 outline-none border border-white/10 focus:border-[#7eb8f7] transition-all"
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                  />
+                </div>
+
+                {searchQuery && (
+                  <div className="flex flex-col gap-2 max-h-60 overflow-y-auto">
+                    {filteredSearchUsers.length === 0 ? (
+                      <p className="text-xs text-[#7a7a9a] text-center py-2">No matching users found</p>
+                    ) : (
+                      filteredSearchUsers.map(u => {
+                        const following = followingIds.includes(u.id);
+                        return (
+                          <div key={u.id} className="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <Avatar name={u.displayName} size={30} />
+                              <span className="text-sm font-semibold text-white truncate">{u.displayName}</span>
+                            </div>
+                            <button
+                              onClick={() => toggleFollow(u.id)}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 hover:scale-105 active:scale-95 ${following
+                                ? "bg-white/10 border border-white/10 text-white"
+                                : "bg-[#7eb8f7] text-[#0c0e13]"
+                                }`}
+                            >
+                              {following ? (
+                                <>
+                                  <UserCheck size={12} />
+                                  Following
+                                </>
+                              ) : (
+                                <>
+                                  <UserPlus size={12} />
+                                  Follow
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                )}
+
+                {/* Friend suggestions list inside the card */}
+                <div className="flex flex-col gap-3 mt-2 border-t border-white/5 pt-4">
+                  <span className="text-xs font-mono font-bold text-[#7a7a9a] uppercase tracking-wider">Suggested for You</span>
+                  <div className="flex flex-col gap-3">
+                    {SUGGESTED.map((s, idx) => {
+                      const isFollowing = !!followedSuggested[s.name];
                       return (
-                        <div key={u.id} className="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
+                        <div key={idx} className="flex items-center justify-between">
                           <div className="flex items-center gap-2.5 min-w-0">
-                            <Avatar name={u.displayName} size={30} />
-                            <span className="text-sm font-semibold text-white truncate">{u.displayName}</span>
+                            <Avatar name={s.name} size={30} />
+                            <div className="min-w-0">
+                              <p className="text-xs font-bold text-white truncate">{s.name}</p>
+                              <p className="text-[10px] text-[#7a7a9a] truncate">{s.role} • {s.mutual} mutual</p>
+                            </div>
                           </div>
                           <button
-                            onClick={() => toggleFollow(u.id)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 hover:scale-105 active:scale-95 ${
-                              following
-                                ? "bg-white/10 border border-white/10 text-white"
-                                : "bg-[#64BDE3] text-[#0c0e13]"
-                            }`}
+                            onClick={() => handleToggleSuggested(s.name)}
+                            className={`text-xs font-bold cursor-pointer transition-colors outline-none bg-transparent border-none ${isFollowing ? "text-white/40" : "text-[#7eb8f7] hover:text-[#9ecbfb]"
+                              }`}
                           >
-                            {following ? (
-                              <>
-                                <UserCheck size={12} />
-                                Following
-                              </>
-                            ) : (
-                              <>
-                                <UserPlus size={12} />
-                                Follow
-                              </>
-                            )}
+                            {isFollowing ? "Following" : "Follow"}
                           </button>
                         </div>
                       );
-                    })
-                  )}
+                    })}
+                  </div>
                 </div>
-              )}
-            </GlassCard>
+              </GlassCard>
 
-            {/* Following list */}
-            <div className="flex flex-col gap-3">
-              <p className="text-xs font-mono uppercase tracking-widest text-[#7a7a9a]">
-                Following ({followingIds.length})
-              </p>
-              {followingIds.length === 0 ? (
-                <GlassCard className="p-8 text-center bg-white/5 border border-white/5">
-                  <p className="text-xs text-[#7a7a9a]">You are not following anyone yet.</p>
-                </GlassCard>
-              ) : (
-                <div className="grid grid-cols-1 gap-2">
-                  {allUsers
-                    .filter(u => followingIds.includes(u.id))
-                    .map(u => (
-                      <div key={u.id} className="flex items-center justify-between p-3 rounded-2xl bg-white/10 backdrop-blur-[28px] border border-white/15 shadow-sm">
-                        <div className="flex items-center gap-2.5">
-                          <Avatar name={u.displayName} size={32} />
-                          <div>
-                            <p className="text-sm font-bold text-white leading-tight">{u.displayName}</p>
-                            {u.streak > 0 && (
-                              <p className="text-[10px] text-amber-400 font-bold flex items-center gap-0.5 mt-0.5">
-                                <Flame size={10} className="fill-amber-400" />
-                                {u.streak} Day Streak
-                              </p>
-                            )}
+              {/* Following list */}
+              <div className="flex flex-col gap-3">
+                <p className="text-xs font-mono uppercase tracking-widest text-[#7a7a9a]">
+                  Following ({followingIds.length})
+                </p>
+                {followingIds.length === 0 ? (
+                  <GlassCard className="p-8 text-center bg-white/5 border border-white/5">
+                    <p className="text-xs text-[#7a7a9a]">You are not following anyone yet.</p>
+                  </GlassCard>
+                ) : (
+                  <div className="grid grid-cols-1 gap-2">
+                    {allUsers
+                      .filter(u => followingIds.includes(u.id))
+                      .map(u => (
+                        <div key={u.id} className="flex items-center justify-between p-3 rounded-2xl bg-white/10 backdrop-blur-[28px] border border-white/15 shadow-sm">
+                          <div className="flex items-center gap-2.5">
+                            <Avatar name={u.displayName} size={32} />
+                            <div>
+                              <p className="text-sm font-bold text-white leading-tight">{u.displayName}</p>
+                              {u.streak > 0 && (
+                                <p className="text-[10px] text-amber-400 font-bold flex items-center gap-0.5 mt-0.5">
+                                  <Flame size={10} className="fill-amber-400" />
+                                  {u.streak} Day Streak
+                                </p>
+                              )}
+                            </div>
                           </div>
+                          <button
+                            onClick={() => toggleFollow(u.id)}
+                            className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white/10 border border-white/10 text-white hover:bg-red-500/20 hover:border-red-500/30 hover:text-red-400 cursor-pointer transition-all"
+                          >
+                            Unfollow
+                          </button>
                         </div>
-                        <button
-                          onClick={() => toggleFollow(u.id)}
-                          className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white/10 border border-white/10 text-white hover:bg-red-500/20 hover:border-red-500/30 hover:text-red-400 cursor-pointer transition-all"
-                        >
-                          Unfollow
-                        </button>
-                      </div>
-                    ))}
-                </div>
-              )}
+                      ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* RIGHT COLUMN (Suggested + Activity Panel) */}
+        <div className="w-[280px] shrink-0 sticky top-6 self-start flex flex-col gap-6 hidden md:flex">
+
+          {/* Your Activity mini card */}
+          <div className="p-4 rounded-2xl border border-white/10 flex flex-col gap-3" style={{ background: "rgba(255, 255, 255, 0.02)", backdropFilter: "blur(8px)" }}>
+            <div className="flex items-center gap-3">
+              <Avatar name={user?.displayName || "You"} size={48} />
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-white truncate">{user?.displayName || "Mosaicker"}</p>
+                <span
+                  onClick={() => {
+                    const event = new CustomEvent("navigate-profile");
+                    window.dispatchEvent(event);
+                  }}
+                  className="text-[10px] text-[#7eb8f7] font-semibold cursor-pointer hover:underline"
+                >
+                  View Profile
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-col gap-2 pt-1 border-t border-white/5">
+              <div className="flex justify-between items-center text-[10px] text-[#7a7a9a] font-mono">
+                <span>CURRENT STREAK</span>
+                <StreakBadge streak={userContext?.streak || 0} />
+              </div>
+              <XPBar xp={userContext?.xp || 0} level={userContext?.level || 1} />
             </div>
           </div>
-        )}
+
+          {/* Suggested for You section */}
+          <div className="flex flex-col gap-3">
+            <span className="text-xs font-mono font-bold text-[#7a7a9a] uppercase tracking-wider">Suggested for You</span>
+            <div className="flex flex-col gap-3">
+              {SUGGESTED.map((s, idx) => {
+                const isFollowing = !!followedSuggested[s.name];
+                return (
+                  <div key={idx} className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <Avatar name={s.name} size={32} />
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-white truncate">{s.name}</p>
+                        <p className="text-[10px] text-[#7a7a9a] truncate">{s.role} • {s.mutual} mutual</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleToggleSuggested(s.name)}
+                      className={`text-xs font-bold cursor-pointer transition-colors outline-none bg-transparent border-none ${isFollowing ? "text-white/40" : "text-[#7eb8f7] hover:text-[#9ecbfb]"
+                        }`}
+                    >
+                      {isFollowing ? "Following" : "Follow"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Friends Activity section */}
+          <div className="flex flex-col gap-3">
+            <span className="text-xs font-mono font-bold text-[#7a7a9a] uppercase tracking-wider">Friends Activity</span>
+            {followingIds.length > 0 ? (
+              <div className="flex flex-col gap-3 max-h-[220px] overflow-y-auto pr-1">
+                {allUsers
+                  .filter(u => followingIds.includes(u.id))
+                  .map(u => (
+                    <div key={u.id} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <Avatar name={u.displayName} size={32} />
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-white truncate">{u.displayName}</p>
+                          {u.streak > 0 && (
+                            <p className="text-[10px] text-amber-400 font-bold flex items-center gap-0.5">
+                              <Flame size={10} className="fill-amber-400" />
+                              {u.streak}d streak
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            ) : (
+              <p className="text-xs text-[#7a7a9a] italic">Follow people to see their activity here</p>
+            )}
+          </div>
+
+        </div>
+
       </div>
 
       {/* Camera Modal Overlay */}
       {showCamera && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in"
           style={{ background: "rgba(10, 10, 15, 0.8)", backdropFilter: "blur(8px)" }}
         >
           <GlassCard className="w-full max-w-md p-6 relative overflow-hidden" style={{ border: "1px solid rgba(255, 255, 255, 0.1)" }}>
-            <button 
+            <button
               onClick={() => {
                 if (stream) {
                   stream.getTracks().forEach(track => track.stop());
@@ -614,7 +762,7 @@ export default function FeedPage({ user, userContext, isActive }) {
               <X size={18} />
             </button>
             <h3 className="font-display font-semibold text-lg mb-4" style={{ color: "#f0eeff" }}>Take a Snap</h3>
-            
+
             {cameraError ? (
               <div className="text-center py-8 text-red-400 text-sm font-medium">{cameraError}</div>
             ) : (
@@ -627,9 +775,9 @@ export default function FeedPage({ user, userContext, isActive }) {
                 />
               </div>
             )}
-            
+
             <div className="flex gap-3 justify-end">
-              <button 
+              <button
                 type="button"
                 onClick={() => {
                   if (stream) {
@@ -642,11 +790,11 @@ export default function FeedPage({ user, userContext, isActive }) {
               >
                 Cancel
               </button>
-              <button 
+              <button
                 disabled={!!cameraError}
                 onClick={handleTakeSnap}
                 className="btn-primary text-xs px-4 py-2 flex items-center gap-1.5"
-                style={{ background: "#64BDE3" }}
+                style={{ background: "#7eb8f7", color: "#0c0e13" }}
               >
                 <Camera size={14} /> Take Snap
               </button>
@@ -657,12 +805,12 @@ export default function FeedPage({ user, userContext, isActive }) {
 
       {/* Post Modal Overlay */}
       {showPostDialog && capturedPhoto && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in"
           style={{ background: "rgba(10, 10, 15, 0.8)", backdropFilter: "blur(8px)" }}
         >
           <GlassCard className="w-full max-w-md p-6 relative overflow-hidden" style={{ border: "1px solid rgba(255, 255, 255, 0.1)" }}>
-            <button 
+            <button
               type="button"
               onClick={() => {
                 setCapturedPhoto(null);
@@ -674,11 +822,11 @@ export default function FeedPage({ user, userContext, isActive }) {
               <X size={18} />
             </button>
             <h3 className="font-display font-semibold text-lg mb-4" style={{ color: "#f0eeff" }}>Share Your Win</h3>
-            
+
             <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-4 border border-[rgba(255,255,255,0.08)] bg-black shadow-lg">
               <img src={capturedPhoto} alt="Captured win" className="w-full h-full object-cover" />
             </div>
-            
+
             <form onSubmit={handlePost}>
               <div className="mb-6">
                 <label className="block text-xs font-mono mb-2 uppercase tracking-wide" style={{ color: "#7a7a9a" }}>
@@ -688,15 +836,15 @@ export default function FeedPage({ user, userContext, isActive }) {
                   type="text"
                   required
                   disabled={posting}
-                  className="input-glass w-full py-2.5 px-3 text-sm rounded-xl outline-none border border-[rgba(255,255,255,0.08)] focus:border-[#64BDE3] transition-colors text-white"
+                  className="input-glass w-full py-2.5 px-3 text-sm rounded-xl outline-none border border-[rgba(255,255,255,0.08)] focus:border-[#7eb8f7] transition-colors text-white"
                   placeholder="e.g., Solved 3 Leetcode questions, Worked on project UI"
                   value={taskTitle}
                   onChange={e => setTaskTitle(e.target.value)}
                 />
               </div>
-              
+
               <div className="flex gap-3 justify-end">
-                <button 
+                <button
                   type="button"
                   disabled={posting}
                   onClick={() => {
@@ -708,11 +856,11 @@ export default function FeedPage({ user, userContext, isActive }) {
                 >
                   Retake
                 </button>
-                <button 
+                <button
                   type="submit"
                   disabled={posting || !taskTitle.trim()}
                   className="btn-primary text-xs px-5 py-2 flex items-center gap-1.5"
-                  style={{ background: "#64BDE3" }}
+                  style={{ background: "#7eb8f7", color: "#0c0e13" }}
                 >
                   {posting ? (
                     <>

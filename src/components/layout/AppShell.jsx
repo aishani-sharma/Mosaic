@@ -7,18 +7,75 @@ import TasksPage from "../tasks/TasksPage";
 import CalendarPage from "../calendar/CalendarPage";
 import PomodoroPage from "../pomodoro/PomodoroPage";
 import ProfilePage from "../profile/ProfilePage";
-import { useState } from "react";
+import MosaicMomentInterrupt from "../feed/MosaicMomentInterrupt";
+import { useState, useEffect } from "react";
 import { Sparkles } from "lucide-react";
 
 export default function AppShell({ user, userContext }) {
   const [activePage, setActivePage] = useState("dashboard");
   const [focusInputTrigger, setFocusInputTrigger] = useState(0);
   const [isAiOpen, setIsAiOpen] = useState(false);
+  const [showMomentInterrupt, setShowMomentInterrupt] = useState(false);
+  const [autoOpenCamera, setAutoOpenCamera] = useState(false);
 
   const handleNewTaskClick = () => {
     setActivePage("dashboard");
     setFocusInputTrigger(prev => prev + 1);
   };
+
+  const handleSnapTrigger = () => {
+    setShowMomentInterrupt(false);
+    setActivePage("feed");
+    setAutoOpenCamera(true);
+  };
+
+  // Keyboard trigger logic (Shift + M)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.shiftKey && (e.key === "M" || e.key === "m")) {
+        setShowMomentInterrupt(true);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Daily Scheduler trigger logic
+  useEffect(() => {
+    const checkSchedule = () => {
+      const scheduledTimeStr = localStorage.getItem("moment_scheduled_time");
+      const scheduledDateStr = localStorage.getItem("moment_scheduled_date");
+      const today = new Date().toDateString();
+
+      // If scheduled time has already been triggered today, skip
+      if (scheduledDateStr === today && scheduledTimeStr === "triggered") {
+        return;
+      }
+
+      let scheduledTime = null;
+
+      // If not set or it's a new day, schedule it
+      if (!scheduledTimeStr || scheduledDateStr !== today) {
+        const hoursToAdd = 2 + Math.random() * 6; // random offset between 2 and 8 hours
+        const targetTime = Date.now() + hoursToAdd * 60 * 60 * 1000;
+        
+        localStorage.setItem("moment_scheduled_time", String(targetTime));
+        localStorage.setItem("moment_scheduled_date", today);
+        scheduledTime = targetTime;
+      } else {
+        scheduledTime = Number(scheduledTimeStr);
+      }
+
+      if (scheduledTime && Date.now() >= scheduledTime) {
+        setShowMomentInterrupt(true);
+        localStorage.setItem("moment_scheduled_time", "triggered");
+      }
+    };
+
+    checkSchedule();
+    const interval = setInterval(checkSchedule, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="flex h-screen overflow-hidden relative" style={{ background: "#0f1117" }}>
@@ -68,7 +125,14 @@ export default function AppShell({ user, userContext }) {
           style={{ display: activePage === "feed" ? "block" : "none" }}
           className={activePage === "feed" ? "animate-page-enter" : ""}
         >
-          <FeedPage user={user} userContext={userContext} isActive={activePage === "feed"} />
+          <FeedPage 
+            user={user} 
+            userContext={userContext} 
+            isActive={activePage === "feed"} 
+            onNavigate={setActivePage} 
+            openCamera={autoOpenCamera}
+            onCameraOpened={() => setAutoOpenCamera(false)}
+          />
         </div>
 
         {/* Calendar View */}
@@ -112,6 +176,13 @@ export default function AppShell({ user, userContext }) {
         isOpen={isAiOpen} 
         onClose={() => setIsAiOpen(false)} 
       />
+
+      {showMomentInterrupt && (
+        <MosaicMomentInterrupt 
+          onSnap={handleSnapTrigger} 
+          onDismiss={() => setShowMomentInterrupt(false)} 
+        />
+      )}
     </div>
   );
 }

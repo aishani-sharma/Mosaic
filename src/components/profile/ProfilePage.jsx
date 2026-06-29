@@ -1,7 +1,6 @@
 // components/profile/ProfilePage.jsx
 import { useState, useEffect } from "react";
 import GlassCard from "../ui/GlassCard";
-import XPBar from "../ui/XPBar";
 import StreakBadge from "../ui/StreakBadge";
 import { User, Edit3 } from "lucide-react";
 import { updateUserProfile, getUserTasks } from "../../lib/firestore";
@@ -71,37 +70,34 @@ export default function ProfilePage({ user, userContext, isActive }) {
   const stats = [
     { label: "Tasks Done", value: profileData.tasksCompleted ?? 0 },
     { label: "Current Streak", value: `${profileData.streak ?? 0}d` },
-    { label: "Total XP", value: profileData.xp ?? 0 },
+    { label: "Completed Today", value: completedTodayCount },
     { label: "Sessions", value: profileData.pomodoroSessions ?? 0 },
   ];
 
   return (
     <div className="max-w-2xl mx-auto px-4 md:px-8 py-6">
-      <h1 className="font-display font-bold text-2xl mb-6" style={{ color: "var(--text-strong)" }}>Profile</h1>
+      <h1 className="font-display font-bold text-2xl mb-6" style={{ color: "#111827" }}>Profile</h1>
 
       {/* Avatar + name */}
       <GlassCard className="p-6 mb-5 flex flex-col items-center text-center">
         <div
           className="w-20 h-20 rounded-2xl flex items-center justify-center mb-4 font-display font-bold text-3xl"
-          style={{ background: "rgba(126, 184, 211,0.14)", color: "var(--accent-strong)", border: "1.5px solid rgba(126, 184, 211,0.22)" }}
+          style={{ background: "rgba(126, 184, 211,0.14)", color: "#111827", border: "1.5px solid rgba(126, 184, 211,0.22)" }}
         >
           {user?.displayName?.slice(0, 1) ?? <User size={32} />}
         </div>
-        <p className="font-display font-semibold text-lg mb-0.5" style={{ color: "var(--text-strong)" }}>
+        <p className="font-display font-semibold text-lg mb-0.5" style={{ color: "#111827" }}>
           {user?.displayName ?? "Mosaicker"}
         </p>
-        <p className="text-sm mb-4" style={{ color: "var(--text-muted)" }}>{user?.email}</p>
-        <div className="w-full">
-          <XPBar xp={profileData.xp ?? 0} level={profileData.level ?? 1} />
-        </div>
+        <p className="text-sm mb-4" style={{ color: "#4b5563" }}>{user?.email}</p>
       </GlassCard>
 
       {/* Stats grid */}
       <div className="grid grid-cols-2 gap-3 mb-5">
         {stats.map(s => (
           <GlassCard key={s.label} className="p-4 text-center">
-            <p className="font-mono font-semibold text-2xl mb-1" style={{ color: "#64BDE3" }}>{s.value}</p>
-            <p className="text-xs" style={{ color: "#7a7a9a" }}>{s.label}</p>
+            <p className="font-mono font-semibold text-2xl mb-1" style={{ color: "#111827" }}>{s.value}</p>
+            <p className="text-xs" style={{ color: "#4b5563" }}>{s.label}</p>
           </GlassCard>
         ))}
       </div>
@@ -109,7 +105,7 @@ export default function ProfilePage({ user, userContext, isActive }) {
       {/* Context summary */}
       <GlassCard className="p-4 mb-5">
         <div className="flex items-center justify-between mb-3">
-          <p className="text-xs font-mono uppercase tracking-widest" style={{ color: "#7a7a9a" }}>Your context</p>
+          <p className="text-xs font-mono uppercase tracking-widest" style={{ color: "#4b5563" }}>Your context</p>
           {!isEditing && (
             <button
               onClick={() => {
@@ -119,9 +115,9 @@ export default function ProfilePage({ user, userContext, isActive }) {
                 setIsEditing(true);
               }}
               className="flex items-center gap-1 text-xs"
-              style={{ color: "#64BDE3" }}
+              style={{ color: "#111827" }}
             >
-              <Edit3 size={12} /> Edit
+              <Edit3 size={12} className="text-[#111827]" /> Edit
             </button>
           )}
         </div>
@@ -130,12 +126,12 @@ export default function ProfilePage({ user, userContext, isActive }) {
           <div className="flex flex-col gap-4">
             {/* Role dropdown */}
             <div>
-              <label className="block text-xs font-mono mb-1.5 uppercase" style={{ color: "#7a7a9a" }}>Role</label>
+              <label className="block text-xs font-mono mb-1.5 uppercase" style={{ color: "#4b5563" }}>Role</label>
               <select
                 value={role}
                 onChange={e => setRole(e.target.value)}
-                className="input-glass bg-surface cursor-pointer text-sm w-full py-2.5 px-3 rounded-xl border border-[rgba(255,255,255,0.08)] outline-none"
-                style={{ background: "#13131a", color: "#f0eeff" }}
+                className="input-glass bg-surface cursor-pointer text-sm w-full py-2.5 px-3 rounded-xl border border-[rgba(0,0,0,0.08)] outline-none"
+                style={{ background: "rgba(255, 252, 247, 0.8)", color: "#111827" }}
               >
                 <option value="" disabled>Select your role</option>
                 {ROLES.map(r => (
@@ -146,7 +142,7 @@ export default function ProfilePage({ user, userContext, isActive }) {
 
             {/* Focus areas tags */}
             <div>
-              <label className="block text-xs font-mono mb-2 uppercase" style={{ color: "#7a7a9a" }}>Focus Areas</label>
+              <label className="block text-xs font-mono mb-2 uppercase" style={{ color: "#4b5563" }}>Focus Areas</label>
               <div className="flex flex-wrap gap-1.5">
                 {FOCUS_AREAS.map(f => {
                   const isSelected = focusAreas.includes(f);
@@ -163,7 +159,7 @@ export default function ProfilePage({ user, userContext, isActive }) {
                       style={{
                         background: isSelected ? "rgba(100, 189, 227,0.15)" : "rgba(255,255,255,0.03)",
                         border: `1px solid ${isSelected ? "rgba(100, 189, 227,0.4)" : "rgba(255,255,255,0.08)"}`,
-                        color: isSelected ? "#64BDE3" : "#7a7a9a",
+                        color: isSelected ? "#111827" : "#4b5563",
                       }}
                     >
                       {f}
@@ -175,7 +171,7 @@ export default function ProfilePage({ user, userContext, isActive }) {
 
             {/* Work hours */}
             <div>
-              <label className="block text-xs font-mono mb-1.5 uppercase" style={{ color: "#7a7a9a" }}>Work Hours</label>
+              <label className="block text-xs font-mono mb-1.5 uppercase" style={{ color: "#4b5563" }}>Work Hours</label>
               <input
                 type="text"
                 className="input-glass py-2 px-3 text-sm w-full"
@@ -210,8 +206,8 @@ export default function ProfilePage({ user, userContext, isActive }) {
               { label: "Work hours", value: profileData.workHours ?? "Not set" },
             ].map(row => (
               <div key={row.label} className="flex justify-between text-sm">
-                <span style={{ color: "#7a7a9a" }}>{row.label}</span>
-                <span style={{ color: "#f0eeff" }}>{row.value}</span>
+                <span style={{ color: "#4b5563" }}>{row.label}</span>
+                <span style={{ color: "#111827" }}>{row.value}</span>
               </div>
             ))}
           </div>
@@ -221,33 +217,33 @@ export default function ProfilePage({ user, userContext, isActive }) {
       {/* Streak */}
       <GlassCard className="p-4 flex items-center justify-between mb-5">
         <div>
-          <p className="font-display font-semibold mb-1" style={{ color: "#f0eeff" }}>Daily Habit Streak</p>
-          <p className="text-xs" style={{ color: "#7a7a9a" }}>Complete tasks every day to maintain your streak</p>
+          <p className="font-display font-semibold mb-1" style={{ color: "#111827" }}>Daily Habit Streak</p>
+          <p className="text-xs" style={{ color: "#4b5563" }}>Complete tasks every day to maintain your streak</p>
         </div>
         <StreakBadge streak={profileData.streak ?? 0} />
       </GlassCard>
 
       {/* Goals & Habits Section */}
       <div className="mt-6">
-        <h2 className="font-display font-bold text-lg mb-4" style={{ color: "#f0eeff" }}>Goals & Habits</h2>
+        <h2 className="font-display font-bold text-lg mb-4" style={{ color: "#111827" }}>Goals & Habits</h2>
 
         {/* Today's Goal Card */}
         <GlassCard className="p-4 mb-4">
           <div className="flex justify-between items-start mb-2">
             <div>
-              <p className="font-display font-semibold text-sm" style={{ color: "#f0eeff" }}>Today's Goal</p>
-              <p className="text-xs" style={{ color: "#7a7a9a" }}>Complete 3 tasks today</p>
+              <p className="font-display font-semibold text-sm" style={{ color: "#111827" }}>Today's Goal</p>
+              <p className="text-xs" style={{ color: "#4b5563" }}>Complete 3 tasks today</p>
             </div>
-            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(100, 189, 227,0.1)", color: "#64BDE3" }}>
+            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(100, 189, 227,0.1)", color: "#111827" }}>
               Daily
             </span>
           </div>
 
           <div className="flex items-center justify-between mb-1.5 mt-4">
-            <span className="text-xs font-mono font-medium" style={{ color: completedTodayCount >= 3 ? "#64BDE3" : "#7a7a9a" }}>
+            <span className="text-xs font-mono font-medium" style={{ color: completedTodayCount >= 3 ? "#111827" : "#4b5563" }}>
               {completedTodayCount}/3 tasks completed today
             </span>
-            <span className="text-xs font-mono font-semibold" style={{ color: "#64BDE3" }}>
+            <span className="text-xs font-mono font-semibold" style={{ color: "#111827" }}>
               {Math.min(Math.round((completedTodayCount / 3) * 100), 100)}%
             </span>
           </div>
@@ -261,7 +257,7 @@ export default function ProfilePage({ user, userContext, isActive }) {
 
         {/* 21-Day Activity Calendar Card */}
         <GlassCard className="p-4">
-          <p className="text-xs font-mono uppercase tracking-widest mb-3" style={{ color: "#7a7a9a" }}>21-day activity</p>
+          <p className="text-xs font-mono uppercase tracking-widest mb-3" style={{ color: "#4b5563" }}>21-day activity</p>
           <div className="flex justify-center py-2">
             <div className="grid grid-cols-7 gap-2">
               {(() => {

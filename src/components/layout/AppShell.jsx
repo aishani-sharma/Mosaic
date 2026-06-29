@@ -58,7 +58,7 @@ export default function AppShell({ user, userContext }) {
       if (!scheduledTimeStr || scheduledDateStr !== today) {
         const hoursToAdd = 2 + Math.random() * 6; // random offset between 2 and 8 hours
         const targetTime = Date.now() + hoursToAdd * 60 * 60 * 1000;
-        
+
         localStorage.setItem("moment_scheduled_time", String(targetTime));
         localStorage.setItem("moment_scheduled_date", today);
         scheduledTime = targetTime;
@@ -126,11 +126,11 @@ export default function AppShell({ user, userContext }) {
           style={{ display: activePage === "feed" ? "block" : "none" }}
           className={activePage === "feed" ? "animate-page-enter" : ""}
         >
-          <FeedPage 
-            user={user} 
-            userContext={userContext} 
-            isActive={activePage === "feed"} 
-            onNavigate={setActivePage} 
+          <FeedPage
+            user={user}
+            userContext={userContext}
+            isActive={activePage === "feed"}
+            onNavigate={setActivePage}
             openCamera={autoOpenCamera}
             onCameraOpened={() => setAutoOpenCamera(false)}
           />
@@ -177,16 +177,16 @@ export default function AppShell({ user, userContext }) {
         </button>
       )}
 
-      <GeminiSidebar 
-        userContext={userContext} 
-        isOpen={isAiOpen} 
-        onClose={() => setIsAiOpen(false)} 
+      <GeminiSidebar
+        userContext={userContext}
+        isOpen={isAiOpen}
+        onClose={() => setIsAiOpen(false)}
       />
 
       {showMomentInterrupt && (
-        <MosaicMomentInterrupt 
-          onSnap={handleSnapTrigger} 
-          onDismiss={() => setShowMomentInterrupt(false)} 
+        <MosaicMomentInterrupt
+          onSnap={handleSnapTrigger}
+          onDismiss={() => setShowMomentInterrupt(false)}
         />
       )}
     </div>

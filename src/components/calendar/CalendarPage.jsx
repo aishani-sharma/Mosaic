@@ -137,7 +137,7 @@ export default function CalendarPage({ user, isActive }) {
   if (loading) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-6 flex flex-col items-center justify-center min-h-[400px]">
-        <p className="text-sm font-mono" style={{ color: "#7a7a9a" }}>Loading calendar tasks...</p>
+        <p className="text-sm font-mono" style={{ color: "#4b5563" }}>Loading calendar tasks...</p>
       </div>
     );
   }
@@ -145,7 +145,7 @@ export default function CalendarPage({ user, isActive }) {
   return (
     <div className="max-w-3xl mx-auto px-4 md:px-8 py-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display font-bold text-2xl" style={{ color: "var(--text-strong)" }}>Calendar</h1>
+        <h1 className="font-display font-bold text-2xl" style={{ color: "#111827" }}>Calendar</h1>
         {!accessToken ? (
           <button
             onClick={handleConnectCalendar}
@@ -154,7 +154,7 @@ export default function CalendarPage({ user, isActive }) {
             Connect Google Calendar
           </button>
         ) : (
-          <span className="text-xs font-mono py-1 px-2.5 rounded-full" style={{ background: "rgba(126, 184, 211,0.12)", color: "var(--accent-strong)", border: "1px solid rgba(126, 184, 211,0.2)" }}>
+          <span className="text-xs font-mono py-1 px-2.5 rounded-full" style={{ background: "rgba(126, 184, 211,0.12)", color: "#111827", border: "1px solid rgba(126, 184, 211,0.2)" }}>
             Google Calendar Connected
           </span>
         )}
@@ -164,7 +164,7 @@ export default function CalendarPage({ user, isActive }) {
         {/* Month nav */}
         <div className="flex items-center justify-between mb-5">
           <button onClick={prevMonth} className="nav-icon"><ChevronLeft size={18} /></button>
-          <span className="font-display font-semibold" style={{ color: "var(--text-strong)" }}>
+          <span className="font-display font-semibold" style={{ color: "#111827" }}>
             {MONTHS[viewMonth]} {viewYear}
           </span>
           <button onClick={nextMonth} className="nav-icon"><ChevronRight size={18} /></button>
@@ -173,7 +173,7 @@ export default function CalendarPage({ user, isActive }) {
         {/* Day labels */}
         <div className="grid grid-cols-7 mb-2">
           {DAYS.map(d => (
-            <div key={d} className="text-center text-xs font-mono py-1" style={{ color: "#7a7a9a" }}>{d}</div>
+            <div key={d} className="text-center text-xs font-mono py-1" style={{ color: "#4b5563" }}>{d}</div>
           ))}
         </div>
 
@@ -196,7 +196,7 @@ export default function CalendarPage({ user, isActive }) {
                   border: isSel ? "1px solid rgba(100, 189, 227,0.4)" : "1px solid transparent",
                 }}
               >
-                <span className="text-sm font-mono" style={{ color: isToday ? "#64BDE3" : "#f0eeff", fontWeight: isToday ? 600 : 400 }}>
+                <span className="text-sm font-mono" style={{ color: isToday ? "#2563eb" : "#111827", fontWeight: isToday ? 600 : 400 }}>
                   {day}
                 </span>
                 <div className="flex gap-0.5 mt-0.5">
@@ -217,12 +217,12 @@ export default function CalendarPage({ user, isActive }) {
 
       {/* Selected day tasks */}
       <div>
-        <p className="text-xs font-mono uppercase tracking-widest mb-3" style={{ color: "#7a7a9a" }}>
+        <p className="text-xs font-mono uppercase tracking-widest mb-3" style={{ color: "#4b5563" }}>
           {selected === today.toDateString() ? "Today" : selected}
         </p>
         {selectedTasks.length === 0 ? (
           <GlassCard className="p-4 text-center">
-            <p className="text-sm" style={{ color: "#7a7a9a" }}>No tasks on this day</p>
+            <p className="text-sm" style={{ color: "#4b5563" }}>No tasks on this day</p>
           </GlassCard>
         ) : (
           <div className="flex flex-col gap-3">
@@ -234,13 +234,13 @@ export default function CalendarPage({ user, isActive }) {
                   ) : (
                     <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: priorityColor[t.priority] || "#64BDE3" }} />
                   )}
-                  <span className="text-sm truncate" style={{ color: "#f0eeff" }}>{t.title}</span>
+                  <span className="text-sm truncate" style={{ color: "#111827" }}>{t.title}</span>
                 </div>
                 
                 <div className="flex items-center gap-3 flex-shrink-0">
                   {t.type !== "calendar" ? (
                     <>
-                      <span className="text-xs capitalize font-medium" style={{ color: priorityColor[t.priority] || "#64BDE3" }}>
+                      <span className="text-xs capitalize font-medium" style={{ color: "#374151" }}>
                         {t.priority}
                       </span>
                       {accessToken && (

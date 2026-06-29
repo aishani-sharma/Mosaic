@@ -5,7 +5,7 @@ import GlassCard from "../ui/GlassCard";
 import { Plus, Sparkles, Clock, Trash2, Check, Zap, X, Users, AlertCircle, Calendar, RotateCcw } from "lucide-react";
 import { prioritizeTasks, breakdownTask } from "../../lib/gemini";
 import { generateAiBattlePlan } from "../../lib/planner";
-import { getUserTasks, addTask, updateTask, deleteTask, awardXP } from "../../lib/firestore";
+import { getUserTasks, addTask, updateTask, deleteTask } from "../../lib/firestore";
 
 function parseTaskDate(t) {
   if (t.deadline) {
@@ -114,7 +114,7 @@ function TaskRow({ task, onComplete, onDelete, onToggleExpand, isExpanded, bounc
   };
 
   return (
-    <div 
+    <div
       className="task-card-group relative flex items-center justify-between py-1.5 px-2 transition-all duration-150 hover:bg-black/[0.02] rounded-lg"
       style={{ animation: flashingId === task.id ? 'complete-flash 0.6s ease' : 'none' }}
     >
@@ -133,7 +133,7 @@ function TaskRow({ task, onComplete, onDelete, onToggleExpand, isExpanded, bounc
         </button>
 
         {/* Title and Deadline */}
-        <div 
+        <div
           onClick={() => onToggleExpand && onToggleExpand(task.id, task.title, task.deadline)}
           className="flex items-center gap-2.5 flex-1 min-w-0 cursor-pointer select-none"
         >
@@ -569,13 +569,6 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
       updatedAt: now
     } : t));
 
-    if (newDone && user?.uid) {
-      const result = await awardXP(user.uid);
-      if (result) {
-        setXpPopup(`+50 XP`);
-        setTimeout(() => setXpPopup(null), 2000);
-      }
-    }
   }
 
   async function handleDelete(taskId) {
@@ -587,7 +580,7 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
   const handleToggleExpand = async (taskId, taskTitle, deadline) => {
     setExpandedIds(prev => {
       const next = new Set(prev);
-      if (next.has(taskId)) { next.delete(taskId); } 
+      if (next.has(taskId)) { next.delete(taskId); }
       else { next.add(taskId); }
       return next;
     });
@@ -700,7 +693,7 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
     const manualInput = subtaskInputs[task.id] || "";
 
     return (
-      <div 
+      <div
         className="ml-9 mr-2 mb-3 mt-1 p-3.5 rounded-xl border border-white/10 animate-fade-in"
         style={{ background: "rgba(255, 255, 255, 0.02)" }}
       >
@@ -734,13 +727,12 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
                   <div className="flex items-center gap-2.5 min-w-0">
                     <button
                       onClick={() => toggleSubtaskCheck(task.id, item.subtask)}
-                      className={`w-[14px] h-[14px] rounded border transition-all flex items-center justify-center flex-shrink-0 cursor-pointer ${
-                        isChecked ? "bg-[#64BDE3] border-[#64BDE3]" : "border-[#64BDE3] bg-transparent"
-                      }`}
+                      className={`w-[14px] h-[14px] rounded border transition-all flex items-center justify-center flex-shrink-0 cursor-pointer ${isChecked ? "bg-[#64BDE3] border-[#64BDE3]" : "border-[#64BDE3] bg-transparent"
+                        }`}
                     >
                       {isChecked && <Check size={8} strokeWidth={4} className="text-white" />}
                     </button>
-                    <span 
+                    <span
                       className={`text-xs text-[#f0eeff] truncate ${isChecked ? "line-through opacity-50" : ""}`}
                     >
                       {item.subtask}
@@ -779,13 +771,12 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
                   <div className="flex items-center gap-2.5 min-w-0">
                     <button
                       onClick={() => toggleSubtaskCheck(task.id, item.subtask)}
-                      className={`w-[14px] h-[14px] rounded border transition-all flex items-center justify-center flex-shrink-0 cursor-pointer ${
-                        isChecked ? "bg-[#64BDE3] border-[#64BDE3]" : "border-[#64BDE3] bg-transparent"
-                      }`}
+                      className={`w-[14px] h-[14px] rounded border transition-all flex items-center justify-center flex-shrink-0 cursor-pointer ${isChecked ? "bg-[#64BDE3] border-[#64BDE3]" : "border-[#64BDE3] bg-transparent"
+                        }`}
                     >
                       {isChecked && <Check size={8} strokeWidth={4} className="text-white" />}
                     </button>
-                    <span 
+                    <span
                       className={`text-xs text-[#f0eeff] truncate ${isChecked ? "line-through opacity-50" : ""}`}
                     >
                       {item.subtask}
@@ -841,13 +832,13 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
       prioritizeRef.current = false;
       return;
     }
-    
+
     setPrioritizing(true);
     setPlanLoading(true);
-    
+
     try {
       const pending = tasks.filter(t => !t.completed);
-      
+
       // 1. Generate the AI Battle Plan using current pending tasks list
       const { planText } = await generateAiBattlePlan(pending, user, userContext || {});
       setBattlePlan(planText);
@@ -1144,10 +1135,10 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
                     <div className="flex flex-col gap-1">
                       {displayTasks.map(t => (
                         <div key={t.id} className="flex flex-col">
-                          <TaskRow 
-                            task={t} 
-                            onComplete={handleComplete} 
-                            onDelete={handleDelete} 
+                          <TaskRow
+                            task={t}
+                            onComplete={handleComplete}
+                            onDelete={handleDelete}
                             onToggleExpand={handleToggleExpand}
                             isExpanded={expandedIds.has(t.id)}
                             bouncingId={bouncingId}
@@ -1269,10 +1260,10 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
                         <div className="flex flex-col gap-1">
                           {pending.map(t => (
                             <div key={t.id} className="flex flex-col">
-                              <TaskRow 
-                                task={t} 
-                                onComplete={handleComplete} 
-                                onDelete={handleDelete} 
+                              <TaskRow
+                                task={t}
+                                onComplete={handleComplete}
+                                onDelete={handleDelete}
                                 onToggleExpand={handleToggleExpand}
                                 isExpanded={expandedIds.has(t.id)}
                                 bouncingId={bouncingId}
@@ -1296,10 +1287,10 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
                         <div className="flex flex-col gap-1 opacity-90">
                           {done.map(t => (
                             <div key={t.id} className="flex flex-col">
-                              <TaskRow 
-                                task={t} 
-                                onComplete={handleComplete} 
-                                onDelete={handleDelete} 
+                              <TaskRow
+                                task={t}
+                                onComplete={handleComplete}
+                                onDelete={handleDelete}
                                 onToggleExpand={handleToggleExpand}
                                 isExpanded={expandedIds.has(t.id)}
                                 bouncingId={bouncingId}
@@ -1356,7 +1347,7 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
                         ⚠️ Offline/Local Plan
                       </div>
                     )}
-                    
+
                     {/* Today's Mission */}
                     {plan.mission && (
                       <div className="flex flex-col gap-1 flex-shrink-0">

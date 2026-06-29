@@ -2,7 +2,6 @@
 import { useState, useEffect, useRef } from "react";
 import GlassCard from "../ui/GlassCard";
 import StreakBadge from "../ui/StreakBadge";
-import XPBar from "../ui/XPBar";
 import { Camera, Zap, X, Loader2, Search, Users, UserPlus, UserCheck, Flame, CheckCircle, PartyPopper, Rocket, Trophy, AlertCircle } from "lucide-react";
 import { getFeedPosts, createPost, updateUserProfile } from "../../lib/firestore";
 import { db, isFirebaseConfigured } from "../../lib/firebase";
@@ -688,7 +687,6 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
                 <span>CURRENT STREAK</span>
                 <StreakBadge streak={userContext?.streak || 0} />
               </div>
-              <XPBar xp={userContext?.xp || 0} level={userContext?.level || 1} />
             </div>
           </GlassCard>
 

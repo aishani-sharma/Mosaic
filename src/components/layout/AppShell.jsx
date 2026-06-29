@@ -78,7 +78,7 @@ export default function AppShell({ user, userContext }) {
   }, []);
 
   return (
-    <div className="flex h-screen overflow-hidden relative" style={{ background: "#0f1117" }}>
+    <div className="flex h-screen overflow-hidden relative" style={{ background: "var(--bg-shell)" }}>
       <Background activePage={activePage} />
 
       <NavSidebar
@@ -89,6 +89,7 @@ export default function AppShell({ user, userContext }) {
 
       {/* Main content */}
       <main className={`relative flex-1 z-10 ${activePage === "dashboard" ? "overflow-hidden" : "overflow-y-auto"}`}>
+        <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(180deg,rgba(252,248,240,0.05),rgba(252,248,240,0.18))]" />
         {/* Dashboard View */}
         <div
           style={{ display: activePage === "dashboard" ? "block" : "none" }}
@@ -164,7 +165,12 @@ export default function AppShell({ user, userContext }) {
       {!isAiOpen && (
         <button
           onClick={() => setIsAiOpen(prev => !prev)}
-          className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full flex items-center justify-center bg-[#64BDE3] hover:bg-[#78C9EB] text-[#0c0e13] shadow-lg hover:shadow-[#64BDE3]/25 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer border border-[#64BDE3]/10"
+          className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer border"
+          style={{
+            background: "linear-gradient(180deg, var(--accent), var(--accent-strong))",
+            borderColor: "rgba(255, 255, 255, 0.5)",
+            boxShadow: "0 16px 30px rgba(101, 158, 184, 0.28)",
+          }}
           title="Open AI Companion"
         >
           <Sparkles size={20} strokeWidth={2.5} />

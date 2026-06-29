@@ -1,7 +1,7 @@
 // pages/LoginPage.jsx
 import { useState } from "react";
 import { signInWithPopup } from "firebase/auth";
-import { auth, googleProvider } from "../lib/firebase";
+import { auth, googleProvider, isFirebaseConfigured } from "../lib/firebase";
 import scenery from "../assets/scenery.png";
 import { Zap, Sparkles } from "lucide-react";
 
@@ -9,7 +9,7 @@ export default function LoginPage({ onLogin, onGuestLogin }) {
   const [showModal, setShowModal] = useState(false);
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden flex flex-col justify-center items-center select-none font-sans bg-[#fafafa]">
+    <div className="relative min-h-screen w-full overflow-hidden flex flex-col justify-center items-center select-none font-sans bg-[#faf6ef]">
       {/* Immersive Full Screen Background Scenery */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <img
@@ -22,7 +22,7 @@ export default function LoginPage({ onLogin, onGuestLogin }) {
         <div 
           className="absolute inset-0"
           style={{
-            background: "radial-gradient(circle at center, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.25) 55%, transparent 100%)",
+            background: "radial-gradient(circle at center, rgba(255, 250, 244, 0.72) 0%, rgba(255, 250, 244, 0.34) 52%, rgba(245, 239, 230, 0.12) 100%)",
             pointerEvents: "none"
           }}
         />
@@ -30,9 +30,10 @@ export default function LoginPage({ onLogin, onGuestLogin }) {
 
       {/* Floating White Frame Layer on top of the Scenery */}
       <div 
-        className="absolute inset-[35px] z-5 pointer-events-none border-[12px] border-white rounded-[32px]"
+        className="absolute inset-[35px] z-5 pointer-events-none rounded-[32px]"
         style={{
-          boxShadow: "0 20px 50px rgba(0, 0, 0, 0.12), inset 0 0 20px rgba(0, 0, 0, 0.02)",
+          border: "10px solid rgba(255, 252, 248, 0.95)",
+          boxShadow: "0 24px 56px rgba(91, 88, 76, 0.12), inset 0 0 0 1px rgba(164, 154, 140, 0.14)",
         }}
       />
 
@@ -44,50 +45,51 @@ export default function LoginPage({ onLogin, onGuestLogin }) {
         </h1>
 
         {/* Calming Quote */}
-        <p className="text-lg font-medium text-[#374151] max-w-md italic mb-10 leading-relaxed drop-shadow-sm">
+        <p className="text-lg font-medium text-[#4c5b63] max-w-md italic mb-10 leading-relaxed drop-shadow-sm">
           "Today's effort becomes tomorrow's masterpiece."
         </p>
 
         {/* Primary CTA button (Translucent Frosted Glass) */}
         <button
           onClick={() => setShowModal(true)}
-          className="group relative px-9 py-3.5 rounded-full text-[#111827] font-semibold text-base shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.1)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center gap-2 cursor-pointer outline-none border"
+          className="group relative px-9 py-3.5 rounded-full font-semibold text-base shadow-[0_8px_30px_rgba(91,88,76,0.08)] hover:shadow-[0_12px_35px_rgba(91,88,76,0.12)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center gap-2 cursor-pointer border"
           style={{
-            background: "rgba(255, 255, 255, 0.35)",
-            borderColor: "rgba(255, 255, 255, 0.45)",
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
+            background: "rgba(255, 250, 244, 0.78)",
+            borderColor: "rgba(115, 120, 125, 0.14)",
+            backdropFilter: "blur(14px)",
+            WebkitBackdropFilter: "blur(14px)",
+            color: "#23313a",
           }}
           onMouseOver={e => {
-            e.currentTarget.style.background = "rgba(255, 255, 255, 0.55)";
-            e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.65)";
+            e.currentTarget.style.background = "rgba(255, 250, 244, 0.92)";
+            e.currentTarget.style.borderColor = "rgba(115, 120, 125, 0.2)";
           }}
           onMouseOut={e => {
-            e.currentTarget.style.background = "rgba(255, 255, 255, 0.35)";
-            e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.45)";
+            e.currentTarget.style.background = "rgba(255, 250, 244, 0.78)";
+            e.currentTarget.style.borderColor = "rgba(115, 120, 125, 0.14)";
           }}
         >
           <span>Get Started</span>
-          <Sparkles size={16} className="transition-transform group-hover:rotate-12 text-[#111827]/70" />
+          <Sparkles size={16} className="transition-transform group-hover:rotate-12 text-[#23313a]/70" />
         </button>
       </div>
 
       {/* Frosted Glass Modal Overlay */}
       {showModal && (
         <div 
-          className="fixed inset-0 z-40 bg-black/20 backdrop-blur-[6px] transition-all duration-300 animate-fade-in"
+          className="fixed inset-0 z-40 bg-[rgba(88,84,76,0.18)] backdrop-blur-[8px] transition-all duration-300 animate-fade-in"
           onClick={() => setShowModal(false)}
         >
           {/* Centered Modal */}
           <div
             className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm p-8 flex flex-col items-center animate-scale-in"
             style={{
-              background: "linear-gradient(to bottom, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.05))",
-              backdropFilter: "blur(28px)",
-              WebkitBackdropFilter: "blur(28px)",
-              border: "1px solid rgba(255, 255, 255, 0.25)",
+              background: "linear-gradient(to bottom, rgba(255, 251, 246, 0.92), rgba(250, 244, 236, 0.88))",
+              backdropFilter: "blur(24px)",
+              WebkitBackdropFilter: "blur(24px)",
+              border: "1px solid rgba(115, 120, 125, 0.14)",
               borderRadius: "28px",
-              boxShadow: "0 30px 60px rgba(0,0,0,0.15)",
+              boxShadow: "0 30px 60px rgba(91, 88, 76, 0.14)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -95,13 +97,14 @@ export default function LoginPage({ onLogin, onGuestLogin }) {
             <h2 className="font-serif-display font-semibold text-2xl text-[#111827] mb-2 text-center">
               Welcome to Mosaic
             </h2>
-            <p className="text-xs text-[#6B7280] text-center mb-8 uppercase tracking-wider font-mono">
-              Premium Productivity
+            <p className="text-xs text-[#6f7d84] text-center mb-8 uppercase tracking-[0.24em] font-mono">
+              Calm Productivity
             </p>
 
             {/* Google sign in button */}
             <button
               onClick={async () => {
+                if (!isFirebaseConfigured || !auth || !googleProvider) return;
                 try {
                   await signInWithPopup(auth, googleProvider);
                 } catch (e) {
@@ -109,17 +112,19 @@ export default function LoginPage({ onLogin, onGuestLogin }) {
                 }
               }}
               className="w-full flex items-center justify-center gap-3 px-5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer shadow-sm"
+              disabled={!isFirebaseConfigured}
               style={{
-                background: "#ffffff",
-                border: "1px solid rgba(255,255,255,0.8)",
+                background: "rgba(255,255,255,0.92)",
+                border: "1px solid rgba(115, 120, 125, 0.14)",
                 color: "#111827",
+                opacity: isFirebaseConfigured ? 1 : 0.6,
               }}
               onMouseOver={e => {
-                e.currentTarget.style.background = "#f3f4f6";
+                e.currentTarget.style.background = "#f8fbfd";
                 e.currentTarget.style.transform = "translateY(-1px)";
               }}
               onMouseOut={e => {
-                e.currentTarget.style.background = "#ffffff";
+                e.currentTarget.style.background = "rgba(255,255,255,0.92)";
                 e.currentTarget.style.transform = "translateY(0)";
               }}
             >
@@ -130,32 +135,32 @@ export default function LoginPage({ onLogin, onGuestLogin }) {
                 <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
                 <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
               </svg>
-              <span>Continue with Google</span>
+              <span>{isFirebaseConfigured ? "Continue with Google" : "Google Sign-In Unavailable"}</span>
             </button>
 
             {/* Divider */}
             <div className="flex items-center gap-3 w-full my-5">
-              <div className="flex-1 h-px bg-black/10" />
+              <div className="flex-1 h-px bg-[#6f7d84]/15" />
               <span className="text-xs text-[#6B7280] font-bold uppercase tracking-wider font-mono">or</span>
-              <div className="flex-1 h-px bg-black/10" />
+              <div className="flex-1 h-px bg-[#6f7d84]/15" />
             </div>
 
             {/* Email sign in button (Disabled / Coming Soon) */}
             <button
               disabled
-              className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold opacity-50 cursor-not-allowed text-[#374151]"
+              className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold opacity-70 cursor-not-allowed text-[#4c5b63]"
               style={{
-                background: "rgba(255, 255, 255, 0.3)",
-                border: "1px solid rgba(255, 255, 255, 0.4)",
+                background: "rgba(245, 239, 230, 0.78)",
+                border: "1px solid rgba(115, 120, 125, 0.12)",
               }}
             >
-              <span>Continue with Email (Coming Soon)</span>
+              <span>Email sign-in is coming soon</span>
             </button>
 
             {/* Developer Bypass Link */}
             <button
               onClick={onGuestLogin}
-              className="mt-6 flex items-center gap-1.5 text-xs font-bold text-[#4f9cf9] hover:text-[#2563eb] transition-colors outline-none cursor-pointer"
+              className="mt-6 flex items-center gap-1.5 text-xs font-bold text-[#659eb8] hover:text-[#4d8198] transition-colors cursor-pointer"
             >
               <Zap size={13} />
               <span>Continue as Guest (Dev Bypass)</span>

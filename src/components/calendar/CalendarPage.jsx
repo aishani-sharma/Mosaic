@@ -143,19 +143,18 @@ export default function CalendarPage({ user, isActive }) {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6">
+    <div className="max-w-3xl mx-auto px-4 md:px-8 py-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display font-bold text-xl" style={{ color: "#f0eeff" }}>Calendar</h1>
+        <h1 className="font-display font-bold text-2xl" style={{ color: "var(--text-strong)" }}>Calendar</h1>
         {!accessToken ? (
           <button
             onClick={handleConnectCalendar}
-            className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5"
-            style={{ background: "#64BDE3" }}
+            className="btn-primary text-xs px-4 py-2 flex items-center gap-1.5"
           >
             Connect Google Calendar
           </button>
         ) : (
-          <span className="text-xs font-mono py-1 px-2.5 rounded-full" style={{ background: "rgba(100, 189, 227,0.1)", color: "#64BDE3", border: "1px solid rgba(100, 189, 227,0.2)" }}>
+          <span className="text-xs font-mono py-1 px-2.5 rounded-full" style={{ background: "rgba(126, 184, 211,0.12)", color: "var(--accent-strong)", border: "1px solid rgba(126, 184, 211,0.2)" }}>
             Google Calendar Connected
           </span>
         )}
@@ -165,7 +164,7 @@ export default function CalendarPage({ user, isActive }) {
         {/* Month nav */}
         <div className="flex items-center justify-between mb-5">
           <button onClick={prevMonth} className="nav-icon"><ChevronLeft size={18} /></button>
-          <span className="font-display font-semibold" style={{ color: "#f0eeff" }}>
+          <span className="font-display font-semibold" style={{ color: "var(--text-strong)" }}>
             {MONTHS[viewMonth]} {viewYear}
           </span>
           <button onClick={nextMonth} className="nav-icon"><ChevronRight size={18} /></button>

@@ -24,7 +24,7 @@ let lastCallTime = 0;
 const MIN_INTERVAL = 2000;
 let apiQueue = Promise.resolve();
 
-async function callGemini(prompt, systemInstruction = "") {
+export async function callGemini(prompt, systemInstruction = "") {
   const currentQueue = apiQueue;
   let resolveQueue;
   apiQueue = new Promise((resolve) => {

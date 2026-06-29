@@ -1,7 +1,7 @@
 // components/layout/NavSidebar.jsx
 import { CheckSquare, ListTodo, Calendar, Timer, Users, User, Settings, LogOut, Plus } from "lucide-react";
 import { signOut } from "firebase/auth";
-import { auth } from "../../lib/firebase";
+import { auth, isFirebaseConfigured } from "../../lib/firebase";
 
 const navItems = [
   { id: "dashboard", icon: CheckSquare, label: "Dashboard" },
@@ -18,11 +18,12 @@ export default function NavSidebar({ activePage, setActivePage, onNewTaskClick }
       className="flex flex-col py-6 h-screen select-none relative z-20"
       style={{
         width: 220,
-        background: "rgba(20, 30, 40, 0.35)",
-        backdropFilter: "blur(28px)",
-        WebkitBackdropFilter: "blur(28px)",
-        borderRight: "1px solid rgba(255, 255, 255, 0.15)",
+        background: "rgba(248, 241, 233, 0.72)",
+        backdropFilter: "blur(26px)",
+        WebkitBackdropFilter: "blur(26px)",
+        borderRight: "1px solid rgba(115, 120, 125, 0.14)",
         flexShrink: 0,
+        boxShadow: "12px 0 32px rgba(109, 104, 91, 0.08)",
       }}
     >
       {/* Brand Logo and Subtitle */}
@@ -31,19 +32,19 @@ export default function NavSidebar({ activePage, setActivePage, onNewTaskClick }
           <div
             className="w-8 h-8 rounded-lg flex items-center justify-center font-display font-black text-sm transition-all duration-300"
             style={{
-              background: "rgba(255, 255, 255, 0.08)",
-              color: "#64BDE3",
-              border: "1.5px solid rgba(255, 255, 255, 0.18)",
+              background: "rgba(255, 250, 244, 0.84)",
+              color: "var(--accent-strong)",
+              border: "1px solid rgba(115, 120, 125, 0.18)",
             }}
           >
             M
           </div>
-          <span className="font-display font-black text-lg text-white tracking-tight">
+          <span className="font-display font-black text-lg tracking-tight" style={{ color: "var(--text-strong)" }}>
             Mosaic
           </span>
         </div>
-        <span className="text-[10px] font-semibold text-white/50 uppercase tracking-wider mt-1 font-mono">
-          Premium Productivity
+        <span className="text-[10px] font-semibold uppercase tracking-[0.24em] mt-1 font-mono" style={{ color: "var(--text-muted)" }}>
+          Calm Productivity
         </span>
       </div>
 
@@ -55,21 +56,22 @@ export default function NavSidebar({ activePage, setActivePage, onNewTaskClick }
             <button
               key={id}
               onClick={() => setActivePage(id)}
-              className="flex items-center gap-3 w-full py-2.5 px-3 rounded-lg text-sm font-semibold transition-all duration-150 text-left outline-none"
+              className="flex items-center gap-3 w-full py-3 px-3.5 rounded-2xl text-sm font-semibold transition-all duration-150 text-left"
               style={{
-                borderLeft: isActive ? "3px solid #64BDE3" : "3px solid transparent",
-                color: isActive ? "#64BDE3" : "rgba(255, 255, 255, 0.65)",
-                background: isActive ? "rgba(255, 255, 255, 0.08)" : "transparent",
+                color: isActive ? "var(--text-strong)" : "var(--text)",
+                background: isActive ? "rgba(255, 250, 244, 0.82)" : "transparent",
+                border: isActive ? "1px solid rgba(115, 120, 125, 0.16)" : "1px solid transparent",
+                boxShadow: isActive ? "0 12px 30px rgba(110, 106, 91, 0.08)" : "none",
               }}
               onMouseOver={e => {
                 if (!isActive) {
-                  e.currentTarget.style.color = "#ffffff";
-                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.04)";
+                  e.currentTarget.style.color = "var(--text-strong)";
+                  e.currentTarget.style.background = "rgba(255, 250, 244, 0.45)";
                 }
               }}
               onMouseOut={e => {
                 if (!isActive) {
-                  e.currentTarget.style.color = "rgba(255, 255, 255, 0.65)";
+                  e.currentTarget.style.color = "var(--text)";
                   e.currentTarget.style.background = "transparent";
                 }
               }}
@@ -86,20 +88,21 @@ export default function NavSidebar({ activePage, setActivePage, onNewTaskClick }
         {/* + New Task button */}
         <button
           onClick={onNewTaskClick}
-          className="w-full bg-[#64BDE3] hover:bg-[#78C9EB] text-[#0c0e13] font-bold py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all text-xs hover:scale-[1.02] active:scale-[0.98] outline-none"
+          className="w-full btn-primary font-bold py-3 px-3 rounded-2xl flex items-center justify-center gap-1.5 text-xs hover:scale-[1.02] active:scale-[0.98]"
         >
           <Plus size={14} strokeWidth={3} />
           <span>New Task</span>
         </button>
 
         {/* Separator */}
-        <div className="h-px bg-white/10 w-full" />
+        <div className="h-px w-full" style={{ background: "rgba(111, 125, 132, 0.16)" }} />
 
         {/* Settings & Logout Row */}
         <div className="flex items-center justify-between px-1.5">
           <button
-            className="flex items-center gap-2 text-xs font-semibold text-white/60 hover:text-white transition-colors outline-none"
+            className="flex items-center gap-2 text-xs font-semibold transition-colors"
             title="Settings"
+            style={{ color: "var(--text-muted)" }}
           >
             <Settings size={18} />
             <span>Settings</span>
@@ -107,13 +110,15 @@ export default function NavSidebar({ activePage, setActivePage, onNewTaskClick }
 
           <button
             onClick={async () => {
+              if (!isFirebaseConfigured || !auth) return;
               try {
                 await signOut(auth);
               } catch (e) {
                 console.error("Signout error:", e);
               }
             }}
-            className="p-2 rounded-lg hover:bg-red-500/10 text-white/60 hover:text-[#f76a6a] transition-all outline-none"
+            className="p-2 rounded-xl hover:bg-red-500/10 transition-all"
+            style={{ color: "var(--text-muted)" }}
             title="Log Out"
           >
             <LogOut size={18} />

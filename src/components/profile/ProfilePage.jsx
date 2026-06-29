@@ -76,21 +76,21 @@ export default function ProfilePage({ user, userContext, isActive }) {
   ];
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-6">
-      <h1 className="font-display font-bold text-xl mb-6" style={{ color: "#f0eeff" }}>Profile</h1>
+    <div className="max-w-2xl mx-auto px-4 md:px-8 py-6">
+      <h1 className="font-display font-bold text-2xl mb-6" style={{ color: "var(--text-strong)" }}>Profile</h1>
 
       {/* Avatar + name */}
       <GlassCard className="p-6 mb-5 flex flex-col items-center text-center">
         <div
           className="w-20 h-20 rounded-2xl flex items-center justify-center mb-4 font-display font-bold text-3xl"
-          style={{ background: "rgba(100, 189, 227,0.15)", color: "#64BDE3", border: "1.5px solid rgba(100, 189, 227,0.3)" }}
+          style={{ background: "rgba(126, 184, 211,0.14)", color: "var(--accent-strong)", border: "1.5px solid rgba(126, 184, 211,0.22)" }}
         >
           {user?.displayName?.slice(0, 1) ?? <User size={32} />}
         </div>
-        <p className="font-display font-semibold text-lg mb-0.5" style={{ color: "#f0eeff" }}>
+        <p className="font-display font-semibold text-lg mb-0.5" style={{ color: "var(--text-strong)" }}>
           {user?.displayName ?? "Mosaicker"}
         </p>
-        <p className="text-sm mb-4" style={{ color: "#7a7a9a" }}>{user?.email}</p>
+        <p className="text-sm mb-4" style={{ color: "var(--text-muted)" }}>{user?.email}</p>
         <div className="w-full">
           <XPBar xp={profileData.xp ?? 0} level={profileData.level ?? 1} />
         </div>

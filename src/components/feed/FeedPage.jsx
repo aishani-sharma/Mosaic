@@ -5,7 +5,7 @@ import StreakBadge from "../ui/StreakBadge";
 import XPBar from "../ui/XPBar";
 import { Camera, Zap, X, Loader2, Search, Users, UserPlus, UserCheck, Flame, CheckCircle, PartyPopper, Rocket, Trophy, AlertCircle } from "lucide-react";
 import { getFeedPosts, createPost, updateUserProfile } from "../../lib/firestore";
-import { db } from "../../lib/firebase";
+import { db, isFirebaseConfigured } from "../../lib/firebase";
 import { doc, updateDoc, increment, collection, getDocs } from "firebase/firestore";
 
 const DEMO_POSTS = [
@@ -91,28 +91,28 @@ function FeedPost({ post, onReact }) {
   const rx = post.reactions || { clap: 0, fire: 0, rocket: 0, hundred: 0 };
 
   return (
-    <div className="flex flex-col gap-3 py-4 border-b border-white/[0.06]">
+    <GlassCard className="flex flex-col gap-3 p-5">
       <div className="flex items-start gap-3">
         <Avatar name={post.displayName} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2 mb-0.5">
             <div className="flex items-center gap-1.5 min-w-0">
-              <span className="font-display font-semibold text-sm text-[#f0eeff] truncate">
+              <span className="font-display font-semibold text-sm truncate" style={{ color: "var(--text-strong)" }}>
                 {post.displayName}
               </span>
               {badge && (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white font-medium border border-white/10 shrink-0">
+                <span className="text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0" style={{ background: "rgba(255, 250, 244, 0.9)", color: "var(--text-muted)", border: "1px solid rgba(115, 120, 125, 0.12)" }}>
                   {badge}
                 </span>
               )}
             </div>
-            <span className="text-[11px] text-[#7a7a9a] shrink-0">
+            <span className="text-[11px] shrink-0" style={{ color: "var(--text-muted)" }}>
               {formatTimeAgo(post.createdAt, post.isDemo, post.id)}
             </span>
           </div>
-          <p className="text-sm font-medium leading-relaxed text-[#c8c4e8]">
+          <p className="text-sm font-medium leading-relaxed" style={{ color: "var(--text)" }}>
             <span className="inline-flex items-center gap-1.5">
-              <CheckCircle size={14} className="text-[#7eb8f7] shrink-0" />
+              <CheckCircle size={14} className="shrink-0" style={{ color: "var(--accent-strong)" }} />
               {post.taskTitle}
             </span>
           </p>
@@ -135,11 +135,11 @@ function FeedPost({ post, onReact }) {
         <div
           className="w-full h-[120px] rounded-xl flex items-center justify-center px-6 text-center select-none"
           style={{
-            background: "linear-gradient(135deg, rgba(126,184,247,0.08) 0%, rgba(255,255,255,0.02) 100%)",
-            border: "1px solid rgba(255,255,255,0.03)"
+            background: "linear-gradient(135deg, rgba(126,184,211,0.12) 0%, rgba(255,252,247,0.96) 100%)",
+            border: "1px solid rgba(115,120,125,0.1)"
           }}
         >
-          <span className="text-sm font-semibold text-white tracking-wide leading-relaxed">
+          <span className="text-sm font-semibold tracking-wide leading-relaxed" style={{ color: "var(--text-strong)" }}>
             {post.taskTitle}
           </span>
         </div>
@@ -159,14 +159,15 @@ function FeedPost({ post, onReact }) {
               if (post.isDemo) return;
               onReact(post.id, r.key);
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/5 bg-white/5 text-xs text-[#7a7a9a] hover:bg-white/10 hover:text-white transition-all cursor-pointer active:scale-125"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs transition-all cursor-pointer active:scale-125"
+            style={{ border: "1px solid rgba(115,120,125,0.1)", background: "rgba(255,252,247,0.88)", color: "var(--text-muted)" }}
           >
             <span>{r.label}</span>
-            <span className="font-mono text-[10px] font-bold text-white/70">{rx[r.key] || 0}</span>
+            <span className="font-mono text-[10px] font-bold" style={{ color: "var(--text)" }}>{rx[r.key] || 0}</span>
           </button>
         ))}
       </div>
-    </div>
+    </GlassCard>
   );
 }
 
@@ -221,10 +222,17 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
     loadPosts();
 
     // Load users list for the Friends system
-    getDocs(collection(db, "users")).then((snap) => {
-      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      setAllUsers(list);
-    });
+    if (isFirebaseConfigured && db) {
+      getDocs(collection(db, "users")).then((snap) => {
+        const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        setAllUsers(list);
+      }).catch((err) => {
+        console.error("Error loading users:", err);
+        setAllUsers([]);
+      });
+    } else {
+      setAllUsers([]);
+    }
 
     // Scheduled Mosaic Moment Alert notification check
     const today = new Date().toDateString();
@@ -345,6 +353,7 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
   };
 
   const handleReact = async (postId, type) => {
+    if (!isFirebaseConfigured || !db) return;
     try {
       const postRef = doc(db, "posts", postId);
       await updateDoc(postRef, {
@@ -401,32 +410,32 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
 
   return (
     <div className="relative min-h-screen pb-12">
-      <div className="flex gap-6 max-w-5xl mx-auto px-4 py-6 relative z-10 animate-page-enter">
+      <div className="flex gap-6 max-w-6xl mx-auto px-4 md:px-8 py-6 relative z-10 animate-page-enter">
 
         {/* LEFT COLUMN (Main Feed or Friends List) */}
         <div className="flex-1 max-w-[680px] min-w-0 flex flex-col gap-4">
 
           {/* Top header row with underline tabs and Snap button */}
-          <div className="flex items-center justify-between border-b border-white/[0.06] pb-4 mb-2 flex-shrink-0">
+          <div className="flex items-center justify-between pb-4 mb-2 flex-shrink-0" style={{ borderBottom: "1px solid rgba(115,120,125,0.12)" }}>
             <div className="flex gap-6">
               <button
                 onClick={() => setActiveSection("moments")}
-                className={`pb-2 text-sm font-bold tracking-wide relative cursor-pointer outline-none transition-colors bg-transparent border-none ${activeSection === "moments" ? "text-[#7eb8f7]" : "text-white/60 hover:text-white"
-                  }`}
+                className="pb-2 text-sm font-bold tracking-wide relative cursor-pointer outline-none transition-colors bg-transparent border-none"
+                style={{ color: activeSection === "moments" ? "var(--accent-strong)" : "var(--text-muted)" }}
               >
                 Moments
                 {activeSection === "moments" && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#7eb8f7]" />
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ background: "var(--accent-strong)" }} />
                 )}
               </button>
               <button
                 onClick={() => setActiveSection("friends")}
-                className={`pb-2 text-sm font-bold tracking-wide relative cursor-pointer outline-none transition-colors bg-transparent border-none ${activeSection === "friends" ? "text-[#7eb8f7]" : "text-white/60 hover:text-white"
-                  }`}
+                className="pb-2 text-sm font-bold tracking-wide relative cursor-pointer outline-none transition-colors bg-transparent border-none"
+                style={{ color: activeSection === "friends" ? "var(--accent-strong)" : "var(--text-muted)" }}
               >
                 Friends
                 {activeSection === "friends" && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#7eb8f7]" />
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ background: "var(--accent-strong)" }} />
                 )}
               </button>
             </div>
@@ -435,12 +444,12 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
               onClick={() => setShowCamera(true)}
               className="btn-primary text-xs px-4 py-2 flex items-center gap-1.5 font-bold shadow-md hover:scale-105 active:scale-95 transition-all duration-200"
               style={{
-                background: "#7eb8f7",
-                color: "#0a0a0f",
-                boxShadow: "0 4px 14px rgba(126, 184, 247, 0.3)"
+                background: "var(--accent)",
+                color: "#ffffff",
+                boxShadow: "0 4px 14px rgba(126, 184, 211, 0.3)"
               }}
             >
-              <Camera size={13} fill="#0a0a0f" />
+              <Camera size={13} fill="#ffffff" />
               Snap
             </button>
           </div>
@@ -452,7 +461,7 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
             <div className="flex flex-col gap-4">
 
               {/* Stories style horizontal row */}
-              <div className="flex gap-4 overflow-x-auto pb-4 mb-2 border-b border-white/[0.06] scrollbar-none flex-shrink-0 select-none">
+              <GlassCard className="flex gap-4 overflow-x-auto pb-4 pt-1 px-4 mb-2 scrollbar-none flex-shrink-0 select-none">
                 {/* Real User Snap trigger */}
                 <div
                   onClick={() => setShowCamera(true)}
@@ -461,7 +470,7 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
                   <div className="w-14 h-14 rounded-full border-2 border-[#7eb8f7] p-0.5 flex items-center justify-center transition-transform group-hover:scale-105">
                     <Avatar name={user?.displayName || "You"} size={48} />
                   </div>
-                  <span className="text-[10px] text-white/70 font-medium max-w-[60px] truncate">Your Snap</span>
+                  <span className="text-[10px] font-medium max-w-[60px] truncate" style={{ color: "var(--text-muted)" }}>Your Snap</span>
                 </div>
 
                 {/* 5 Demo Stories */}
@@ -476,10 +485,10 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
                     <div className="w-14 h-14 rounded-full border-2 border-[#7eb8f7]/40 p-0.5 flex items-center justify-center">
                       <Avatar name={story.name} size={48} />
                     </div>
-                    <span className="text-[10px] text-white/70 font-medium max-w-[60px] truncate">{story.name}</span>
+                    <span className="text-[10px] font-medium max-w-[60px] truncate" style={{ color: "var(--text-muted)" }}>{story.name}</span>
                   </div>
                 ))}
-              </div>
+              </GlassCard>
 
               {/* Scheduled posting alert */}
               {alertActive && (
@@ -492,9 +501,9 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
                   }}
                 >
                   <div className="min-w-0 flex-1 pr-3">
-                    <p className="text-xs font-bold font-mono uppercase tracking-wider text-amber-400">Mosaic Moment Alert</p>
-                    <p className="text-xs text-amber-200/90 mt-0.5 leading-snug">
-                      Post what you are building within the next <strong className="font-mono text-white text-sm">{formatCountdown(alertSeconds)}</strong>!
+                    <p className="text-xs font-bold font-mono uppercase tracking-wider text-amber-700">Mosaic Moment Alert</p>
+                    <p className="text-xs mt-0.5 leading-snug text-amber-900/80">
+                      Post what you are building within the next <strong className="font-mono text-amber-950 text-sm">{formatCountdown(alertSeconds)}</strong>!
                     </p>
                   </div>
                   <button
@@ -510,8 +519,8 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
               <div className="flex flex-col">
                 {loadingPosts ? (
                   <div className="text-center py-12">
-                    <Loader2 className="animate-spin mx-auto mb-2 text-[#7eb8f7]" size={24} />
-                    <p className="text-xs font-mono text-slate-500">Loading wins feed…</p>
+                    <Loader2 className="animate-spin mx-auto mb-2" style={{ color: "var(--accent-strong)" }} size={24} />
+                    <p className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>Loading wins feed...</p>
                   </div>
                 ) : (
                   allPosts.map(post => (
@@ -528,15 +537,15 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
               {/* Search users card */}
               <GlassCard className="p-5 flex flex-col gap-4">
                 <div className="flex items-center gap-2">
-                  <Users size={16} className="text-[#7eb8f7]" />
-                  <span className="font-display font-semibold text-sm text-[#f0eeff]">Find Friends</span>
+                  <Users size={16} style={{ color: "var(--accent-strong)" }} />
+                  <span className="font-display font-semibold text-sm" style={{ color: "var(--text-strong)" }}>Find Friends</span>
                 </div>
                 <div className="relative">
-                  <Search size={16} className="absolute left-3.5 top-3.5 text-[#7a7a9a]" />
+                  <Search size={16} className="absolute left-3.5 top-3.5" style={{ color: "var(--text-muted)" }} />
                   <input
                     type="text"
                     placeholder="Search users by name..."
-                    className="w-full bg-white/5 hover:bg-white/10 focus:bg-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-white/40 outline-none border border-white/10 focus:border-[#7eb8f7] transition-all"
+                    className="input-glass w-full rounded-xl pl-10 pr-4 py-3 text-sm"
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
                   />
@@ -545,22 +554,22 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
                 {searchQuery && (
                   <div className="flex flex-col gap-2 max-h-60 overflow-y-auto">
                     {filteredSearchUsers.length === 0 ? (
-                      <p className="text-xs text-[#7a7a9a] text-center py-2">No matching users found</p>
+                      <p className="text-xs text-center py-2" style={{ color: "var(--text-muted)" }}>No matching users found</p>
                     ) : (
                       filteredSearchUsers.map(u => {
                         const following = followingIds.includes(u.id);
                         return (
-                          <div key={u.id} className="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
+                          <div key={u.id} className="flex items-center justify-between p-3 rounded-2xl" style={{ background: "rgba(255,252,247,0.82)", border: "1px solid rgba(115,120,125,0.08)" }}>
                             <div className="flex items-center gap-2.5 min-w-0">
                               <Avatar name={u.displayName} size={30} />
-                              <span className="text-sm font-semibold text-white truncate">{u.displayName}</span>
+                              <span className="text-sm font-semibold truncate" style={{ color: "var(--text-strong)" }}>{u.displayName}</span>
                             </div>
                             <button
                               onClick={() => toggleFollow(u.id)}
-                              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 hover:scale-105 active:scale-95 ${following
-                                ? "bg-white/10 border border-white/10 text-white"
-                                : "bg-[#7eb8f7] text-[#0c0e13]"
-                                }`}
+                              className="px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1 hover:scale-105 active:scale-95"
+                              style={following
+                                ? { background: "rgba(255,250,244,0.9)", border: "1px solid rgba(115,120,125,0.12)", color: "var(--text)" }
+                                : { background: "var(--accent)", color: "#ffffff" }}
                             >
                               {following ? (
                                 <>
@@ -582,8 +591,8 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
                 )}
 
                 {/* Friend suggestions list inside the card */}
-                <div className="flex flex-col gap-3 mt-2 border-t border-white/5 pt-4">
-                  <span className="text-xs font-mono font-bold text-[#7a7a9a] uppercase tracking-wider">Suggested for You</span>
+                <div className="flex flex-col gap-3 mt-2 pt-4" style={{ borderTop: "1px solid rgba(115,120,125,0.1)" }}>
+                  <span className="text-xs font-mono font-bold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Suggested for You</span>
                   <div className="flex flex-col gap-3">
                     {SUGGESTED.map((s, idx) => {
                       const isFollowing = !!followedSuggested[s.name];
@@ -592,14 +601,14 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
                           <div className="flex items-center gap-2.5 min-w-0">
                             <Avatar name={s.name} size={30} />
                             <div className="min-w-0">
-                              <p className="text-xs font-bold text-white truncate">{s.name}</p>
-                              <p className="text-[10px] text-[#7a7a9a] truncate">{s.role} • {s.mutual} mutual</p>
+                              <p className="text-xs font-bold truncate" style={{ color: "var(--text-strong)" }}>{s.name}</p>
+                              <p className="text-[10px] truncate" style={{ color: "var(--text-muted)" }}>{s.role} • {s.mutual} mutual</p>
                             </div>
                           </div>
                           <button
                             onClick={() => handleToggleSuggested(s.name)}
-                            className={`text-xs font-bold cursor-pointer transition-colors outline-none bg-transparent border-none ${isFollowing ? "text-white/40" : "text-[#7eb8f7] hover:text-[#9ecbfb]"
-                              }`}
+                            className="text-xs font-bold cursor-pointer transition-colors outline-none bg-transparent border-none"
+                            style={{ color: isFollowing ? "var(--text-muted)" : "var(--accent-strong)" }}
                           >
                             {isFollowing ? "Following" : "Follow"}
                           </button>
@@ -612,23 +621,23 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
 
               {/* Following list */}
               <div className="flex flex-col gap-3">
-                <p className="text-xs font-mono uppercase tracking-widest text-[#7a7a9a]">
+                <p className="text-xs font-mono uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
                   Following ({followingIds.length})
                 </p>
                 {followingIds.length === 0 ? (
-                  <GlassCard className="p-8 text-center bg-white/5 border border-white/5">
-                    <p className="text-xs text-[#7a7a9a]">You are not following anyone yet.</p>
+                  <GlassCard className="p-8 text-center">
+                    <p className="text-xs" style={{ color: "var(--text-muted)" }}>You are not following anyone yet.</p>
                   </GlassCard>
                 ) : (
                   <div className="grid grid-cols-1 gap-2">
                     {allUsers
                       .filter(u => followingIds.includes(u.id))
                       .map(u => (
-                        <div key={u.id} className="flex items-center justify-between p-3 rounded-2xl bg-white/10 backdrop-blur-[28px] border border-white/15 shadow-sm">
+                        <div key={u.id} className="flex items-center justify-between p-3 rounded-2xl shadow-sm" style={{ background: "rgba(255,252,247,0.82)", border: "1px solid rgba(115,120,125,0.1)" }}>
                           <div className="flex items-center gap-2.5">
                             <Avatar name={u.displayName} size={32} />
                             <div>
-                              <p className="text-sm font-bold text-white leading-tight">{u.displayName}</p>
+                              <p className="text-sm font-bold leading-tight" style={{ color: "var(--text-strong)" }}>{u.displayName}</p>
                               {u.streak > 0 && (
                                 <p className="text-[10px] text-amber-400 font-bold flex items-center gap-0.5 mt-0.5">
                                   <Flame size={10} className="fill-amber-400" />
@@ -639,7 +648,8 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
                           </div>
                           <button
                             onClick={() => toggleFollow(u.id)}
-                            className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white/10 border border-white/10 text-white hover:bg-red-500/20 hover:border-red-500/30 hover:text-red-400 cursor-pointer transition-all"
+                            className="px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all"
+                            style={{ background: "rgba(255,250,244,0.92)", border: "1px solid rgba(115,120,125,0.12)", color: "var(--text)" }}
                           >
                             Unfollow
                           </button>
@@ -656,34 +666,35 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
         <div className="w-[280px] shrink-0 sticky top-6 self-start flex flex-col gap-6 hidden md:flex">
 
           {/* Your Activity mini card */}
-          <div className="p-4 rounded-2xl border border-white/10 flex flex-col gap-3" style={{ background: "rgba(255, 255, 255, 0.02)", backdropFilter: "blur(8px)" }}>
+          <GlassCard className="p-4 flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <Avatar name={user?.displayName || "You"} size={48} />
               <div className="min-w-0">
-                <p className="text-sm font-bold text-white truncate">{user?.displayName || "Mosaicker"}</p>
+                <p className="text-sm font-bold truncate" style={{ color: "var(--text-strong)" }}>{user?.displayName || "Mosaicker"}</p>
                 <span
                   onClick={() => {
                     const event = new CustomEvent("navigate-profile");
                     window.dispatchEvent(event);
                   }}
-                  className="text-[10px] text-[#7eb8f7] font-semibold cursor-pointer hover:underline"
+                  className="text-[10px] font-semibold cursor-pointer hover:underline"
+                  style={{ color: "var(--accent-strong)" }}
                 >
                   View Profile
                 </span>
               </div>
             </div>
-            <div className="flex flex-col gap-2 pt-1 border-t border-white/5">
-              <div className="flex justify-between items-center text-[10px] text-[#7a7a9a] font-mono">
+            <div className="flex flex-col gap-2 pt-1" style={{ borderTop: "1px solid rgba(115,120,125,0.1)" }}>
+              <div className="flex justify-between items-center text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>
                 <span>CURRENT STREAK</span>
                 <StreakBadge streak={userContext?.streak || 0} />
               </div>
               <XPBar xp={userContext?.xp || 0} level={userContext?.level || 1} />
             </div>
-          </div>
+          </GlassCard>
 
           {/* Suggested for You section */}
           <div className="flex flex-col gap-3">
-            <span className="text-xs font-mono font-bold text-[#7a7a9a] uppercase tracking-wider">Suggested for You</span>
+            <span className="text-xs font-mono font-bold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Suggested for You</span>
             <div className="flex flex-col gap-3">
               {SUGGESTED.map((s, idx) => {
                 const isFollowing = !!followedSuggested[s.name];
@@ -692,14 +703,14 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
                     <div className="flex items-center gap-2.5 min-w-0">
                       <Avatar name={s.name} size={32} />
                       <div className="min-w-0">
-                        <p className="text-xs font-bold text-white truncate">{s.name}</p>
-                        <p className="text-[10px] text-[#7a7a9a] truncate">{s.role} • {s.mutual} mutual</p>
+                        <p className="text-xs font-bold truncate" style={{ color: "var(--text-strong)" }}>{s.name}</p>
+                        <p className="text-[10px] truncate" style={{ color: "var(--text-muted)" }}>{s.role} • {s.mutual} mutual</p>
                       </div>
                     </div>
                     <button
                       onClick={() => handleToggleSuggested(s.name)}
-                      className={`text-xs font-bold cursor-pointer transition-colors outline-none bg-transparent border-none ${isFollowing ? "text-white/40" : "text-[#7eb8f7] hover:text-[#9ecbfb]"
-                        }`}
+                      className="text-xs font-bold cursor-pointer transition-colors outline-none bg-transparent border-none"
+                      style={{ color: isFollowing ? "var(--text-muted)" : "var(--accent-strong)" }}
                     >
                       {isFollowing ? "Following" : "Follow"}
                     </button>
@@ -711,7 +722,7 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
 
           {/* Friends Activity section */}
           <div className="flex flex-col gap-3">
-            <span className="text-xs font-mono font-bold text-[#7a7a9a] uppercase tracking-wider">Friends Activity</span>
+            <span className="text-xs font-mono font-bold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Friends Activity</span>
             {followingIds.length > 0 ? (
               <div className="flex flex-col gap-3 max-h-[220px] overflow-y-auto pr-1">
                 {allUsers
@@ -721,7 +732,7 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
                       <div className="flex items-center gap-2.5 min-w-0">
                         <Avatar name={u.displayName} size={32} />
                         <div className="min-w-0">
-                          <p className="text-xs font-bold text-white truncate">{u.displayName}</p>
+                          <p className="text-xs font-bold truncate" style={{ color: "var(--text-strong)" }}>{u.displayName}</p>
                           {u.streak > 0 && (
                             <p className="text-[10px] text-amber-400 font-bold flex items-center gap-0.5">
                               <Flame size={10} className="fill-amber-400" />
@@ -734,7 +745,7 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
                   ))}
               </div>
             ) : (
-              <p className="text-xs text-[#7a7a9a] italic">Follow people to see their activity here</p>
+              <p className="text-xs italic" style={{ color: "var(--text-muted)" }}>Follow people to see their activity here</p>
             )}
           </div>
 
@@ -748,7 +759,7 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
           className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in"
           style={{ background: "rgba(10, 10, 15, 0.8)", backdropFilter: "blur(8px)" }}
         >
-          <GlassCard className="w-full max-w-md p-6 relative overflow-hidden" style={{ border: "1px solid rgba(255, 255, 255, 0.1)" }}>
+          <GlassCard className="w-full max-w-md p-6 relative overflow-hidden" style={{ border: "1px solid rgba(115, 120, 125, 0.12)" }}>
             <button
               onClick={() => {
                 if (stream) {
@@ -757,11 +768,12 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
                 }
                 setShowCamera(false);
               }}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors"
+              className="absolute top-4 right-4 transition-colors"
+              style={{ color: "var(--text-muted)" }}
             >
               <X size={18} />
             </button>
-            <h3 className="font-display font-semibold text-lg mb-4" style={{ color: "#f0eeff" }}>Take a Snap</h3>
+            <h3 className="font-display font-semibold text-lg mb-4" style={{ color: "var(--text-strong)" }}>Take a Snap</h3>
 
             {cameraError ? (
               <div className="text-center py-8 text-red-400 text-sm font-medium">{cameraError}</div>
@@ -809,19 +821,20 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
           className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in"
           style={{ background: "rgba(10, 10, 15, 0.8)", backdropFilter: "blur(8px)" }}
         >
-          <GlassCard className="w-full max-w-md p-6 relative overflow-hidden" style={{ border: "1px solid rgba(255, 255, 255, 0.1)" }}>
+          <GlassCard className="w-full max-w-md p-6 relative overflow-hidden" style={{ border: "1px solid rgba(115, 120, 125, 0.12)" }}>
             <button
               type="button"
               onClick={() => {
                 setCapturedPhoto(null);
                 setShowPostDialog(false);
               }}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors"
+              className="absolute top-4 right-4 transition-colors"
+              style={{ color: "var(--text-muted)" }}
               disabled={posting}
             >
               <X size={18} />
             </button>
-            <h3 className="font-display font-semibold text-lg mb-4" style={{ color: "#f0eeff" }}>Share Your Win</h3>
+            <h3 className="font-display font-semibold text-lg mb-4" style={{ color: "var(--text-strong)" }}>Share Your Win</h3>
 
             <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-4 border border-[rgba(255,255,255,0.08)] bg-black shadow-lg">
               <img src={capturedPhoto} alt="Captured win" className="w-full h-full object-cover" />
@@ -836,7 +849,7 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
                   type="text"
                   required
                   disabled={posting}
-                  className="input-glass w-full py-2.5 px-3 text-sm rounded-xl outline-none border border-[rgba(255,255,255,0.08)] focus:border-[#7eb8f7] transition-colors text-white"
+                  className="input-glass w-full py-2.5 px-3 text-sm rounded-xl"
                   placeholder="e.g., Solved 3 Leetcode questions, Worked on project UI"
                   value={taskTitle}
                   onChange={e => setTaskTitle(e.target.value)}

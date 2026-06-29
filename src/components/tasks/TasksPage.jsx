@@ -3,7 +3,8 @@ import BasketballGame from "../game/BasketballGame";
 import { useState, useEffect, useRef } from "react";
 import GlassCard from "../ui/GlassCard";
 import { Plus, Sparkles, Clock, Trash2, Check, Zap, X, Users, AlertCircle, Calendar, RotateCcw } from "lucide-react";
-import { prioritizeTasks, generateDailyPlan, breakdownTask } from "../../lib/gemini";
+import { prioritizeTasks, breakdownTask } from "../../lib/gemini";
+import { generateAiBattlePlan } from "../../lib/planner";
 import { getUserTasks, addTask, updateTask, deleteTask, awardXP } from "../../lib/firestore";
 
 function parseTaskDate(t) {
@@ -428,13 +429,20 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
         return;
       }
 
+      if (userContext?.battlePlan) {
+        setBattlePlan(userContext.battlePlan);
+        localStorage.setItem("battlePlanDate", todayStr);
+        localStorage.setItem("battlePlanText", userContext.battlePlan);
+        return;
+      }
+
       setPlanLoading(true);
       try {
         const incomplete = tasks.filter(t => !t.completed);
-        const plan = await generateDailyPlan(incomplete, userContext || {});
-        setBattlePlan(plan);
+        const { planText } = await generateAiBattlePlan(incomplete, user, userContext || {});
+        setBattlePlan(planText);
         localStorage.setItem("battlePlanDate", todayStr);
-        localStorage.setItem("battlePlanText", plan);
+        localStorage.setItem("battlePlanText", planText);
       } catch (err) {
         console.error("Error generating daily battle plan:", err);
       } finally {
@@ -466,11 +474,11 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
     setPlanLoading(true);
     try {
       const incomplete = tasks.filter(t => !t.completed);
-      const plan = await generateDailyPlan(incomplete, userContext || {});
-      setBattlePlan(plan);
+      const { planText } = await generateAiBattlePlan(incomplete, user, userContext || {});
+      setBattlePlan(planText);
       const todayStr = new Date().toDateString();
       localStorage.setItem("battlePlanDate", todayStr);
-      localStorage.setItem("battlePlanText", plan);
+      localStorage.setItem("battlePlanText", planText);
     } catch (err) {
       console.error("Error regenerating battle plan:", err);
     } finally {
@@ -833,28 +841,45 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
       prioritizeRef.current = false;
       return;
     }
+    
     setPrioritizing(true);
+    setPlanLoading(true);
+    
     try {
       const pending = tasks.filter(t => !t.completed);
-      const result = await prioritizeTasks(pending, userContext ?? { role: "student" });
+      
+      // 1. Generate the AI Battle Plan using current pending tasks list
+      const { planText } = await generateAiBattlePlan(pending, user, userContext || {});
+      setBattlePlan(planText);
+      const todayStr = new Date().toDateString();
+      localStorage.setItem("battlePlanDate", todayStr);
+      localStorage.setItem("battlePlanText", planText);
 
-      const updates = {};
-      result.forEach(r => {
-        const task = pending[r.id];
-        if (task) updates[task.id] = { priority: r.priority, reason: r.reason };
-      });
+      // 2. Perform the individual task priority updates in Firestore/state
+      try {
+        const result = await prioritizeTasks(pending, userContext ?? { role: "student" });
+        const updates = {};
+        result.forEach(r => {
+          const task = pending[r.id];
+          if (task) updates[task.id] = { priority: r.priority, reason: r.reason };
+        });
 
-      await Promise.all(
-        Object.entries(updates).map(([taskId, data]) => updateTask(taskId, data))
-      );
+        await Promise.all(
+          Object.entries(updates).map(([taskId, data]) => updateTask(taskId, data))
+        );
 
-      const updatedTasks = tasks.map(t => updates[t.id] ? { ...t, ...updates[t.id] } : t);
-      setTasks(updatedTasks);
-      window.dispatchEvent(new CustomEvent('tasksReprioritized', { detail: updatedTasks }));
+        const updatedTasks = tasks.map(t => updates[t.id] ? { ...t, ...updates[t.id] } : t);
+        setTasks(updatedTasks);
+        window.dispatchEvent(new CustomEvent('tasksReprioritized', { detail: updatedTasks }));
+      } catch (reprioritizeErr) {
+        console.error("Non-blocking error during task prioritization updates:", reprioritizeErr);
+      }
+
     } catch (e) {
-      console.error(e);
+      console.error("AI Prioritize error:", e);
     } finally {
       setPrioritizing(false);
+      setPlanLoading(false);
       prioritizeRef.current = false;
     }
   }
@@ -882,6 +907,14 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
 
   const displayTasks = viewMode === "dashboard" ? pending : tasks;
 
+  const plan = (() => {
+    if (!battlePlan) return null;
+    try {
+      return JSON.parse(battlePlan);
+    } catch (e) {
+      return null;
+    }
+  })();
 
   return (
     <div className="min-h-screen relative text-[#111827] h-screen overflow-hidden">
@@ -1293,13 +1326,14 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
 
             {/* Right Column: Daily Battle Plan */}
             <div
-              className="p-5 md:p-6 flex flex-col w-[320px] shrink-0 min-h-0"
+              className="p-5 md:p-6 flex flex-col w-[380px] shrink-0 min-h-0"
               style={{
                 background: "rgba(255, 255, 255, 0.07)",
                 backdropFilter: "blur(24px)",
                 WebkitBackdropFilter: "blur(24px)",
                 border: "1px solid rgba(255, 255, 255, 0.18)",
                 borderRadius: "28px",
+                height: "100%",
               }}
             >
               <div className="flex items-center gap-2 mb-4 flex-shrink-0">
@@ -1309,16 +1343,106 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
                 </h2>
               </div>
 
-              <div className="flex-1 overflow-y-auto pr-1 text-[#111827]">
+              <div className="flex-1 overflow-y-auto pr-1 text-[#111827] min-h-0">
                 {planLoading ? (
                   <div className="py-8 text-center flex flex-col items-center justify-center">
                     <span className="inline-block animate-spin text-xs text-[#7eb8f7] mb-2">⏳</span>
                     <span className="text-xs text-[#7a7a9a] font-mono">Generating daily plan...</span>
                   </div>
+                ) : plan ? (
+                  <div className="flex flex-col gap-4 text-left">
+                    {plan.isLocal && (
+                      <div className="text-[10px] font-bold font-mono px-2 py-1 rounded bg-amber-500/10 text-amber-600 border border-amber-500/20 text-center uppercase tracking-wider flex items-center justify-center gap-1.5 flex-shrink-0 animate-pulse">
+                        ⚠️ Offline/Local Plan
+                      </div>
+                    )}
+                    
+                    {/* Today's Mission */}
+                    {plan.mission && (
+                      <div className="flex flex-col gap-1 flex-shrink-0">
+                        <span className="text-[10px] font-bold uppercase tracking-wider font-mono text-[#7a7a9a]">
+                          Today's Mission
+                        </span>
+                        <p className="text-[13px] font-semibold leading-relaxed text-[#111827]">
+                          {plan.mission}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Priorities */}
+                    {plan.priorities && plan.priorities.length > 0 && (
+                      <div className="flex flex-col gap-1.5 flex-shrink-0">
+                        <span className="text-[10px] font-bold uppercase tracking-wider font-mono text-[#7a7a9a]">
+                          Priorities
+                        </span>
+                        <div className="flex flex-col gap-2">
+                          {plan.priorities.map((item, idx) => (
+                            <div key={idx} className="p-3 rounded-2xl border flex flex-col gap-0.5 bg-transparent border-[#111827]/10">
+                              <div className="flex justify-between items-start gap-2">
+                                <span className="text-[13px] font-semibold leading-tight text-[#111827] truncate">
+                                  {item.task}
+                                </span>
+                                {item.duration && (
+                                  <span className="text-[10px] font-bold font-mono text-[#659eb8] shrink-0 pt-0.5">
+                                    ⏱️ {item.duration}
+                                  </span>
+                                )}
+                              </div>
+                              {item.reason && (
+                                <span className="text-[10px] leading-tight text-[#6f7d84] italic">
+                                  {item.reason}
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Focus Block & Estimated Time */}
+                    {(plan.focusBlock || plan.estimatedTime) && (
+                      <div className="grid grid-cols-2 gap-2 mt-1 flex-shrink-0">
+                        {plan.focusBlock && (
+                          <div className="p-3 rounded-2xl border flex flex-col gap-0.5 bg-transparent border-[#111827]/10">
+                            <span className="text-[9px] font-bold uppercase tracking-wider font-mono text-[#7a7a9a]">
+                              Focus Block
+                            </span>
+                            <span className="text-[11px] font-semibold leading-tight text-[#111827] truncate">
+                              {plan.focusBlock}
+                            </span>
+                          </div>
+                        )}
+                        {plan.estimatedTime && (
+                          <div className="p-3 rounded-2xl border flex flex-col gap-0.5 bg-transparent border-[#111827]/10">
+                            <span className="text-[9px] font-bold uppercase tracking-wider font-mono text-[#7a7a9a]">
+                              Total Time
+                            </span>
+                            <span className="text-[11px] font-semibold leading-tight text-[#111827] truncate">
+                              {plan.estimatedTime}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Motivation */}
+                    {plan.motivation && (
+                      <div className="flex flex-col gap-1 border-t pt-3 mt-1 flex-shrink-0 border-[#111827]/10">
+                        <span className="text-[10px] font-bold uppercase tracking-wider font-mono text-[#7a7a9a]">
+                          Companion Tip
+                        </span>
+                        <p className="text-[11px] italic leading-relaxed text-[#111827] font-semibold">
+                          "{plan.motivation}"
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 ) : battlePlan ? (
-                  <p className="whitespace-pre-line text-[13px] leading-relaxed">
-                    {battlePlan}
-                  </p>
+                  <div className="flex flex-col gap-3 text-left">
+                    <p className="whitespace-pre-line text-[13px] leading-relaxed text-[#4c5b63]">
+                      {battlePlan}
+                    </p>
+                  </div>
                 ) : (
                   <p className="text-[#7a7a9a] italic py-4">No plan generated yet.</p>
                 )}

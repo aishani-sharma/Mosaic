@@ -2,7 +2,7 @@
 import { getUserProfile, createUserProfile, checkAndUpdateStreak } from "./lib/firestore";
 import { useState, useEffect } from "react";
 import { signInWithPopup } from "firebase/auth";
-import { auth, googleProvider } from "./lib/firebase";
+import { auth, googleProvider, isFirebaseConfigured } from "./lib/firebase";
 import { useAuth } from "./hooks/useAuth";
 import Onboarding from "./components/onboarding/Onboarding";
 import AppShell from "./components/layout/AppShell";
@@ -76,6 +76,7 @@ export default function App() {
   }, [user, loading]);
 
   async function handleLogin() {
+    if (!isFirebaseConfigured || !auth || !googleProvider) return;
     try {
       await signInWithPopup(auth, googleProvider);
     } catch (e) {

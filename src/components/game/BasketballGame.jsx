@@ -621,7 +621,7 @@ export default function BasketballGame() {
               x1={hoop.backboard.x + hoop.backboard.w / 2}
               y1={hoop.rimY - 25}
               x2={hoop.backboard.x + hoop.backboard.w / 2}
-              y2={groundY(hoop.backboard.x + hoop.backboard.w / 2)}
+              y2={hoop.rimY + 90}
               stroke="#4b5563"
               strokeWidth="7"
               strokeLinecap="round"
@@ -793,7 +793,7 @@ export default function BasketballGame() {
           border-radius: 14px;
           padding: 12px 18px;
           background: #4f46e5;
-          color: white;
+          color: #111827;
           font-weight: 800;
           cursor: pointer;
           width: 100%;
@@ -874,15 +874,16 @@ export default function BasketballGame() {
 
         .score-card {
           position: absolute;
-          top: 10px;
-          right: 10px;
+          bottom: 16px;
+          left: 50%;
+          transform: translateX(-50%);
           z-index: 6;
           padding: 6px 10.5px;
           border-radius: 10px;
-          background: rgba(255, 255, 255, 0.08);
+          background: rgba(255, 255, 255, 0.05);
           backdrop-filter: blur(28px);
           WebkitBackdropFilter: "blur(28px)";
-          border: 1px solid rgba(255, 255, 255, 0.18);
+          border: 1px solid rgba(255, 255, 255, 0.12);
           color: #111827;
           font-size: 11px;
           font-weight: 800;
@@ -902,13 +903,13 @@ export default function BasketballGame() {
           gap: 8px;
           padding: 8px 12px;
           border-radius: 999px;
-          background: rgba(17, 24, 39, 0.75);
+          background: rgba(255, 255, 255, 0.22);
           backdrop-filter: blur(8px);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(115, 120, 125, 0.18);
           font-size: 11px;
           font-weight: 900;
-          color: #f3f4f6;
-          box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+          color: #111827;
+          box-shadow: 0 8px 20px rgba(0,0,0,0.06);
           font-family: 'Outfit', sans-serif;
         }
 
@@ -916,7 +917,7 @@ export default function BasketballGame() {
           width: 100px;
           height: 8px;
           border-radius: 999px;
-          background: rgba(255, 255, 255, 0.1);
+          background: rgba(0, 0, 0, 0.1);
           overflow: hidden;
         }
 
@@ -971,12 +972,12 @@ export default function BasketballGame() {
           z-index: 5;
           padding: 6px 12px;
           border-radius: 999px;
-          background: rgba(17, 24, 39, 0.75);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          color: #f3f4f6;
+          background: rgba(255, 255, 255, 0.22);
+          border: 1px solid rgba(115, 120, 125, 0.18);
+          color: #111827;
           font-size: 11px;
           font-weight: 800;
-          box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+          box-shadow: 0 6px 16px rgba(0,0,0,0.06);
           pointer-events: none;
           animation: hintPulse 1.4s ease-in-out infinite;
           font-family: 'Outfit', sans-serif;

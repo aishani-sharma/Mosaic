@@ -1,14 +1,13 @@
-// components/layout/GeminiSidebar.jsx
 import { useState, useRef, useEffect } from "react";
 import { Send, Sparkles, Mic } from "lucide-react";
 import { useGeminiChat } from "../../hooks/useGemini";
 
 function renderMessage(text) {
   return text
-    .replace(/\*\*(.*?)\*\*/g, '$1')  // bold
-    .replace(/\*(.*?)\*/g, '$1')       // italic
-    .replace(/#{1,6}\s/g, '')          // headers
-    .replace(/`(.*?)`/g, '$1');        // inline code
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/\*(.*?)\*/g, "$1")
+    .replace(/#{1,6}\s/g, "")
+    .replace(/`(.*?)`/g, "$1");
 }
 
 export default function GeminiSidebar({ userContext, isOpen, onClose }) {
@@ -20,40 +19,34 @@ export default function GeminiSidebar({ userContext, isOpen, onClose }) {
   const recognitionRef = useRef(null);
 
   function handleMicClick() {
-    if (!('SpeechRecognition' in window) && !('webkitSpeechRecognition' in window)) {
-      alert('Voice input requires Chrome or Edge');
+    if (!("SpeechRecognition" in window) && !("webkitSpeechRecognition" in window)) {
+      alert("Voice input requires Chrome or Edge");
       return;
     }
 
     if (listening) {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
+      recognitionRef.current?.stop();
       setListening(false);
-    } else {
-      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-      recognition.lang = 'en-US';
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-
-      recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        setInput(transcript);
-      };
-
-      recognition.onend = () => {
-        setListening(false);
-      };
-
-      recognition.onerror = (event) => {
-        console.error("Speech recognition error:", event.error);
-        setListening(false);
-      };
-
-      recognitionRef.current = recognition;
-      recognition.start();
-      setListening(true);
+      return;
     }
+
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onresult = (event) => {
+      setInput(event.results[0][0].transcript);
+    };
+    recognition.onend = () => setListening(false);
+    recognition.onerror = (event) => {
+      console.error("Speech recognition error:", event.error);
+      setListening(false);
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+    setListening(true);
   }
 
   useEffect(() => {
@@ -65,7 +58,6 @@ export default function GeminiSidebar({ userContext, isOpen, onClose }) {
     if (!trimmed || loading || cooldown) return;
     setInput("");
     sendMessage(trimmed);
-
     setCooldown(true);
     setTimeout(() => setCooldown(false), 1500);
   }
@@ -80,19 +72,15 @@ export default function GeminiSidebar({ userContext, isOpen, onClose }) {
   return (
     <>
       <style>{`
-        @keyframes mic-pulse {
-          0%, 100% { box-shadow: 0 0 0 0px rgba(247,106,106,0.4); }
-          50% { box-shadow: 0 0 0 6px rgba(247,106,106,0.1); }
-        }
         @keyframes pulse {
-          0%, 100% { box-shadow: 0 0 0 0px rgba(247,106,106,0.4); }
-          50% { box-shadow: 0 0 0 6px rgba(247,106,106,0.1); }
+          0%, 100% { box-shadow: 0 0 0 0 rgba(185, 94, 82, 0.24); }
+          50% { box-shadow: 0 0 0 6px rgba(185, 94, 82, 0.08); }
         }
       `}</style>
-      {/* Translucent Backdrop Click-to-Close Overlay */}
+
       {isOpen && (
         <div
-          className="fixed inset-0 z-30 bg-black/10 backdrop-blur-[1px]"
+          className="fixed inset-0 z-30 bg-[rgba(236,232,225,0.25)] backdrop-blur-[2px]"
           onClick={onClose}
         />
       )}
@@ -101,39 +89,37 @@ export default function GeminiSidebar({ userContext, isOpen, onClose }) {
         className="fixed top-0 right-0 h-screen z-40 flex flex-col transition-transform duration-300 ease-out shadow-2xl"
         style={{
           width: 300,
-          background: "rgba(20, 30, 40, 0.35)",
+          background: "rgba(248, 241, 233, 0.8)",
           backdropFilter: "blur(28px)",
           WebkitBackdropFilter: "blur(28px)",
-          borderLeft: "1px solid rgba(255, 255, 255, 0.15)",
+          borderLeft: "1px solid rgba(115, 120, 125, 0.14)",
           transform: isOpen ? "translateX(0)" : "translateX(100%)",
         }}
       >
-        {/* Header */}
         <div
           className="flex items-center gap-2.5 px-4 py-4 animate-page-enter"
-          style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.1)" }}
+          style={{ borderBottom: "1px solid rgba(115, 120, 125, 0.12)" }}
         >
           <div
             className="w-7 h-7 rounded-lg flex items-center justify-center"
-            style={{ background: "rgba(100, 189, 227,0.1)", border: "1px solid rgba(100, 189, 227,0.25)" }}
+            style={{ background: "rgba(126, 184, 211, 0.12)", border: "1px solid rgba(126, 184, 211, 0.24)" }}
           >
-            <Sparkles size={14} style={{ color: "#64BDE3" }} />
+            <Sparkles size={14} style={{ color: "var(--accent-strong)" }} />
           </div>
           <div>
-            <p className="text-sm font-display font-bold" style={{ color: "#ffffff" }}>
+            <p className="text-sm font-display font-bold" style={{ color: "var(--text-strong)" }}>
               Mosaic AI
             </p>
-            <p className="text-xs" style={{ color: "rgba(255, 255, 255, 0.6)" }}>
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
               Your companion
             </p>
           </div>
           <div
             className="ml-auto w-2 h-2 rounded-full"
-            style={{ background: "#64BDE3", boxShadow: "0 0 6px #64BDE3" }}
-          ></div>
+            style={{ background: "var(--accent-strong)", boxShadow: "0 0 6px rgba(101, 158, 184, 0.35)" }}
+          />
         </div>
 
-        {/* Messages */}
         <div className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-3">
           {messages.map((msg, i) => (
             <div
@@ -145,15 +131,15 @@ export default function GeminiSidebar({ userContext, isOpen, onClose }) {
                 style={
                   msg.role === "user"
                     ? {
-                        background: "rgba(100, 189, 227,0.12)",
-                        color: "#ffffff",
-                        border: "1px solid rgba(100, 189, 227,0.25)",
+                        background: "rgba(126, 184, 211, 0.18)",
+                        color: "var(--text-strong)",
+                        border: "1px solid rgba(126, 184, 211, 0.25)",
                         borderBottomRightRadius: 4,
                       }
                     : {
-                        background: "rgba(255, 255, 255, 0.08)",
-                        color: "#ffffff",
-                        border: "1px solid rgba(255, 255, 255, 0.12)",
+                        background: "rgba(255, 252, 247, 0.82)",
+                        color: "var(--text-strong)",
+                        border: "1px solid rgba(115, 120, 125, 0.12)",
                         borderBottomLeftRadius: 4,
                       }
                 }
@@ -166,23 +152,26 @@ export default function GeminiSidebar({ userContext, isOpen, onClose }) {
           {loading && (
             <div className="flex justify-start">
               <div
-                className="px-3 py-2 rounded-xl text-sm border border-white/10"
-                style={{ background: "rgba(255, 255, 255, 0.08)", color: "rgba(255, 255, 255, 0.6)" }}
+                className="px-3 py-2 rounded-xl text-sm"
+                style={{
+                  background: "rgba(255, 252, 247, 0.82)",
+                  border: "1px solid rgba(115, 120, 125, 0.12)",
+                  color: "var(--text-muted)",
+                }}
               >
-                <span className="animate-pulse">Thinking…</span>
+                <span className="animate-pulse">Thinking...</span>
               </div>
             </div>
           )}
           <div ref={bottomRef} />
         </div>
 
-        {/* Input */}
         <div className="px-3 pb-4 relative z-10 bg-transparent flex-shrink-0">
           <div
             className="flex items-end gap-2 rounded-xl p-2"
             style={{
-              background: "rgba(255, 255, 255, 0.08)",
-              border: "1px solid rgba(255, 255, 255, 0.15)",
+              background: "rgba(255, 252, 247, 0.84)",
+              border: "1px solid rgba(115, 120, 125, 0.12)",
               backdropFilter: "blur(28px)",
               WebkitBackdropFilter: "blur(28px)",
             }}
@@ -196,16 +185,16 @@ export default function GeminiSidebar({ userContext, isOpen, onClose }) {
                   ? {
                       width: "32px",
                       height: "32px",
-                      color: "#f76a6a",
+                      color: "#b95e52",
                       background: "transparent",
-                      boxShadow: "0 0 0 4px rgba(247,106,106,0.3)",
-                      animation: "pulse 1s infinite"
+                      boxShadow: "0 0 0 4px rgba(185, 94, 82, 0.22)",
+                      animation: "pulse 1s infinite",
                     }
                   : {
                       width: "32px",
                       height: "32px",
-                      color: "#7a7a9a",
-                      background: "transparent"
+                      color: "var(--text-muted)",
+                      background: "transparent",
                     }
               }
               title={listening ? "Stop listening" : "Start voice input"}
@@ -213,9 +202,9 @@ export default function GeminiSidebar({ userContext, isOpen, onClose }) {
               <Mic size={16} />
             </button>
             <textarea
-              className="flex-1 bg-transparent text-sm resize-none outline-none leading-relaxed text-white placeholder-white/40"
-              style={{ minHeight: 36, maxHeight: 120, fontFamily: "Inter, sans-serif" }}
-              placeholder="Ask Mosaic anything…"
+              className="flex-1 bg-transparent text-sm resize-none outline-none leading-relaxed"
+              style={{ minHeight: 36, maxHeight: 120, fontFamily: "Inter, sans-serif", color: "var(--text-strong)" }}
+              placeholder="Ask Mosaic anything..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKey}
@@ -226,14 +215,14 @@ export default function GeminiSidebar({ userContext, isOpen, onClose }) {
               disabled={!input.trim() || loading || cooldown}
               className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-200"
               style={{
-                background: (input.trim() && !loading && !cooldown) ? "#64BDE3" : "rgba(255, 255, 255, 0.08)",
-                color: (input.trim() && !loading && !cooldown) ? "#0c0e13" : "rgba(255, 255, 255, 0.35)",
+                background: input.trim() && !loading && !cooldown ? "var(--accent)" : "rgba(255, 250, 244, 0.72)",
+                color: input.trim() && !loading && !cooldown ? "#ffffff" : "rgba(111, 125, 132, 0.5)",
               }}
             >
               <Send size={14} />
             </button>
           </div>
-          <p className="text-center mt-1.5 text-[10px]" style={{ color: "rgba(255, 255, 255, 0.5)" }}>
+          <p className="text-center mt-1.5 text-[10px]" style={{ color: "var(--text-muted)" }}>
             Enter to send
           </p>
         </div>

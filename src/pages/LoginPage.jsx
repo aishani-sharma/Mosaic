@@ -1,24 +1,26 @@
 // pages/LoginPage.jsx
 import { useState } from "react";
 import { isFirebaseConfigured } from "../lib/firebase";
-import scenery from "../assets/scenery.png";
+import cozyCafe from "../assets/cozy_cafe.png";
 import { Sparkles } from "lucide-react";
 
-export default function LoginPage({ onLogin }) {
+export default function LoginPage({ onLogin, onGuestLogin }) {
   const [showModal, setShowModal] = useState(false);
+  const [guestName, setGuestName] = useState("");
+  const isGuestReady = guestName.trim().length > 0;
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden flex flex-col justify-center items-center select-none font-sans bg-[#faf6ef]">
+    <div className="relative h-screen min-h-[100svh] w-full overflow-hidden flex flex-col justify-center items-center select-none font-sans bg-[#faf6ef]">
       {/* Immersive Full Screen Background Scenery */}
-      <div className="absolute inset-0 z-0 overflow-hidden">
+      <div className="fixed inset-0 z-0 overflow-hidden">
         <img
-          src={scenery}
+          src={cozyCafe}
           alt="Scenery Background"
-          className="w-full h-full object-cover select-none pointer-events-none"
-          style={{ objectPosition: "center 40%" }}
+          className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
+          style={{ objectPosition: "center center" }}
         />
         {/* Soft radial overlay behind text content for readability */}
-        <div
+        <div 
           className="absolute inset-0"
           style={{
             background: "radial-gradient(circle at center, rgba(255, 250, 244, 0.72) 0%, rgba(255, 250, 244, 0.34) 52%, rgba(245, 239, 230, 0.12) 100%)",
@@ -28,8 +30,8 @@ export default function LoginPage({ onLogin }) {
       </div>
 
       {/* Floating White Frame Layer on top of the Scenery */}
-      <div
-        className="absolute inset-[35px] z-5 pointer-events-none rounded-[32px]"
+      <div 
+        className="absolute inset-[clamp(16px,3vw,35px)] z-5 pointer-events-none rounded-[clamp(20px,3vw,32px)]"
         style={{
           border: "10px solid rgba(255, 252, 248, 0.95)",
           boxShadow: "0 24px 56px rgba(91, 88, 76, 0.12), inset 0 0 0 1px rgba(164, 154, 140, 0.14)",
@@ -37,17 +39,7 @@ export default function LoginPage({ onLogin }) {
       />
 
       {/* Hero Content */}
-      <div className="relative z-10 text-center px-6 max-w-xl animate-fade-in flex flex-col items-center">
-        {/* Brand Name (Elegant Serif Display Font) */}
-        <h1 className="font-serif-display font-semibold text-5xl text-[#111827] mb-4 drop-shadow-sm tracking-tight">
-          Mosaic
-        </h1>
-
-        {/* Calming Quote */}
-        <p className="text-lg font-medium text-[#4c5b63] max-w-md italic mb-10 leading-relaxed drop-shadow-sm">
-          "Today's effort becomes tomorrow's masterpiece."
-        </p>
-
+      <div className="relative z-10 mt-80 text-center px-6 max-w-xl animate-fade-in flex flex-col items-center">
         {/* Primary CTA button (Translucent Frosted Glass) */}
         <button
           onClick={() => setShowModal(true)}
@@ -75,7 +67,7 @@ export default function LoginPage({ onLogin }) {
 
       {/* Frosted Glass Modal Overlay */}
       {showModal && (
-        <div
+        <div 
           className="fixed inset-0 z-40 bg-[rgba(88,84,76,0.18)] backdrop-blur-[8px] transition-all duration-300 animate-fade-in"
           onClick={() => setShowModal(false)}
         >
@@ -137,10 +129,41 @@ export default function LoginPage({ onLogin }) {
               <div className="flex-1 h-px bg-[#6f7d84]/15" />
             </div>
 
+            <div className="w-full space-y-3">
+              <input
+                type="text"
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+                placeholder="Enter a name for guest pass"
+                className="w-full px-4 py-3 rounded-xl text-sm transition-all duration-200"
+                style={{
+                  background: "rgba(255,255,255,0.78)",
+                  border: "1px solid rgba(115, 120, 125, 0.14)",
+                  color: "#111827",
+                }}
+              />
+              <button
+                onClick={() => {
+                  if (!isGuestReady) return;
+                  onGuestLogin?.(guestName);
+                }}
+                disabled={!isGuestReady}
+                className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold transition-all duration-200"
+                style={{
+                  background: isGuestReady ? "rgba(35, 49, 58, 0.92)" : "rgba(35, 49, 58, 0.42)",
+                  border: "1px solid rgba(35, 49, 58, 0.08)",
+                  color: "#fffaf4",
+                  opacity: isGuestReady ? 1 : 0.7,
+                }}
+              >
+                <span>Enter with Guest Pass</span>
+              </button>
+            </div>
+
             {/* Email sign in button (Disabled / Coming Soon) */}
             <button
               disabled
-              className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold opacity-70 cursor-not-allowed text-[#4c5b63]"
+              className="mt-3 w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold opacity-70 cursor-not-allowed text-[#4c5b63]"
               style={{
                 background: "rgba(245, 239, 230, 0.78)",
                 border: "1px solid rgba(115, 120, 125, 0.12)",

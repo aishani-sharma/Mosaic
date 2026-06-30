@@ -8,18 +8,44 @@ import Onboarding from "./components/onboarding/Onboarding";
 import AppShell from "./components/layout/AppShell";
 import LoginPage from "./pages/LoginPage";
 
+const DEV_GUEST_KEY = "mosaic_dev_guest_name";
+
 export default function App() {
   const { user: firebaseUser, loading: authLoading } = useAuth();
   const [screen, setScreen] = useState("login");
   const [userContext, setUserContext] = useState(null);
+  const [guestName, setGuestName] = useState(() => localStorage.getItem(DEV_GUEST_KEY) || "");
 
-  const user = firebaseUser;
+  const guestUser = guestName
+    ? {
+        uid: `guest-${guestName.toLowerCase().replace(/[^a-z0-9]+/g, "-") || "dev"}`,
+        displayName: guestName,
+        email: null,
+        isGuest: true,
+      }
+    : null;
+  const user = guestUser || firebaseUser;
   const loading = authLoading;
 
   useEffect(() => {
     if (loading) return;
     if (!user) {
+      setUserContext(null);
       setScreen("login");
+      return;
+    }
+
+    if (user.isGuest) {
+      setUserContext({
+        displayName: user.displayName,
+        xp: 0,
+        level: 1,
+        streak: 0,
+        role: "guest",
+        interests: [],
+        bio: ""
+      });
+      setScreen("app");
       return;
     }
 
@@ -66,6 +92,21 @@ export default function App() {
     }
   }
 
+  function handleGuestLogin(name) {
+    const trimmedName = name.trim();
+    if (!trimmedName) return;
+    localStorage.setItem(DEV_GUEST_KEY, trimmedName);
+    setGuestName(trimmedName);
+  }
+
+  async function handleLogout() {
+    if (!guestUser) return;
+    localStorage.removeItem(DEV_GUEST_KEY);
+    setGuestName("");
+    setUserContext(null);
+    setScreen("login");
+  }
+
   async function handleOnboardingComplete(data) {
     await createUserProfile(user.uid, data);
     const profile = await getUserProfile(user.uid);
@@ -73,9 +114,9 @@ export default function App() {
     setScreen("app");
   }
 
-  if (loading) return <LoginPage onLogin={handleLogin} />;
+  if (loading) return <LoginPage onLogin={handleLogin} onGuestLogin={handleGuestLogin} />;
 
-  if (screen === "login") return <LoginPage onLogin={handleLogin} />;
+  if (screen === "login") return <LoginPage onLogin={handleLogin} onGuestLogin={handleGuestLogin} />;
   if (screen === "onboarding") return <Onboarding onComplete={handleOnboardingComplete} />;
-  return <AppShell user={user} userContext={userContext} />;
+  return <AppShell user={user} userContext={userContext} onLogout={handleLogout} />;
 }

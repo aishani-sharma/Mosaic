@@ -12,7 +12,7 @@ const navItems = [
   { id: "profile", icon: User, label: "Profile" },
 ];
 
-export default function NavSidebar({ activePage, setActivePage, onNewTaskClick }) {
+export default function NavSidebar({ activePage, setActivePage, onNewTaskClick, onLogout, isGuest = false }) {
   return (
     <aside
       className="flex flex-col py-6 h-screen select-none relative z-20"
@@ -110,6 +110,10 @@ export default function NavSidebar({ activePage, setActivePage, onNewTaskClick }
 
           <button
             onClick={async () => {
+              if (isGuest) {
+                onLogout?.();
+                return;
+              }
               if (!isFirebaseConfigured || !auth) return;
               try {
                 await signOut(auth);

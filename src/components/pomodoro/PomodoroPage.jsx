@@ -72,7 +72,7 @@ export default function PomodoroPage({ user, userContext, isActive }) {
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
       osc.start(ctx.currentTime);
       osc.stop(ctx.currentTime + 0.8);
-    } catch { }
+    } catch {}
   }
 
   // Timer loop
@@ -303,7 +303,7 @@ export default function PomodoroPage({ user, userContext, isActive }) {
 
                 <rect x="120" y="122" width="12" height="9" fill="#f9fafb" stroke="#d1d5db" strokeWidth="0.8" rx="0.5" />
                 <polygon points="118,122 126,117 134,122" fill="#4f46e5" />
-
+                
                 {/* Path */}
                 <path d="M 64 128 C 76 130, 95 128, 120 129" stroke="#fed7aa" strokeWidth="1.5" fill="none" opacity="0.5" strokeDasharray="2,2" />
               </g>
@@ -326,8 +326,8 @@ export default function PomodoroPage({ user, userContext, isActive }) {
 
         {/* Action buttons */}
         <div className="flex items-center gap-4">
-          <button
-            onClick={reset}
+          <button 
+            onClick={reset} 
             className="px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer border border-[#111827]/10 hover:bg-black/5 bg-transparent text-[#111827] flex items-center gap-1.5"
           >
             <RotateCcw size={14} />
@@ -361,10 +361,11 @@ export default function PomodoroPage({ user, userContext, isActive }) {
               <button
                 key={s.id}
                 onClick={() => setActiveSound(s.id)}
-                className={`px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer border transition-all duration-200 ${activeSound === s.id
-                  ? "bg-[#64BDE3] border-[#64BDE3] text-[#0c0e13]"
-                  : "bg-white/15 border-[#111827]/10 text-[#111827] hover:bg-black/5"
-                  }`}
+                className={`px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer border transition-all duration-200 ${
+                  activeSound === s.id
+                    ? "bg-[#64BDE3] border-[#64BDE3] text-[#0c0e13]"
+                    : "bg-white/15 border-[#111827]/10 text-[#111827] hover:bg-black/5"
+                }`}
               >
                 {s.label}
               </button>

@@ -12,7 +12,7 @@ const PomodoroPage = lazy(() => import("../pomodoro/PomodoroPage"));
 const ProfilePage = lazy(() => import("../profile/ProfilePage"));
 const MosaicMomentInterrupt = lazy(() => import("../feed/MosaicMomentInterrupt"));
 
-export default function AppShell({ user, userContext }) {
+export default function AppShell({ user, userContext, onLogout }) {
   const [activePage, setActivePage] = useState("dashboard");
   const [focusInputTrigger, setFocusInputTrigger] = useState(0);
   const [isAiOpen, setIsAiOpen] = useState(false);
@@ -86,6 +86,8 @@ export default function AppShell({ user, userContext }) {
         activePage={activePage}
         setActivePage={setActivePage}
         onNewTaskClick={handleNewTaskClick}
+        onLogout={onLogout}
+        isGuest={Boolean(user?.isGuest)}
       />
 
       {/* Main content */}

@@ -68,6 +68,45 @@ export async function callGemini(prompt, systemInstruction = "") {
   }
 }
 
+function buildLocalTaskBreakdown(taskTitle, deadline) {
+  const title = (taskTitle || "Task").trim();
+  const dueLine = deadline ? ` before ${deadline}` : "";
+  const lowered = title.toLowerCase();
+
+  const templates = [
+    `Clarify exactly what "${title}" needs${dueLine}.`,
+    `Gather the files, links, or materials needed for "${title}".`,
+    `Do the first focused work block for "${title}".`,
+    `Review what is still missing and finish the remaining pieces.`,
+    `Check the final result and mark "${title}" complete.`,
+  ];
+
+  if (lowered.includes("essay") || lowered.includes("write") || lowered.includes("report")) {
+    return [
+      { subtask: `Outline the main points for "${title}".`, estimatedMinutes: 15 },
+      { subtask: "Collect the references or source material you need.", estimatedMinutes: 20 },
+      { subtask: "Draft the first version from start to finish.", estimatedMinutes: 45 },
+      { subtask: "Edit for clarity, grammar, and structure.", estimatedMinutes: 20 },
+      { subtask: "Do a final proofread and submit it.", estimatedMinutes: 10 },
+    ];
+  }
+
+  if (lowered.includes("study") || lowered.includes("exam") || lowered.includes("homework")) {
+    return [
+      { subtask: `List the topics covered by "${title}".`, estimatedMinutes: 10 },
+      { subtask: "Review notes, slides, or textbook sections.", estimatedMinutes: 25 },
+      { subtask: "Solve practice questions or active recall prompts.", estimatedMinutes: 30 },
+      { subtask: "Revisit the hardest parts one more time.", estimatedMinutes: 15 },
+      { subtask: "Summarize the key takeaways in a short recap.", estimatedMinutes: 10 },
+    ];
+  }
+
+  return templates.map((subtask, index) => ({
+    subtask,
+    estimatedMinutes: [10, 15, 30, 20, 10][index],
+  }));
+}
+
 // ── Prioritize tasks based on user context ─────────────────────────────────
 export async function prioritizeTasks(tasks, userContext) {
   const taskList = tasks
@@ -185,11 +224,11 @@ Return ONLY a JSON array with no markdown, no explanation, no code blocks. Examp
 
 Each subtask must be a distinct action step. Do not repeat the task title as a subtask.`;
 
-  const raw = await callGemini(prompt);
   try {
+    const raw = await callGemini(prompt);
     const clean = raw.replace(/```json|```/g, "").trim();
     return JSON.parse(clean);
   } catch {
-    return [{ subtask: taskTitle, estimatedMinutes: 30 }];
+    return buildLocalTaskBreakdown(taskTitle, deadline);
   }
 }

@@ -61,6 +61,22 @@ function isDueTomorrow(deadline) {
   return parsed.toDateString() === tomorrow.toDateString();
 }
 
+function getTodayInputValue() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today.toISOString().split("T")[0];
+}
+
+function isPastInputDate(value) {
+  if (!value) return false;
+  const selected = new Date(value);
+  if (Number.isNaN(selected.getTime())) return false;
+  selected.setHours(0, 0, 0, 0);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return selected < today;
+}
+
 function TaskRow({ task, onComplete, onDelete, onToggleExpand, isExpanded, bouncingId, flashingId }) {
   const category = task.category || "General";
 
@@ -383,6 +399,7 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
   const [dismissedBanners, setDismissedBanners] = useState(new Set());
   const [newTask, setNewTask] = useState("");
   const [newDeadline, setNewDeadline] = useState("");
+  const [addError, setAddError] = useState("");
   const [newCategory, setNewCategory] = useState("auto");
   const [isExpanded, setIsExpanded] = useState(false);
   const [loadingTasks, setLoadingTasks] = useState(true);
@@ -506,6 +523,12 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
 
   async function handleAdd() {
     if (!newTask.trim() || !user?.uid) return;
+    if (isPastInputDate(newDeadline)) {
+      setAddError("Deadline can't be in the past.");
+      return;
+    }
+
+    setAddError("");
     const finalCategory = newCategory === "auto" ? detectedCategory : newCategory;
 
     let formattedDeadline = "";
@@ -528,11 +551,10 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
       deadline: formattedDeadline,
       category: finalCategory,
     });
-    if (!ref) return;
 
     setTasks(prev => [
       {
-        id: ref.id,
+        id: ref?.id || `local-${Date.now()}`,
         title: newTask.trim(),
         deadline: formattedDeadline,
         category: finalCategory,
@@ -1095,10 +1117,21 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
                           type="date"
                           onClick={(e) => e.target.showPicker && e.target.showPicker()}
                           className="w-full bg-white/30 rounded-lg px-3 py-1.5 text-xs text-[#374151] outline-none cursor-pointer"
+                          min={getTodayInputValue()}
                           value={newDeadline}
-                          onChange={e => setNewDeadline(e.target.value)}
+                          onChange={e => {
+                            setNewDeadline(e.target.value);
+                            if (addError) setAddError("");
+                          }}
                         />
                       </div>
+                    </div>
+                  )}
+
+                  {addError && (
+                    <div className="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 animate-page-enter">
+                      <AlertCircle size={12} />
+                      <span>{addError}</span>
                     </div>
                   )}
 
@@ -1112,6 +1145,7 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
                       onFocus={() => setIsExpanded(true)}
                       onChange={e => {
                         setNewTask(e.target.value);
+                        if (addError) setAddError("");
                         if (!isExpanded) setIsExpanded(true);
                       }}
                       onKeyDown={e => {
@@ -1240,8 +1274,12 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
                     onClick={(e) => e.target.showPicker && e.target.showPicker()}
                     className="input-glass outline-none text-xs flex-shrink-0"
                     style={{ width: "160px", height: "38px", padding: "8px 12px" }}
+                    min={getTodayInputValue()}
                     value={newDeadline}
-                    onChange={e => setNewDeadline(e.target.value)}
+                    onChange={e => {
+                      setNewDeadline(e.target.value);
+                      if (addError) setAddError("");
+                    }}
                     onKeyDown={e => {
                       if (e.key === "Enter") {
                         handleAdd();
@@ -1257,6 +1295,12 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
                     + Add
                   </button>
                 </div>
+                {addError && (
+                  <div className="mt-3 flex items-center gap-1.5 text-[11px] font-semibold text-red-600 animate-page-enter">
+                    <AlertCircle size={12} />
+                    <span>{addError}</span>
+                  </div>
+                )}
               </GlassCard>
 
               {/* Task list container (Only scrollable container) */}

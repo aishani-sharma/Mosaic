@@ -23,6 +23,8 @@ export async function createUserProfile(uid, data) {
     const ref = doc(db, "users", uid);
     await setDoc(ref, {
         ...data,
+        xp: 0,
+        level: 1,
         streak: 0,
         lastActiveDate: null,
         tasksCompleted: 0,
@@ -92,6 +94,19 @@ export async function updateTask(taskId, data) {
 export async function deleteTask(taskId) {
     if (!requireDb()) return null;
     await deleteDoc(doc(db, "tasks", taskId));
+}
+
+const XP_PER_TASK = 50;
+const XP_PER_LEVEL = 100;
+
+export async function awardXP(uid, amount = XP_PER_TASK) {
+    if (!requireDb()) return null;
+    const profile = await getUserProfile(uid);
+    if (!profile) return null;
+    const xp = (profile.xp ?? 0) + amount;
+    const level = Math.floor(xp / XP_PER_LEVEL) + 1;
+    await updateUserProfile(uid, { xp, level });
+    return { xp, level };
 }
 
 

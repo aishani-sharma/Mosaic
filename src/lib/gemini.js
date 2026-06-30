@@ -1,8 +1,7 @@
 // lib/gemini.js
 // Wrapper for all Gemini API calls in Mosaic
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+const GEMINI_PROXY_URL = "/api/gemini";
 async function fetchWithRetry(url, options, maxRetries = 3, delayMs = 1000) {
   for (let i = 0; i < maxRetries; i++) {
     try {
@@ -53,7 +52,7 @@ export async function callGemini(prompt, systemInstruction = "") {
       },
     };
 
-    const res = await fetchWithRetry(`${API_URL}?key=${GEMINI_API_KEY}`, {
+    const res = await fetchWithRetry(GEMINI_PROXY_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -151,7 +150,7 @@ Keep responses under 3 sentences unless asked for more.`;
     generationConfig: { temperature: 0.7, maxOutputTokens: 1024 }
   };
 
-  const res = await fetchWithRetry(`${API_URL}?key=${GEMINI_API_KEY}`, {
+  const res = await fetchWithRetry(GEMINI_PROXY_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),

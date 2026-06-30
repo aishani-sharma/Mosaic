@@ -873,11 +873,11 @@ export default function BasketballGame() {
         }
 
         .score-card {
-          position: absolute;
-          bottom: 16px;
+          position: fixed;
+          bottom: 20px;
           left: 50%;
           transform: translateX(-50%);
-          z-index: 6;
+          z-index: 30;
           padding: 6px 10.5px;
           border-radius: 10px;
           background: rgba(255, 255, 255, 0.05);

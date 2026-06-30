@@ -4,23 +4,9 @@ import GlassCard from "../ui/GlassCard";
 import StreakBadge from "../ui/StreakBadge";
 import { Camera, Zap, X, Loader2, Search, Users, UserPlus, UserCheck, Flame, CheckCircle, PartyPopper, Rocket, Trophy, AlertCircle } from "lucide-react";
 import { getFeedPosts, createPost, updateUserProfile } from "../../lib/firestore";
-import { db, isFirebaseConfigured } from "../../lib/firebase";
+import { db, isFirebaseConfigured, storage } from "../../lib/firebase";
 import { doc, updateDoc, increment, collection, getDocs } from "firebase/firestore";
-
-const DEMO_POSTS = [
-  { id: "demo1", displayName: "Priya K", taskTitle: "Finished system design mock interview", photoURL: null, createdAt: null, reactions: { clap: 12, fire: 8, rocket: 5, hundred: 3 }, streak: 14, isDemo: true },
-  { id: "demo2", displayName: "Arjun M", taskTitle: "Submitted internship application to Google", photoURL: null, createdAt: null, reactions: { clap: 24, fire: 19, rocket: 11, hundred: 7 }, streak: 7, isDemo: true },
-  { id: "demo3", displayName: "Rhea S", taskTitle: "Completed 2 hours of DSA revision", photoURL: null, createdAt: null, reactions: { clap: 6, fire: 14, rocket: 2, hundred: 9 }, streak: 3, isDemo: true },
-  { id: "demo4", displayName: "Karan V", taskTitle: "Pushed first open source PR", photoURL: null, createdAt: null, reactions: { clap: 31, fire: 22, rocket: 18, hundred: 12 }, streak: 21, isDemo: true },
-];
-
-const SUGGESTED = [
-  { name: "Meera T", role: "CS Student", mutual: 3 },
-  { name: "Dev P", role: "Working Professional", mutual: 1 },
-  { name: "Ananya R", role: "Engineering Student", mutual: 5 },
-  { name: "Rohan K", role: "Entrepreneur", mutual: 2 },
-  { name: "Sia B", role: "Medical Student", mutual: 0 },
-];
+import { getDownloadURL, ref, uploadString } from "firebase/storage";
 
 function Avatar({ name, size = 36 }) {
   const initials = name?.slice(0, 1).toUpperCase() ?? "?";
@@ -36,14 +22,7 @@ function Avatar({ name, size = 36 }) {
   );
 }
 
-function formatTimeAgo(timestamp, isDemo, demoId) {
-  if (isDemo) {
-    if (demoId === "demo1") return "2h ago";
-    if (demoId === "demo2") return "5h ago";
-    if (demoId === "demo3") return "Yesterday";
-    if (demoId === "demo4") return "2 days ago";
-    return "just now";
-  }
+function formatTimeAgo(timestamp) {
   if (!timestamp) return "just now";
 
   const date = typeof timestamp.toDate === "function"
@@ -106,7 +85,7 @@ function FeedPost({ post, onReact }) {
               )}
             </div>
             <span className="text-[11px] shrink-0" style={{ color: "var(--text-muted)" }}>
-              {formatTimeAgo(post.createdAt, post.isDemo, post.id)}
+              {formatTimeAgo(post.createdAt)}
             </span>
           </div>
           <p className="text-sm font-medium leading-relaxed" style={{ color: "var(--text)" }}>
@@ -155,7 +134,6 @@ function FeedPost({ post, onReact }) {
           <button
             key={r.key}
             onClick={() => {
-              if (post.isDemo) return;
               onReact(post.id, r.key);
             }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs transition-all cursor-pointer active:scale-125"
@@ -170,7 +148,7 @@ function FeedPost({ post, onReact }) {
   );
 }
 
-export default function FeedPage({ user, userContext, isActive, onNavigate }) {
+export default function FeedPage({ user, userContext, isActive, onNavigate, openCamera, onCameraOpened }) {
   const [activeSection, setActiveSection] = useState("moments"); // moments or friends
   const [posts, setPosts] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
@@ -193,14 +171,6 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
   const [allUsers, setAllUsers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [followingIds, setFollowingIds] = useState([]);
-  const [followedSuggested, setFollowedSuggested] = useState({});
-
-  const handleToggleSuggested = (name) => {
-    setFollowedSuggested(prev => ({
-      ...prev,
-      [name]: !prev[name]
-    }));
-  };
 
   const videoRef = useRef(null);
 
@@ -248,6 +218,12 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
       setFollowingIds(userContext.following || []);
     }
   }, [userContext]);
+
+  useEffect(() => {
+    if (!isActive || !openCamera) return;
+    setShowCamera(true);
+    onCameraOpened?.();
+  }, [isActive, openCamera, onCameraOpened]);
 
   // Alert 2-min countdown timer ticker
   useEffect(() => {
@@ -328,11 +304,18 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
 
     setPosting(true);
     try {
+      let photoURL = null;
+      if (capturedPhoto && storage) {
+        const photoRef = ref(storage, `posts/${user.uid}/${Date.now()}.jpg`);
+        await uploadString(photoRef, capturedPhoto, "data_url");
+        photoURL = await getDownloadURL(photoRef);
+      }
+
       await createPost(
         user.uid,
         user.displayName || "Mosaicker",
         taskTitle.trim(),
-        capturedPhoto
+        photoURL
       );
 
       setCapturedPhoto(null);
@@ -398,6 +381,7 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
     if (u.id === user?.uid) return false;
     return u.displayName?.toLowerCase().includes(searchQuery.toLowerCase());
   });
+  const suggestedUsers = allUsers.filter(u => u.id !== user?.uid && !followingIds.includes(u.id)).slice(0, 5);
 
   const formatCountdown = (secs) => {
     const m = Math.floor(secs / 60);
@@ -405,7 +389,7 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
     return `${m}:${String(s).padStart(2, "0")}`;
   };
 
-  const allPosts = [...DEMO_POSTS, ...posts];
+  const storyUsers = allUsers.filter(u => u.id !== user?.uid).slice(0, 5);
 
   return (
     <div className="relative min-h-screen pb-12">
@@ -472,19 +456,12 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
                   <span className="text-[10px] font-medium max-w-[60px] truncate" style={{ color: "var(--text-muted)" }}>Your Snap</span>
                 </div>
 
-                {/* 5 Demo Stories */}
-                {[
-                  { name: "Priya K" },
-                  { name: "Arjun M" },
-                  { name: "Rhea S" },
-                  { name: "Karan V" },
-                  { name: "Meera T" },
-                ].map((story, i) => (
-                  <div key={i} className="flex flex-col items-center gap-1.5 flex-shrink-0">
+                {storyUsers.map((story) => (
+                  <div key={story.id} className="flex flex-col items-center gap-1.5 flex-shrink-0">
                     <div className="w-14 h-14 rounded-full border-2 border-[#7eb8f7]/40 p-0.5 flex items-center justify-center">
-                      <Avatar name={story.name} size={48} />
+                      <Avatar name={story.displayName} size={48} />
                     </div>
-                    <span className="text-[10px] font-medium max-w-[60px] truncate" style={{ color: "var(--text-muted)" }}>{story.name}</span>
+                    <span className="text-[10px] font-medium max-w-[60px] truncate" style={{ color: "var(--text-muted)" }}>{story.displayName}</span>
                   </div>
                 ))}
               </GlassCard>
@@ -522,7 +499,7 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
                     <p className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>Loading wins feed...</p>
                   </div>
                 ) : (
-                  allPosts.map(post => (
+                  posts.map(post => (
                     <FeedPost key={post.id} post={post} onReact={handleReact} />
                   ))
                 )}
@@ -593,19 +570,19 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
                 <div className="flex flex-col gap-3 mt-2 pt-4" style={{ borderTop: "1px solid rgba(115,120,125,0.1)" }}>
                   <span className="text-xs font-mono font-bold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Suggested for You</span>
                   <div className="flex flex-col gap-3">
-                    {SUGGESTED.map((s, idx) => {
-                      const isFollowing = !!followedSuggested[s.name];
+                    {suggestedUsers.map((u) => {
+                      const isFollowing = followingIds.includes(u.id);
                       return (
-                        <div key={idx} className="flex items-center justify-between">
+                        <div key={u.id} className="flex items-center justify-between">
                           <div className="flex items-center gap-2.5 min-w-0">
-                            <Avatar name={s.name} size={30} />
+                            <Avatar name={u.displayName} size={30} />
                             <div className="min-w-0">
-                              <p className="text-xs font-bold truncate" style={{ color: "var(--text-strong)" }}>{s.name}</p>
-                              <p className="text-[10px] truncate" style={{ color: "var(--text-muted)" }}>{s.role} • {s.mutual} mutual</p>
+                              <p className="text-xs font-bold truncate" style={{ color: "var(--text-strong)" }}>{u.displayName}</p>
+                              <p className="text-[10px] truncate" style={{ color: "var(--text-muted)" }}>{u.role || "Mosaic user"}</p>
                             </div>
                           </div>
                           <button
-                            onClick={() => handleToggleSuggested(s.name)}
+                            onClick={() => toggleFollow(u.id)}
                             className="text-xs font-bold cursor-pointer transition-colors outline-none bg-transparent border-none"
                             style={{ color: isFollowing ? "var(--text-muted)" : "var(--accent-strong)" }}
                           >
@@ -671,10 +648,7 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
               <div className="min-w-0">
                 <p className="text-sm font-bold truncate" style={{ color: "var(--text-strong)" }}>{user?.displayName || "Mosaicker"}</p>
                 <span
-                  onClick={() => {
-                    const event = new CustomEvent("navigate-profile");
-                    window.dispatchEvent(event);
-                  }}
+                  onClick={() => onNavigate?.("profile")}
                   className="text-[10px] font-semibold cursor-pointer hover:underline"
                   style={{ color: "var(--accent-strong)" }}
                 >
@@ -694,19 +668,19 @@ export default function FeedPage({ user, userContext, isActive, onNavigate }) {
           <div className="flex flex-col gap-3">
             <span className="text-xs font-mono font-bold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Suggested for You</span>
             <div className="flex flex-col gap-3">
-              {SUGGESTED.map((s, idx) => {
-                const isFollowing = !!followedSuggested[s.name];
+              {suggestedUsers.map((u) => {
+                const isFollowing = followingIds.includes(u.id);
                 return (
-                  <div key={idx} className="flex items-center justify-between gap-2">
+                  <div key={u.id} className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <Avatar name={s.name} size={32} />
+                      <Avatar name={u.displayName} size={32} />
                       <div className="min-w-0">
-                        <p className="text-xs font-bold truncate" style={{ color: "var(--text-strong)" }}>{s.name}</p>
-                        <p className="text-[10px] truncate" style={{ color: "var(--text-muted)" }}>{s.role} • {s.mutual} mutual</p>
+                        <p className="text-xs font-bold truncate" style={{ color: "var(--text-strong)" }}>{u.displayName}</p>
+                        <p className="text-[10px] truncate" style={{ color: "var(--text-muted)" }}>{u.role || "Mosaic user"}</p>
                       </div>
                     </div>
                     <button
-                      onClick={() => handleToggleSuggested(s.name)}
+                      onClick={() => toggleFollow(u.id)}
                       className="text-xs font-bold cursor-pointer transition-colors outline-none bg-transparent border-none"
                       style={{ color: isFollowing ? "var(--text-muted)" : "var(--accent-strong)" }}
                     >

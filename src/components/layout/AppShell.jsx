@@ -2,14 +2,15 @@
 import Background from "./background";
 import NavSidebar from "./NavSidebar";
 import GeminiSidebar from "./GeminiSidebar";
-import FeedPage from "../feed/FeedPage";
-import TasksPage from "../tasks/TasksPage";
-import CalendarPage from "../calendar/CalendarPage";
-import PomodoroPage from "../pomodoro/PomodoroPage";
-import ProfilePage from "../profile/ProfilePage";
-import MosaicMomentInterrupt from "../feed/MosaicMomentInterrupt";
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Sparkles } from "lucide-react";
+
+const FeedPage = lazy(() => import("../feed/FeedPage"));
+const TasksPage = lazy(() => import("../tasks/TasksPage"));
+const CalendarPage = lazy(() => import("../calendar/CalendarPage"));
+const PomodoroPage = lazy(() => import("../pomodoro/PomodoroPage"));
+const ProfilePage = lazy(() => import("../profile/ProfilePage"));
+const MosaicMomentInterrupt = lazy(() => import("../feed/MosaicMomentInterrupt"));
 
 export default function AppShell({ user, userContext }) {
   const [activePage, setActivePage] = useState("dashboard");
@@ -90,10 +91,11 @@ export default function AppShell({ user, userContext }) {
       {/* Main content */}
       <main className={`relative flex-1 z-10 ${activePage === "dashboard" ? "overflow-hidden" : "overflow-y-auto"}`}>
         <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(180deg,rgba(252,248,240,0.05),rgba(252,248,240,0.18))]" />
+        <Suspense fallback={<div className="p-6 text-sm text-[#4b5563]">Loading...</div>}>
         {/* Dashboard View */}
         <div
           style={{ display: activePage === "dashboard" ? "block" : "none" }}
-          className={activePage === "dashboard" ? "animate-page-enter" : ""}
+          className={activePage === "dashboard" ? "animate-page-enter h-full" : "h-full"}
         >
           <TasksPage
             user={user}
@@ -109,7 +111,7 @@ export default function AppShell({ user, userContext }) {
         {/* Tasks List View */}
         <div
           style={{ display: activePage === "tasks" ? "block" : "none" }}
-          className={activePage === "tasks" ? "animate-page-enter" : ""}
+          className={activePage === "tasks" ? "animate-page-enter h-full" : "h-full"}
         >
           <TasksPage
             user={user}
@@ -159,6 +161,7 @@ export default function AppShell({ user, userContext }) {
         >
           <ProfilePage user={user} userContext={userContext} isActive={activePage === "profile"} />
         </div> {/* page-content */}
+        </Suspense>
       </main>
 
       {/* Floating AI Button (Bottom Right) */}

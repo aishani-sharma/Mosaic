@@ -41,6 +41,8 @@ export default function ProfilePage({ user, userContext, isActive }) {
     return isToday(t.completedAt) || isToday(t.updatedAt);
   }).length;
 
+  const tasksCompletedCount = userTasks.filter(t => t.completed || t.xpAwarded).length;
+
   useEffect(() => {
     if (userContext) {
       setProfileData(userContext);
@@ -68,7 +70,7 @@ export default function ProfilePage({ user, userContext, isActive }) {
   }
 
   const stats = [
-    { label: "Tasks Done", value: profileData.tasksCompleted ?? 0 },
+    { label: "Tasks Done", value: tasksCompletedCount },
     { label: "Current Streak", value: `${profileData.streak ?? 0}d` },
     { label: "Completed Today", value: completedTodayCount },
     { label: "Sessions", value: profileData.pomodoroSessions ?? 0 },
@@ -202,7 +204,7 @@ export default function ProfilePage({ user, userContext, isActive }) {
           <div className="flex flex-col gap-2">
             {[
               { label: "Role", value: profileData.role ?? "Not set" },
-              { label: "Focus areas", value: profileData.focusAreas?.join(", ") ?? "Not set" },
+              { label: "Focus areas", value: profileData.focusAreas?.length ? profileData.focusAreas.join(", ") : "Not set" },
               { label: "Work hours", value: profileData.workHours ?? "Not set" },
             ].map(row => (
               <div key={row.label} className="flex justify-between text-sm">

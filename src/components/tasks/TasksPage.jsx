@@ -1,11 +1,12 @@
 // components/tasks/TasksPage.jsx
-import BasketballGame from "../game/BasketballGame";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import GlassCard from "../ui/GlassCard";
 import { Plus, Sparkles, Clock, Trash2, Check, Zap, X, Users, AlertCircle, Calendar, RotateCcw } from "lucide-react";
 import { prioritizeTasks, breakdownTask } from "../../lib/gemini";
 import { generateAiBattlePlan } from "../../lib/planner";
-import { getUserTasks, addTask, updateTask, deleteTask } from "../../lib/firestore";
+import { getUserTasks, addTask, updateTask, deleteTask, awardXP } from "../../lib/firestore";
+
+const BasketballGame = lazy(() => import("../game/BasketballGame"));
 
 function parseTaskDate(t) {
   if (t.deadline) {
@@ -505,7 +506,7 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
 
   async function handleAdd() {
     if (!newTask.trim() || !user?.uid) return;
-    const finalCategory = "General";
+    const finalCategory = newCategory === "auto" ? detectedCategory : newCategory;
 
     let formattedDeadline = "";
     if (newDeadline) {
@@ -527,6 +528,7 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
       deadline: formattedDeadline,
       category: finalCategory,
     });
+    if (!ref) return;
 
     setTasks(prev => [
       {
@@ -547,6 +549,9 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
   }
 
   async function handleComplete(taskId, currentlyDone) {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+
     setBouncingId(taskId);
     setTimeout(() => setBouncingId(null), 400);
 
@@ -557,18 +562,27 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
 
     const newDone = !currentlyDone;
     const now = new Date().toISOString();
-    await updateTask(taskId, {
+    const shouldAwardXP = newDone && user?.uid && !task.xpAwarded;
+    const taskUpdate = {
       completed: newDone,
       completedAt: newDone ? now : null,
-      updatedAt: now
-    });
+      updatedAt: now,
+      ...(shouldAwardXP ? { xpAwarded: true } : {}),
+    };
+
+    await updateTask(taskId, taskUpdate);
     setTasks(prev => prev.map(t => t.id === taskId ? {
       ...t,
-      completed: newDone,
-      completedAt: newDone ? now : null,
-      updatedAt: now
+      ...taskUpdate,
     } : t));
 
+    if (shouldAwardXP) {
+      const result = await awardXP(user.uid);
+      if (result) {
+        setXpPopup(`+50 XP`);
+        setTimeout(() => setXpPopup(null), 2000);
+      }
+    }
   }
 
   async function handleDelete(taskId) {
@@ -908,7 +922,7 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
   })();
 
   return (
-    <div className="min-h-screen relative text-[#111827] h-screen overflow-hidden">
+    <div className="relative text-[#111827] h-full min-h-0 overflow-hidden">
       <style>{`
         @keyframes checkbox-bounce {
           0% { transform: scale(1); }
@@ -939,20 +953,22 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
 
       {/* Background Basketball Game */}
       {viewMode === "dashboard" && (
-        <BasketballGame />
+        <Suspense fallback={<div className="text-xs text-[#4b5563]">Loading game...</div>}>
+          <BasketballGame />
+        </Suspense>
       )}
 
       {/* Main Container */}
       <div
-        className={`max-w-6xl mx-auto px-6 relative h-full py-4 flex flex-col min-h-0 z-10 ${viewMode === "dashboard" ? "pointer-events-none" : ""
+        className={`max-w-6xl mx-auto px-4 sm:px-6 relative h-full py-3 sm:py-4 flex flex-col min-h-0 z-10 ${viewMode === "dashboard" ? "pointer-events-none" : ""
           }`}
       >
 
         {viewMode === "dashboard" ? (
           <>
-            <div className="max-w-2xl mx-auto flex flex-col w-full mt-2 animate-page-enter pointer-events-auto">
+            <div className="max-w-2xl mx-auto flex flex-col w-full mt-2 max-h-full min-h-0 animate-page-enter pointer-events-auto">
               <div
-                className="p-5 md:p-6 flex flex-col w-full"
+                className="p-4 md:p-6 flex flex-col w-full min-h-0 max-h-full"
                 style={{
                   background: "linear-gradient(to bottom, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04))",
                   backdropFilter: "blur(28px)",

@@ -6,17 +6,15 @@ import { auth, googleProvider, isFirebaseConfigured } from "./lib/firebase";
 import { useAuth } from "./hooks/useAuth";
 import Onboarding from "./components/onboarding/Onboarding";
 import AppShell from "./components/layout/AppShell";
-import LoadingScreen from "./components/ui/LoadingScreen";
 import LoginPage from "./pages/LoginPage";
 
 export default function App() {
   const { user: firebaseUser, loading: authLoading } = useAuth();
-  const [guestUser, setGuestUser] = useState(null);
   const [screen, setScreen] = useState("login");
   const [userContext, setUserContext] = useState(null);
 
-  const user = firebaseUser || guestUser;
-  const loading = authLoading && !guestUser;
+  const user = firebaseUser;
+  const loading = authLoading;
 
   useEffect(() => {
     if (loading) return;
@@ -28,22 +26,6 @@ export default function App() {
     // User is logged in — check Firestore for their profile
     async function loadProfile() {
       try {
-        if (user.uid === "dev-user") {
-          setUserContext({
-            displayName: "Aishani",
-            xp: 150,
-            level: 2,
-            streak: 3,
-            tasksCompleted: 4,
-            pomodoroSessions: 1,
-            role: "student",
-            interests: ["Coding"],
-            bio: "Guest profile"
-          });
-          setScreen("app");
-          return;
-        }
-
         let profile = await getUserProfile(user.uid);
         await checkAndUpdateStreak(user.uid);
 
@@ -84,29 +66,16 @@ export default function App() {
     }
   }
 
-  function handleGuestLogin() {
-    setGuestUser({
-      uid: "dev-user",
-      displayName: "Aishani",
-      email: "dev@mosaic.app"
-    });
-  }
-
   async function handleOnboardingComplete(data) {
-    if (user.uid === "dev-user") {
-      setUserContext({ ...data, xp: 0, level: 1, streak: 0 });
-      setScreen("app");
-      return;
-    }
     await createUserProfile(user.uid, data);
     const profile = await getUserProfile(user.uid);
     setUserContext(profile);
     setScreen("app");
   }
 
-  if (loading) return <LoginPage onLogin={handleLogin} onGuestLogin={handleGuestLogin} />;
+  if (loading) return <LoginPage onLogin={handleLogin} />;
 
-  if (screen === "login") return <LoginPage onLogin={handleLogin} onGuestLogin={handleGuestLogin} />;
+  if (screen === "login") return <LoginPage onLogin={handleLogin} />;
   if (screen === "onboarding") return <Onboarding onComplete={handleOnboardingComplete} />;
   return <AppShell user={user} userContext={userContext} />;
 }

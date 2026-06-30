@@ -5,8 +5,8 @@ AI-powered productivity companion for students and professionals.
 ## Stack
 - React + Vite + Tailwind CSS
 - Firebase (Auth, Firestore, Storage)
-- Gemini 2.0 Flash API
-- Deployed on Google AI Studio
+- Gemini 2.5 Flash API
+- Google Cloud Run ready
 
 ## Features
 - 🤖 Gemini-powered task prioritization + daily planning
@@ -21,9 +21,16 @@ AI-powered productivity companion for students and professionals.
 
 ```bash
 npm install
-cp .env.example .env
+copy .env.example .env
 # Fill in your Firebase + Gemini API keys
 npm run dev
+```
+
+For the production-style app with the server-side Gemini proxy:
+
+```bash
+npm run build
+npm start
 ```
 
 ## Firebase Setup
@@ -36,10 +43,11 @@ npm run dev
 
 ## Gemini API Key
 1. Go to [Google AI Studio](https://aistudio.google.com)
-2. Create API key → copy into `.env` as `VITE_GEMINI_API_KEY`
+2. Create API key → copy into `.env` as `GEMINI_API_KEY`
 
-## Deploy to Google AI Studio
+## Deploy to Google Cloud Run
 ```bash
 npm run build
-# Upload the /dist folder to AI Studio
+npm test
+npm start
 ```

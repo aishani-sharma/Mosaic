@@ -1,11 +1,10 @@
 // pages/LoginPage.jsx
 import { useState } from "react";
-import { signInWithPopup } from "firebase/auth";
-import { auth, googleProvider, isFirebaseConfigured } from "../lib/firebase";
+import { isFirebaseConfigured } from "../lib/firebase";
 import scenery from "../assets/scenery.png";
-import { Zap, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
-export default function LoginPage({ onLogin, onGuestLogin }) {
+export default function LoginPage({ onLogin }) {
   const [showModal, setShowModal] = useState(false);
 
   return (
@@ -19,7 +18,7 @@ export default function LoginPage({ onLogin, onGuestLogin }) {
           style={{ objectPosition: "center 40%" }}
         />
         {/* Soft radial overlay behind text content for readability */}
-        <div 
+        <div
           className="absolute inset-0"
           style={{
             background: "radial-gradient(circle at center, rgba(255, 250, 244, 0.72) 0%, rgba(255, 250, 244, 0.34) 52%, rgba(245, 239, 230, 0.12) 100%)",
@@ -29,7 +28,7 @@ export default function LoginPage({ onLogin, onGuestLogin }) {
       </div>
 
       {/* Floating White Frame Layer on top of the Scenery */}
-      <div 
+      <div
         className="absolute inset-[35px] z-5 pointer-events-none rounded-[32px]"
         style={{
           border: "10px solid rgba(255, 252, 248, 0.95)",
@@ -76,13 +75,13 @@ export default function LoginPage({ onLogin, onGuestLogin }) {
 
       {/* Frosted Glass Modal Overlay */}
       {showModal && (
-        <div 
+        <div
           className="fixed inset-0 z-40 bg-[rgba(88,84,76,0.18)] backdrop-blur-[8px] transition-all duration-300 animate-fade-in"
           onClick={() => setShowModal(false)}
         >
           {/* Centered Modal */}
           <div
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm p-8 flex flex-col items-center animate-scale-in"
+            className="fixed inset-x-4 top-1/2 -translate-y-1/2 w-auto max-w-sm mx-auto p-8 flex flex-col items-center animate-scale-in"
             style={{
               background: "linear-gradient(to bottom, rgba(255, 251, 246, 0.92), rgba(250, 244, 236, 0.88))",
               backdropFilter: "blur(24px)",
@@ -103,14 +102,7 @@ export default function LoginPage({ onLogin, onGuestLogin }) {
 
             {/* Google sign in button */}
             <button
-              onClick={async () => {
-                if (!isFirebaseConfigured || !auth || !googleProvider) return;
-                try {
-                  await signInWithPopup(auth, googleProvider);
-                } catch (e) {
-                  console.error(e);
-                }
-              }}
+              onClick={onLogin}
               className="w-full flex items-center justify-center gap-3 px-5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer shadow-sm"
               disabled={!isFirebaseConfigured}
               style={{
@@ -156,15 +148,6 @@ export default function LoginPage({ onLogin, onGuestLogin }) {
             >
               <span>Email sign-in is coming soon</span>
             </button>
-
-            {/* Developer Bypass Link */}
-            <button
-              onClick={onGuestLogin}
-              className="mt-6 flex items-center gap-1.5 text-xs font-bold text-[#659eb8] hover:text-[#4d8198] transition-colors cursor-pointer"
-            >
-              <Zap size={13} />
-              <span>Continue as Guest (Dev Bypass)</span>
-            </button>
           </div>
         </div>
       )}
@@ -191,8 +174,8 @@ export default function LoginPage({ onLogin, onGuestLogin }) {
         }
         
         @keyframes scaleIn {
-          from { opacity: 0; transform: translate(-50%, -45%) scale(0.95); }
-          to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+          from { opacity: 0; transform: translateY(-45%) scale(0.95); }
+          to { opacity: 1; transform: translateY(-50%) scale(1); }
         }
       `}</style>
     </div>

@@ -41,43 +41,6 @@ export default function AppShell({ user, userContext, onLogout }) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Daily Scheduler trigger logic
-  useEffect(() => {
-    const checkSchedule = () => {
-      const scheduledTimeStr = localStorage.getItem("moment_scheduled_time");
-      const scheduledDateStr = localStorage.getItem("moment_scheduled_date");
-      const today = new Date().toDateString();
-
-      // If scheduled time has already been triggered today, skip
-      if (scheduledDateStr === today && scheduledTimeStr === "triggered") {
-        return;
-      }
-
-      let scheduledTime = null;
-
-      // If not set or it's a new day, schedule it
-      if (!scheduledTimeStr || scheduledDateStr !== today) {
-        const hoursToAdd = 2 + Math.random() * 6; // random offset between 2 and 8 hours
-        const targetTime = Date.now() + hoursToAdd * 60 * 60 * 1000;
-
-        localStorage.setItem("moment_scheduled_time", String(targetTime));
-        localStorage.setItem("moment_scheduled_date", today);
-        scheduledTime = targetTime;
-      } else {
-        scheduledTime = Number(scheduledTimeStr);
-      }
-
-      if (scheduledTime && Date.now() >= scheduledTime) {
-        setShowMomentInterrupt(true);
-        localStorage.setItem("moment_scheduled_time", "triggered");
-      }
-    };
-
-    checkSchedule();
-    const interval = setInterval(checkSchedule, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <div className="flex h-screen overflow-hidden relative" style={{ background: "var(--bg-shell)" }}>
       <Background activePage={activePage} />
@@ -94,36 +57,20 @@ export default function AppShell({ user, userContext, onLogout }) {
       <main className={`relative flex-1 z-10 ${activePage === "dashboard" ? "overflow-hidden" : "overflow-y-auto"}`}>
         <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(180deg,rgba(252,248,240,0.05),rgba(252,248,240,0.18))]" />
         <Suspense fallback={<div className="p-6 text-sm text-[#4b5563]">Loading...</div>}>
-        {/* Dashboard View */}
-        <div
-          style={{ display: activePage === "dashboard" ? "block" : "none" }}
-          className={activePage === "dashboard" ? "animate-page-enter h-full" : "h-full"}
-        >
-          <TasksPage
-            user={user}
-            userContext={userContext}
-            isActive={activePage === "dashboard"}
-            viewMode="dashboard"
-            onViewAll={() => setActivePage("tasks")}
-            focusInputTrigger={focusInputTrigger}
-            onNavigate={setActivePage}
-          />
-        </div>
-
-        {/* Tasks List View */}
-        <div
-          style={{ display: activePage === "tasks" ? "block" : "none" }}
-          className={activePage === "tasks" ? "animate-page-enter h-full" : "h-full"}
-        >
-          <TasksPage
-            user={user}
-            userContext={userContext}
-            isActive={activePage === "tasks"}
-            viewMode="tasks"
-            focusInputTrigger={focusInputTrigger}
-            onNavigate={setActivePage}
-          />
-        </div>
+        {/* Shared Tasks View */}
+        {(activePage === "dashboard" || activePage === "tasks") && (
+          <div className="animate-page-enter h-full">
+            <TasksPage
+              user={user}
+              userContext={userContext}
+              isActive
+              viewMode={activePage === "dashboard" ? "dashboard" : "tasks"}
+              onViewAll={() => setActivePage("tasks")}
+              focusInputTrigger={focusInputTrigger}
+              onNavigate={setActivePage}
+            />
+          </div>
+        )}
 
         {/* Feed View */}
         <div

@@ -1,6 +1,6 @@
 // App.jsx
 import { getUserProfile, createUserProfile, checkAndUpdateStreak } from "./lib/firestore";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider, isFirebaseConfigured } from "./lib/firebase";
 import { useAuth } from "./hooks/useAuth";
@@ -16,14 +16,16 @@ export default function App() {
   const [userContext, setUserContext] = useState(null);
   const [guestName, setGuestName] = useState(() => localStorage.getItem(DEV_GUEST_KEY) || "");
 
-  const guestUser = guestName
-    ? {
-        uid: `guest-${guestName.toLowerCase().replace(/[^a-z0-9]+/g, "-") || "dev"}`,
-        displayName: guestName,
-        email: null,
-        isGuest: true,
-      }
-    : null;
+  const guestUser = useMemo(() => (
+    guestName
+      ? {
+          uid: `guest-${guestName.toLowerCase().replace(/[^a-z0-9]+/g, "-") || "dev"}`,
+          displayName: guestName,
+          email: null,
+          isGuest: true,
+        }
+      : null
+  ), [guestName]);
   const user = guestUser || firebaseUser;
   const loading = authLoading;
 

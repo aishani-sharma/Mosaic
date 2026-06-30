@@ -1,10 +1,33 @@
 import { createServer } from "node:http";
+import { setDefaultResultOrder } from "node:dns";
 import { readFile } from "node:fs/promises";
 import { extname, join, normalize } from "node:path";
 
+async function loadLocalEnv() {
+  for (const filename of [".env.local", ".env"]) {
+    try {
+      const contents = await readFile(join(process.cwd(), filename), "utf8");
+      for (const rawLine of contents.split(/\r?\n/)) {
+        const line = rawLine.trim();
+        if (!line || line.startsWith("#")) continue;
+        const separator = line.indexOf("=");
+        if (separator <= 0) continue;
+        const key = line.slice(0, separator).trim();
+        if (process.env[key]) continue;
+        process.env[key] = line.slice(separator + 1).trim().replace(/^['"]|['"]$/g, "");
+      }
+    } catch {}
+  }
+}
+
+// ponytail: keep env loading local and dependency-free so the server can boot from .env without dotenv.
+await loadLocalEnv();
+setDefaultResultOrder("ipv4first");
+
 const PORT = Number(process.env.PORT || 8080);
 const DIST_DIR = join(process.cwd(), "dist");
-const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
+const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 const CONTENT_TYPES = {
   ".css": "text/css; charset=utf-8",
@@ -73,14 +96,25 @@ async function handleGemini(req, res) {
     return;
   }
 
-  const upstream = await fetch(`${API_URL}?key=${process.env.GEMINI_API_KEY}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
+  try {
+    const upstream = await fetch(`${API_URL}?key=${process.env.GEMINI_API_KEY}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
 
-  const data = await upstream.json().catch(() => ({ error: { message: "Invalid Gemini response" } }));
-  json(res, upstream.status, data);
+    const data = await upstream.json().catch(() => ({ error: { message: "Invalid Gemini response" } }));
+    json(res, upstream.status, data);
+  } catch (error) {
+    console.error(error);
+    json(res, 502, {
+      error: {
+        message: error?.cause?.code === "UND_ERR_CONNECT_TIMEOUT"
+          ? "Gemini upstream connection timed out"
+          : (error?.message || "Gemini upstream request failed"),
+      },
+    });
+  }
 }
 
 createServer(async (req, res) => {

@@ -5,22 +5,22 @@
 :root {
   --bg-app: #edf3f3;
   --bg-shell: #f5efe6;
-  --surface-1: rgba(255, 252, 247, 0.22);
-  --surface-2: rgba(255, 250, 244, 0.35);
-  --surface-3: rgba(242, 233, 224, 0.3);
-  --surface-strong: rgba(255, 248, 240, 0.4);
-  --border-soft: rgba(115, 120, 125, 0.18);
-  --border-strong: rgba(115, 120, 125, 0.28);
-  --text-strong: #23313a;
-  --text: #4c5b63;
-  --text-muted: #6f7d84;
-  --accent: #7eb8d3;
-  --accent-strong: #659eb8;
-  --accent-soft: rgba(126, 184, 211, 0.18);
+  --surface-1: rgba(255, 252, 247, 0.62);
+  --surface-2: rgba(255, 250, 244, 0.78);
+  --surface-3: rgba(242, 233, 224, 0.5);
+  --surface-strong: rgba(255, 248, 240, 0.92);
+  --border-soft: rgba(87, 97, 105, 0.18);
+  --border-strong: rgba(87, 97, 105, 0.3);
+  --text-strong: #18252d;
+  --text: #31414a;
+  --text-muted: #53626b;
+  --accent: #6aa8c4;
+  --accent-strong: #447d98;
+  --accent-soft: rgba(106, 168, 196, 0.18);
   --success-soft: rgba(145, 194, 166, 0.22);
   --danger-soft: rgba(227, 146, 137, 0.2);
-  --shadow-soft: 0 24px 60px rgba(110, 106, 91, 0.12);
-  --shadow-lift: 0 18px 40px rgba(110, 106, 91, 0.16);
+  --shadow-soft: 0 24px 60px rgba(81, 75, 61, 0.12);
+  --shadow-lift: 0 20px 48px rgba(81, 75, 61, 0.18);
 }
 
 @layer base {
@@ -39,6 +39,8 @@
     color: var(--text-strong);
     font-family: "Inter", "Segoe UI", sans-serif;
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    line-height: 1.5;
     overflow: hidden; /* app shell handles scroll internally */
   }
 
@@ -80,8 +82,8 @@
     background: var(--surface-1);
     border: 1px solid var(--border-soft);
     border-radius: 24px;
-    backdrop-filter: blur(22px);
-    -webkit-backdrop-filter: blur(22px);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
     box-shadow: var(--shadow-soft);
   }
 
@@ -96,7 +98,7 @@
   }
 
   .btn-primary {
-    @apply px-5 py-2.5 rounded-2xl font-medium text-sm transition-all duration-200;
+    @apply px-5 py-2.5 rounded-2xl font-semibold text-sm transition-all duration-200;
     background: var(--accent);
     color: #f8fbfd;
     box-shadow: 0 12px 30px rgba(126, 184, 211, 0.28);
@@ -111,9 +113,9 @@
   }
 
   .btn-ghost {
-    @apply px-5 py-2.5 rounded-2xl font-medium text-sm transition-all duration-200;
-    color: var(--text);
-    background: var(--surface-2);
+    @apply px-5 py-2.5 rounded-2xl font-semibold text-sm transition-all duration-200;
+    color: var(--text-strong);
+    background: var(--surface-strong);
     border: 1px solid var(--border-soft);
   }
   .btn-ghost:hover {
@@ -171,7 +173,7 @@
 
   .input-glass {
     @apply w-full px-4 py-3 rounded-2xl text-sm transition-all duration-200;
-    background: rgba(255, 252, 247, 0.35);
+    background: rgba(255, 252, 247, 0.88);
     border: 1px solid var(--border-soft);
     color: var(--text-strong);
     font-family: "Inter", sans-serif;

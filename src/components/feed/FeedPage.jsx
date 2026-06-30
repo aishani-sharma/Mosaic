@@ -98,17 +98,24 @@ function FeedPost({ post, onReact }) {
       </div>
 
       {post.photoURL ? (
-        <div
-          className="relative w-full rounded-xl overflow-hidden border border-[rgba(255,255,255,0.06)] bg-black"
-          style={{ maxHeight: 400 }}
-        >
-          <img
-            src={post.photoURL}
-            alt="Proof snap"
-            className="w-full object-cover"
+        <>
+          <div
+            className="relative w-full rounded-xl overflow-hidden border border-[rgba(255,255,255,0.06)] bg-black"
             style={{ maxHeight: 400 }}
-          />
-        </div>
+          >
+            <img
+              src={post.photoURL}
+              alt="Proof snap"
+              className="w-full object-cover"
+              style={{ maxHeight: 400 }}
+            />
+          </div>
+          {post.caption ? (
+            <p className="text-xs leading-relaxed -mt-1" style={{ color: "var(--text-muted)" }}>
+              {post.caption}
+            </p>
+          ) : null}
+        </>
       ) : (
         <div
           className="w-full h-[120px] rounded-xl flex items-center justify-center px-6 text-center select-none"

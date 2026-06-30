@@ -424,13 +424,28 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
   const [isAnimating, setIsAnimating] = useState(false);
   const [hoopGlow, setHoopGlow] = useState(false);
 
+  const mergeTasks = (currentTasks, fetchedTasks) => {
+    const fetchedIds = new Set(fetchedTasks.map(task => task.id));
+    const optimisticTasks = currentTasks.filter(task => task.pendingSync && !fetchedIds.has(task.id));
+    return [...optimisticTasks, ...fetchedTasks];
+  };
+
   // Load tasks from Firestore on mount
   useEffect(() => {
     if (!isActive) return;
     if (!user?.uid) return;
+    let cancelled = false;
     getUserTasks(user.uid)
-      .then(setTasks)
-      .finally(() => setLoadingTasks(false));
+      .then(fetchedTasks => {
+        if (cancelled) return;
+        setTasks(currentTasks => mergeTasks(currentTasks, fetchedTasks));
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingTasks(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [user?.uid, isActive]);
 
   // Load daily plan
@@ -469,7 +484,7 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
     };
 
     getPlan();
-  }, [isActive, user?.uid, userContext, loadingTasks]);
+  }, [isActive, user?.uid, userContext?.battlePlan, loadingTasks, tasks]);
 
   // Handle focus triggers
   useEffect(() => {
@@ -546,23 +561,37 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
       }
     }
 
+    const title = newTask.trim();
+    const tempId = `pending-${Date.now()}`;
+    const optimisticTask = {
+      id: tempId,
+      title,
+      deadline: formattedDeadline,
+      category: finalCategory,
+      completed: false,
+      priority: "med",
+      createdAt: new Date().toISOString(),
+      pendingSync: true,
+    };
+
+    setTasks(prev => [optimisticTask, ...prev]);
+
     const ref = await addTask(user.uid, {
       title: newTask.trim(),
       deadline: formattedDeadline,
       category: finalCategory,
     });
 
-    setTasks(prev => [
-      {
-        id: ref?.id || `local-${Date.now()}`,
-        title: newTask.trim(),
-        deadline: formattedDeadline,
-        category: finalCategory,
-        completed: false,
-        priority: "med",
-      },
-      ...prev,
-    ]);
+    setTasks(prev => prev.map(task => (
+      task.id === tempId
+        ? {
+            ...task,
+            id: ref?.id || tempId,
+            title,
+            pendingSync: false,
+          }
+        : task
+    )));
 
     setNewTask("");
     setNewDeadline("");
@@ -592,11 +621,13 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
       ...(shouldAwardXP ? { xpAwarded: true } : {}),
     };
 
-    await updateTask(taskId, taskUpdate);
     setTasks(prev => prev.map(t => t.id === taskId ? {
       ...t,
       ...taskUpdate,
     } : t));
+    updateTask(taskId, taskUpdate, user?.uid).catch(err => {
+      console.error("Failed to update task:", err);
+    });
 
     if (shouldAwardXP) {
       const result = await awardXP(user.uid);
@@ -608,8 +639,10 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
   }
 
   async function handleDelete(taskId) {
-    await deleteTask(taskId);
     setTasks(prev => prev.filter(t => t.id !== taskId));
+    deleteTask(taskId, user?.uid).catch(err => {
+      console.error("Failed to delete task:", err);
+    });
   }
 
   // Expanded panel handlers
@@ -892,7 +925,7 @@ export default function TasksPage({ user, userContext, isActive, viewMode = "das
         });
 
         await Promise.all(
-          Object.entries(updates).map(([taskId, data]) => updateTask(taskId, data))
+          Object.entries(updates).map(([taskId, data]) => updateTask(taskId, data, user?.uid))
         );
 
         const updatedTasks = tasks.map(t => updates[t.id] ? { ...t, ...updates[t.id] } : t);

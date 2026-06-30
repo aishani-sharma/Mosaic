@@ -2,11 +2,11 @@
 // Wrapper for all Gemini API calls in Mosaic
 
 const GEMINI_PROXY_URL = "/api/gemini";
-async function fetchWithRetry(url, options, maxRetries = 3, delayMs = 1000) {
+async function fetchWithRetry(url, options, maxRetries = 3, delayMs = 2000) {
   for (let i = 0; i < maxRetries; i++) {
     try {
       const res = await fetch(url, options);
-      if (res.status === 429 && i < maxRetries - 1) {
+      if ((res.status === 429 || res.status === 503 || res.status === 502) && i < maxRetries - 1) {
         await new Promise(resolve => setTimeout(resolve, delayMs * Math.pow(2, i)));
         continue;
       }
@@ -20,10 +20,10 @@ async function fetchWithRetry(url, options, maxRetries = 3, delayMs = 1000) {
 }
 
 let lastCallTime = 0;
-const MIN_INTERVAL = 2000;
+const MIN_INTERVAL = 8000;
 let apiQueue = Promise.resolve();
 
-export async function callGemini(prompt, systemInstruction = "") {
+async function postGemini(body) {
   const currentQueue = apiQueue;
   let resolveQueue;
   apiQueue = new Promise((resolve) => {
@@ -36,21 +36,6 @@ export async function callGemini(prompt, systemInstruction = "") {
     const wait = MIN_INTERVAL - (now - lastCallTime);
     if (wait > 0) await new Promise(r => setTimeout(r, wait));
     lastCallTime = Date.now();
-
-    const contents = typeof prompt === "string"
-      ? [{ role: "user", parts: [{ text: prompt }] }]
-      : prompt;
-
-    const body = {
-      contents,
-      ...(systemInstruction && {
-        systemInstruction: { parts: [{ text: systemInstruction }] },
-      }),
-      generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 1024,
-      },
-    };
 
     const res = await fetchWithRetry(GEMINI_PROXY_URL, {
       method: "POST",
@@ -66,6 +51,23 @@ export async function callGemini(prompt, systemInstruction = "") {
   } finally {
     resolveQueue();
   }
+}
+
+export async function callGemini(prompt, systemInstruction = "") {
+  const contents = typeof prompt === "string"
+    ? [{ role: "user", parts: [{ text: prompt }] }]
+    : prompt;
+
+  return postGemini({
+    contents,
+    ...(systemInstruction && {
+      systemInstruction: { parts: [{ text: systemInstruction }] },
+    }),
+    generationConfig: {
+      temperature: 0.7,
+      maxOutputTokens: 768,
+    },
+  });
 }
 
 function buildLocalTaskBreakdown(taskTitle, deadline) {
@@ -183,24 +185,11 @@ Keep responses under 3 sentences unless asked for more.`;
     parts: [{ text: m.text }]
   }));
 
-  const body = {
+  const replyText = await postGemini({
     systemInstruction: { parts: [{ text: systemText }] },
     contents,
-    generationConfig: { temperature: 0.7, maxOutputTokens: 1024 }
-  };
-
-  const res = await fetchWithRetry(GEMINI_PROXY_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    generationConfig: { temperature: 0.7, maxOutputTokens: 384 }
   });
-
-  if (!res.ok) {
-    const err = await res.json();
-    throw new Error(JSON.stringify(err));
-  }
-  const data = await res.json();
-  const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "No response";
 
   // Check if response ends mid-sentence
   const trimmed = replyText.trim();

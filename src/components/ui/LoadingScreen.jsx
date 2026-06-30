@@ -1,11 +1,14 @@
 import { useEffect, useState, useRef } from "react";
-import { getQuoteOfDay } from "../../lib/gemini";
 
-const FALLBACK = { quote: "Do it now. Sometimes 'later' becomes 'never'.", author: "Unknown" };
+const QUOTES = [
+  { quote: "Do it now. Sometimes 'later' becomes 'never'.", author: "Unknown" },
+  { quote: "Small steps count when they keep you moving.", author: "Unknown" },
+  { quote: "Clarity first. Speed second. Finish third.", author: "Unknown" },
+];
 const DISPLAY_MS = 3000;
 
 export default function LoadingScreen({ onDone }) {
-  const [quote, setQuote] = useState(FALLBACK);
+  const [quote] = useState(() => QUOTES[Math.floor(Math.random() * QUOTES.length)]);
   const [fading, setFading] = useState(false);
   const calledRef = useRef(false);
 
@@ -17,10 +20,6 @@ export default function LoadingScreen({ onDone }) {
       setFading(true);
       setTimeout(onDone, 600);
     }, DISPLAY_MS);
-
-    getQuoteOfDay()
-      .then((q) => { if (q?.quote) setQuote(q); })
-      .catch((e) => console.error("Failed to load daily quote:", e));
 
     return () => clearTimeout(exitTimer);
   }, []);
